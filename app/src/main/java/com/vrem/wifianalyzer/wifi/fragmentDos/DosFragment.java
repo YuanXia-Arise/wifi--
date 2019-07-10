@@ -175,12 +175,12 @@ public class DosFragment extends Fragment {
                     devStatusDBUtils.close();
                     BackgroundTask.clearAll();
                     BackgroundTask.mTimerHandling       = new Timer();
-                    if (getActivity() == null){ //由于当线程结束时activity变得不可见,getActivity()有可能为空，需要提前判断
-                        return;
-                    }
                     BackgroundTask.mTimerTaskHandling   = new TimerTask() {
                         @Override
                         public void run() {
+                            if (getActivity() == null){ //由于当线程结束时activity变得不可见,getActivity()有可能为空，需要提前判断
+                                return;
+                            }
                             getActivity().runOnUiThread(new Runnable() {  /*在fragment中，不能直接用runOnUiThread，需要加getActivity，因为它是activity中的方法*/
                                 @Override
                                 public void run() {

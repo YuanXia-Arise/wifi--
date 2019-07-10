@@ -185,6 +185,9 @@ public class SnifferFragment extends Fragment {
                     BackgroundTask.mTimerTaskScan   = new TimerTask() {
                         @Override
                         public void run() {
+                            if (getActivity() == null){ //由于当线程结束时activity变得不可见,getActivity()有可能为空，需要提前判断
+                                return;
+                            }
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
