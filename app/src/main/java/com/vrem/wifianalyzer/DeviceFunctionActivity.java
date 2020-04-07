@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,6 +23,8 @@ import org.json.JSONException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Map;
+
+import static com.android.volley.VolleyLog.TAG;
 
 public class DeviceFunctionActivity extends Activity {
 	private ListView listview;
@@ -47,7 +50,7 @@ public class DeviceFunctionActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_device_functions);
 //		getActionBar().setDisplayShowTitleEnabled(true);
-		getActionBar().setLogo(R.drawable.backlayout);
+//		getActionBar().setLogo(R.drawable.backlayout);
 //		getActionBar().setHomeButtonEnabled(true);
 		
 		Intent intent = getIntent();

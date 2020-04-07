@@ -23,12 +23,10 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.google.gson.Gson;
 import com.vrem.wifianalyzer.settings.Settings;
 import com.vrem.wifianalyzer.wifi.common.APInfoUpdater;
 import com.vrem.wifianalyzer.wifi.common.AsyncResponse;
@@ -38,19 +36,13 @@ import com.vrem.wifianalyzer.wifi.model.WiFiDetail;
 
 import org.apache.commons.collections4.Closure;
 import org.apache.commons.collections4.IterableUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
-import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class Scanner implements ScannerService {
     private final List<UpdateNotifier> updateNotifiers;
@@ -83,8 +75,6 @@ public class Scanner implements ScannerService {
     //更新，重新扫描 7
     @Override
     public void update() {
-//        Log.d("当前时间：", String.valueOf(currentSecond));
-
         performWiFiScan();
         IterableUtils.forEach(updateNotifiers, new UpdateClosure());
     }
@@ -134,16 +124,11 @@ public class Scanner implements ScannerService {
     @Override
     public boolean isWifiApStatus() {
         try {
-            //通过反射获取 getWifiApState()方法
-            Method method = wifiManager.getClass().getDeclaredMethod("getWifiApState");
-            //调用getWifiApState() ，获取返回值
-            int status = (int) method.invoke(wifiManager);
-            //通过反射获取 WIFI_AP的开启状态属性
-            Field field = wifiManager.getClass().getDeclaredField("WIFI_AP_STATE_ENABLED");
-            //获取属性值
-            int value = (int) field.get(wifiManager);
-            //判断是否开启
-            if (status == value){
+            Method method = wifiManager.getClass().getDeclaredMethod("getWifiApState"); //通过反射获取 getWifiApState()方法
+            int status = (int) method.invoke(wifiManager); //调用getWifiApState() ，获取返回值
+            Field field = wifiManager.getClass().getDeclaredField("WIFI_AP_STATE_ENABLED"); //通过反射获取 WIFI_AP的开启状态属性
+            int value = (int) field.get(wifiManager); //获取属性值
+            if (status == value){ //判断是否开启
                 return true;
             }
         } catch (NoSuchMethodException e) {
@@ -162,16 +147,11 @@ public class Scanner implements ScannerService {
     @Override
     public boolean isWifiStatus() {
         try {
-            //通过反射获取 getWifiApState()方法
-            Method method = wifiManager.getClass().getDeclaredMethod("getWifiState");
-            //调用getWifiApState() ，获取返回值
-            int status = (int) method.invoke(wifiManager);
-            //通过反射获取 WIFI_AP的开启状态属性
-            Field field = wifiManager.getClass().getDeclaredField("WIFI_STATE_ENABLED");
-            //获取属性值
-            int value = (int) field.get(wifiManager);
-            //判断是否开启
-            if (status == value){
+            Method method = wifiManager.getClass().getDeclaredMethod("getWifiState"); //通过反射获取 getWifiApState()方法
+            int status = (int) method.invoke(wifiManager); //调用getWifiApState() ，获取返回值
+            Field field = wifiManager.getClass().getDeclaredField("WIFI_STATE_ENABLED"); //通过反射获取 WIFI_AP的开启状态属性
+            int value = (int) field.get(wifiManager); //获取属性值
+            if (status == value){ //判断是否开启
                 return true;
             }
         } catch (NoSuchMethodException e) {
@@ -191,8 +171,8 @@ public class Scanner implements ScannerService {
         if (settings.isWiFiOffOnExit()) {
             try {
                 wifiManager.setWifiEnabled(false);
-            } catch (Exception e) {
-                // critical error: do not die
+            } catch (Exception e) { // critical error: do not die
+                e.printStackTrace();
             }
         }
     }
@@ -219,36 +199,34 @@ public class Scanner implements ScannerService {
         return updateNotifiers;
     }
 
-    //执行扫wifi描 5
+    //执行扫描wifi 5
     private void performWiFiScan() {
         count = count +1;
         if (count == 3){ //控制获取数据的速度
             count = 0;
         }
-//        List<ScanResult> scanResults = Collections.emptyList(); //用于存放所有的扫描结果
+        List<ScanResult> scanResults = Collections.emptyList(); //用于存放所有的扫描结果
         WifiInfo wifiInfo = null; //用于存放当前连接的wifi动态信息
-        List<WifiConfiguration> configuredNetworks = null;//用于存放手机中曾经连接过得wifi列表
+        List<WifiConfiguration> configuredNetworks = null; //用于存放手机中曾经连接过得wifi列表
         try {
             if (!wifiManager.isWifiEnabled()) { //判断wifi是否开启
-                wifiManager.setWifiEnabled(true);//打开wifi
+                wifiManager.setWifiEnabled(true); //打开wifi
             }
             if (wifiManager.startScan()) { //是否已扫描 扫描周围无线网络
-//                scanResults = wifiManager.getScanResults();//获取所有扫描结果，存入List<ScanResult>
+                scanResults = wifiManager.getScanResults(); //获取所有扫描结果，存入List<ScanResult>
             }
-            wifiInfo = wifiManager.getConnectionInfo();//获取当前连接wifi的动态信息
-
-            configuredNetworks = wifiManager.getConfiguredNetworks();//返回手机列表中曾经连接成功的wifi
-        } catch (Exception e) {
-            // critical error: set to no results and do not die
+            wifiInfo = wifiManager.getConnectionInfo(); //获取当前连接wifi的动态信息
+            configuredNetworks = wifiManager.getConfiguredNetworks(); //返回手机列表中曾经连接成功的wifi
+        } catch (Exception e) { // critical error: set to no results and do not die
+            e.printStackTrace();
         }
-        final String devId = PrefSingleton.getInstance().getString("device");//获取设备ID
+        final String devId = PrefSingleton.getInstance().getString("device"); //获取设备ID
 
-        final WifiDetailImpl wifiDetaiOne = new WifiDetailImpl();//一层缓存
-        final WifiDetailImpl wifiDetaiTwo = new WifiDetailImpl();//二层缓存
+        final WifiDetailImpl wifiDetaiOne = new WifiDetailImpl(); //一层缓存
+        final WifiDetailImpl wifiDetaiTwo = new WifiDetailImpl(); //二层缓存
         List<WiFiDetail> cacheWifiDetailOne = wifiDetaiOne.getCache("one");
-
         if (count == 2){
-            if (cacheWifiDetailOne!=null){
+            if (cacheWifiDetailOne != null){
                 wifiDetaiOne.clearCache("one");
                 Log.d("1层缓存：","已释放");
             }
@@ -267,7 +245,7 @@ public class Scanner implements ScannerService {
                     }
                 }
             });
-        }else if (cacheWifiDetailOne!=null){
+        }else if (cacheWifiDetailOne != null){
             if (wifiDetaiTwo.isContains("two")){
                 wifiDetaiTwo.clearCache("two");
                 Log.d("2层缓存：","已释放");
@@ -276,11 +254,10 @@ public class Scanner implements ScannerService {
             }
             wiFiData = transformer.transformToWiFiData(cacheWifiDetailOne, wifiInfo, configuredNetworks);
             Log.d("使用：","1层缓存数据");
-        }else if (cacheWifiDetailOne==null && wifiDetaiTwo.getCache("two") !=null){
+        } else if (cacheWifiDetailOne == null && wifiDetaiTwo.getCache("two") != null){
             wiFiData = transformer.transformToWiFiData(wifiDetaiTwo.getCache("two"), wifiInfo, configuredNetworks);
             Log.d("使用：","2层缓存数据");
-        }
-        else{
+        } else {
             APInfoUpdater apInfoUpdater = (APInfoUpdater) new APInfoUpdater(context, devId, 0, 1, 0).execute();
             apInfoUpdater.setOnAsyncResponse(new AsyncResponse() {
                 @Override

@@ -44,15 +44,15 @@
         android:dividerHeight="10dp"
         android:layout_below="@id/title"
         android:layout_marginTop="18dp"
-        android:divider="@android:color/transparent"
-        ></ListView>
+        android:divider="@android:color/transparent">
+
+    </ListView>
 </RelativeLayout>
 <RelativeLayout
         android:id="@+id/left_container"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="start"
- >
+        android:layout_gravity="start">
 
         <ListView
             android:id="@+id/left_drawer"

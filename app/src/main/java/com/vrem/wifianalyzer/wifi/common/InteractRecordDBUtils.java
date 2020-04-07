@@ -10,14 +10,14 @@ import android.util.Log;
 public class InteractRecordDBUtils {
     private static final String TAG = InteractRecordDBUtils.class.getSimpleName();
     static final int DATABASE_VERSION = 2;
-    // DB名
-    public static final String DATABASE_NAME = "InteractRecordDb";
+
+    public static final String DATABASE_NAME = "InteractRecord.Db"; // DB名
 
     public static final String TABLE_INTERACTRECORD_TABLE ="interactrecord";
     public static final String KEY_ROWID = "_id"; // integer 自增长，主key
     public static final String DEVID = "devid"; // dev唯一识别号
-    public static final String REQUEST = "request";
-    public static final String RESPONSE = "response";
+    public static final String REQUEST = "request"; //请求
+    public static final String RESPONSE = "response"; //服务器响应
     public static final String TIME = "time";
 
     final Context mContext;

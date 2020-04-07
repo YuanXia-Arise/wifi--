@@ -34,13 +34,14 @@
     <string name="action_vendors">WPS破解</string>
     <string name="action_forgery">热点伪造</string>
     <string name="action_wifi_hotspot">无线热点</string>
+    <string name="action_search">目标搜索</string>
     <string name="action_datapack">数据包</string>
     <string name="action_settings">设置</string>
-    <string name="action_about">关于</string>
+    <string name="action_client">客户端列表</string>
     <!-- action end -->
 
     <string-array name="fake_spinner">
-        <item>3G模拟</item>
+        <item>4G模拟</item>
         <item>Wifi模拟</item>
     </string-array>
 
@@ -56,7 +57,6 @@
     <string name="channel_rating_heading_number">信道数</string>
     <string name="channel_rating_heading_count">接入点计数</string>
     <string name="channel_short_name">信道</string>
-
     <string name="graph_channel_axis_x">WiFi信道</string>
     <string name="graph_time_axis_x">扫描次数</string>
     <string name="graph_axis_y">信号强度 (dBm)</string>
@@ -95,7 +95,7 @@
     <!-- filter start -->
     <string name="filter_title">滤波器</string>
     <string name="filter_close">关</string>
-    <string name="filter_reset">重启</string>
+    <string name="filter_reset">重置</string>
     <string name="filter_apply">应用</string>
     <string name="filter_wifi_band_title">WiFi频段</string>
     <string name="filter_strength_title">信号强度</string>
@@ -103,8 +103,8 @@
     <!-- filter end -->
 
     <string-array name="drawer_item_array">
-        <item>Gestión de equipos</item>
-        <item>Información del usuario</item>
+        <item>设备管理</item>
+        <item>用户信息</item>
         <item>设置</item>
         <item>帮助</item>
         <item>退出登录</item>

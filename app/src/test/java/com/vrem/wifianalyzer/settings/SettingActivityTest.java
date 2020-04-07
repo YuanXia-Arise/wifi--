@@ -19,6 +19,7 @@
 package com.vrem.wifianalyzer.settings;
 
 import android.app.ActionBar;
+import android.util.Log;
 import android.view.MenuItem;
 
 import com.vrem.wifianalyzer.BuildConfig;
@@ -32,6 +33,7 @@ import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import static com.android.volley.VolleyLog.TAG;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;

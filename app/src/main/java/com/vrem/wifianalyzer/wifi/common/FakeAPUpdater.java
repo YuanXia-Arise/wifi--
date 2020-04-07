@@ -15,6 +15,7 @@ import com.vrem.wifianalyzer.DeviceListActivity;
 import com.vrem.wifianalyzer.MainActivity;
 import com.vrem.wifianalyzer.MainContext;
 import com.vrem.wifianalyzer.R;
+import com.vrem.wifianalyzer.wifi.fragmentFakeAp.FakeApFragment;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -23,6 +24,8 @@ import org.json.JSONObject;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import static android.content.ContentValues.TAG;
 
 public class FakeAPUpdater extends AsyncTask<Object, Object, Void> {
     Context mContext;
@@ -55,8 +58,7 @@ public class FakeAPUpdater extends AsyncTask<Object, Object, Void> {
 
         if (handshakeStep1Done == 0) {
             mStep1Needed = true;
-        }
-        else {
+        } else {
             mStep1Needed = false;
         }
     }
@@ -82,9 +84,12 @@ public class FakeAPUpdater extends AsyncTask<Object, Object, Void> {
             if (response == null) {
                 return null;
             }
-            JSONObject jo = response.getJSONObject("data");
-            JSONArray clients = jo.getJSONArray("mac");
-            Log.w("FAKE_STEP_2", "CLIENTS " + clients.toString());
+
+//            JSONObject jo = response.getJSONObject("data");
+//            Log.d(TAG, "doInBackground: 999999-3:" + jo);
+//            JSONArray clients = jo.getJSONArray("mac");
+//            Log.d(TAG, "doInBackground: 999999-4:" + clients);
+//            Log.w("FAKE_STEP_2", "CLIENTS " + clients.toString());
             //return apData;
         } catch (JSONException e) {
             //mError = true;
@@ -96,7 +101,6 @@ public class FakeAPUpdater extends AsyncTask<Object, Object, Void> {
             devStatusDBUtils.open();
             devStatusDBUtils.fakeAPCancel(mDevId);
             devStatusDBUtils.close();
-
             return null;
         }
         return null;
@@ -105,8 +109,7 @@ public class FakeAPUpdater extends AsyncTask<Object, Object, Void> {
     @Override
     protected void onPostExecute(Void param) {
         if (mError == true) {
-            Toast.makeText(mContext, "出错啦",
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, "出错啦", Toast.LENGTH_SHORT).show();
             return;
         }
         if (mStep1Run == true) {
@@ -114,7 +117,7 @@ public class FakeAPUpdater extends AsyncTask<Object, Object, Void> {
             intent.setClass(mContext,DeviceListActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             mContext.startActivity(intent);  //跳转到功能运行界面
-            ((Activity) mContext).overridePendingTransition(R.anim.slide_left_in,R.anim.slide_right_out);
+            ((Activity) mContext).overridePendingTransition(R.anim.slide_left_in, R.anim.slide_right_out);
             ((Activity) mContext).finish();
             return;
         }
@@ -133,7 +136,6 @@ public class FakeAPUpdater extends AsyncTask<Object, Object, Void> {
 
     public int fakeAPStep1(final Context context, JSONObject jo) throws JSONException {
         String url = PrefSingleton.getInstance().getString("url");
-
         JSONObject obj = new JSONObject();
         int gId = PrefSingleton.getInstance().getInt("id");
         PrefSingleton.getInstance().putInt("id", gId + 1);
@@ -142,27 +144,27 @@ public class FakeAPUpdater extends AsyncTask<Object, Object, Void> {
         param.put("action", "fakeap"); // 2-1
         param.put("essid", jo.getString("essid")); //2-2
         param.put("channel", jo.getInt("channel")); // 2-3
-        JSONObject sec_param = new JSONObject(); // 2-4
-        JSONObject out_param = new JSONObject(); // 2-5
+        JSONObject sec_param = new JSONObject(); // 2-4 //加密
+        JSONObject out_param = new JSONObject(); // 2-5 //目标热点SSID,PSW,CHANNEL
         JSONObject sec_param_data = new JSONObject(); // 2-4-x
         JSONObject out_param_data = new JSONObject(); // 2-5-x
 
         if (jo.getString("net").equals("open")) { // 开放网络
-            // 开放网络
             sec_param.put("type", "open");
-        }
-        else { // 加密网络
+            Log.d(TAG, "fakeAPStep1: 000-1" + sec_param);
+        } else { // 加密网络
             sec_param.put("type", "wpa");
-
             sec_param_data.put("pass", jo.getString("password"));
             String wpaStr = jo.getString("security");
+            Log.d(TAG, "fakeAPStep1: 000-2:" + sec_param);
+            Log.d(TAG, "fakeAPStep1: 000-3:" + sec_param_data);
+            Log.d(TAG, "fakeAPStep1: 000-4:" + wpaStr);
             int wpaInt;
             if (wpaStr.equals("wpa")) {
                 wpaInt = 1;
             } else if (wpaStr.equals("wpa2")) {
                 wpaInt = 2;
-            }
-            else {
+            } else {
                 wpaInt = 3;
             }
             sec_param_data.put("wpa", wpaInt);
@@ -172,7 +174,6 @@ public class FakeAPUpdater extends AsyncTask<Object, Object, Void> {
             if (wpaInt == 1 || wpaInt == 3) {
                 sec_param_data.put("wpa_pairwise", jo.getString("encryption"));
             }
-
             if (wpaInt == 2 || wpaInt == 3) {
                 sec_param_data.put("rsn_pairwise", jo.getString("encryption"));
             }
@@ -183,13 +184,12 @@ public class FakeAPUpdater extends AsyncTask<Object, Object, Void> {
             out_param.put("type", "4g");
         } else { // out = wifi
             out_param.put("type", "wifi");
-
-            out_param_data.put("essid", jo.getString("ssid"));
-            String ticket = jo.getString("ticket");
+            out_param_data.put("essid", jo.getString("ssid")); //目标热点ssid
+            String ticket = jo.getString("ticket");  //目标热点psw
             if (!ticket.equals("")) {
-                out_param_data.put("pass", ticket);
+                out_param_data.put("pass", ticket); //目标热点ssid和psw
             }
-            out_param_data.put("channel", mJo.getInt("ap_channel"));
+            out_param_data.put("channel", mJo.getInt("ap_channel")); //目标热点ssid,pws,频道
         }
         out_param.put("data", out_param_data);
 
@@ -200,24 +200,25 @@ public class FakeAPUpdater extends AsyncTask<Object, Object, Void> {
         Log.w("FAKE_STEP_1_REQUEST", obj.toString());
 
         RequestFuture<JSONObject> requestFuture = RequestFuture.newFuture();
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url,  obj, requestFuture, requestFuture);
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, obj, requestFuture, requestFuture);
         jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(10000,
                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         VolleySingleton.getInstance(context).getRequestQueue().add(jsonObjectRequest);
-
         try {
-            JSONObject response = requestFuture.get(10 - 1, TimeUnit.SECONDS);
+            JSONObject response = requestFuture.get(10 - 1, TimeUnit.SECONDS); //排除超时
 
             new InteractRecordDBUtils(mContext).easy_insert(obj.toString(), response.toString());//将请求命令、返回结果存入数据库
 
             int status = response.getInt("status");
             if (status == 0) {
                 Log.w("FAKE_STEP_1", "RESPONSE:" + response.toString());
-                return 0;
+//                return 0;
+                return -2;
             } else {
                 Log.w("FAKE_STEP_1", "UNEXPECTED RESPONSE: " + response.toString());
-                return -2;
+//                return -2;
+                return 0;
             }
         } catch (TimeoutException e) {
             Log.w("FAKE_STEP_1", "TIMEOUT");
@@ -232,7 +233,6 @@ public class FakeAPUpdater extends AsyncTask<Object, Object, Void> {
 
     public JSONObject fakeAPStep2(final Context context) throws JSONException {
         String url = PrefSingleton.getInstance().getString("url");
-
         JSONObject obj = new JSONObject();
         JSONObject param = new JSONObject();
         param.put("action", "action");
@@ -241,7 +241,7 @@ public class FakeAPUpdater extends AsyncTask<Object, Object, Void> {
         Log.w("FAKE_STEP_2", "REQUEST: " + obj.toString());
 
         RequestFuture<JSONObject> requestFuture = RequestFuture.newFuture();
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url,  obj, requestFuture, requestFuture);
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, obj, requestFuture, requestFuture);
         VolleySingleton.getInstance(context).getRequestQueue().add(jsonObjectRequest);
 
         try {

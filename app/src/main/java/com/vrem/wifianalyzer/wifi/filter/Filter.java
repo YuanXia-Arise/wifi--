@@ -18,15 +18,23 @@
 
 package com.vrem.wifianalyzer.wifi.filter;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.View;
 
+import com.vrem.wifianalyzer.MainActivity;
 import com.vrem.wifianalyzer.MainContext;
 import com.vrem.wifianalyzer.R;
 import com.vrem.wifianalyzer.navigation.NavigationMenu;
+import com.vrem.wifianalyzer.wifi.accesspoint.AccessPointsFragment;
+
+import static android.content.ContentValues.TAG;
+
 
 public class Filter {
 
@@ -41,25 +49,28 @@ public class Filter {
     }
 
     private static AlertDialog buildAlertDialog() { //设置过滤器的五个参数
+        if (MainContext.INSTANCE.getMainActivity().isFinishing()) {
+            return null;
+        }
         View view = MainContext.INSTANCE.getLayoutInflater().inflate(R.layout.filter_popup, null); //获取页面对象
         return new AlertDialog
             .Builder(view.getContext())
             .setView(view)
             .setTitle(R.string.filter_title)
             .setIcon(R.drawable.ic_filter_list_grey_500_48dp)
-            .setNegativeButton(R.string.filter_reset, new Reset())
-            .setNeutralButton(R.string.filter_close, new Close())
-            .setPositiveButton(R.string.filter_apply, new Apply())
+            .setNegativeButton(R.string.filter_reset, new Reset()) //重置
+            .setNeutralButton(R.string.filter_close, new Close()) //关闭
+            .setPositiveButton(R.string.filter_apply, new Apply()) //应用
             .create();
     }
 
     public void show() {
-        if (!alertDialog.isShowing()) { //如果对话框没有显示
-            alertDialog.show();//显示对话框
-            addWiFiBandFilter();
-            addSSIDFilter();
-            addStrengthFilter();
-            addSecurityFilter();
+        if (alertDialog != null && !alertDialog.isShowing()) {
+            alertDialog.show();
+            addWiFiBandFilter(alertDialog);
+            addSSIDFilter(alertDialog);
+            addStrengthFilter(alertDialog);
+            addSecurityFilter(alertDialog);
         }
     }
 
@@ -67,21 +78,22 @@ public class Filter {
         return alertDialog;
     }
 
-    private void addSSIDFilter() {
+    private void addSSIDFilter(@NonNull AlertDialog alertDialog) {
         new SSIDFilter(MainContext.INSTANCE.getFilterAdapter().getSSIDAdapter(), alertDialog);
     }
 
-    private void addWiFiBandFilter() {
+    private void addWiFiBandFilter(@NonNull AlertDialog alertDialog) {
         if (NavigationMenu.ACCESS_POINTS.equals(MainContext.INSTANCE.getMainActivity().getNavigationMenuView().getCurrentNavigationMenu())) {
             new WiFiBandFilter(MainContext.INSTANCE.getFilterAdapter().getWiFiBandAdapter(), alertDialog);
         }
     }
 
-    private void addStrengthFilter() {
+
+    private void addStrengthFilter(@NonNull AlertDialog alertDialog) {
         new StrengthFilter(MainContext.INSTANCE.getFilterAdapter().getStrengthAdapter(), alertDialog);
     }
 
-    private void addSecurityFilter() {
+    private void addSecurityFilter(@NonNull AlertDialog alertDialog) {
         new SecurityFilter(MainContext.INSTANCE.getFilterAdapter().getSecurityAdapter(), alertDialog);
     }
 
@@ -105,7 +117,7 @@ public class Filter {
         }
     }
 
-    //过滤器重启事件
+    //过滤器重置事件
     private static class Reset implements OnClickListener {
         @Override
         public void onClick(DialogInterface dialog, int which) {

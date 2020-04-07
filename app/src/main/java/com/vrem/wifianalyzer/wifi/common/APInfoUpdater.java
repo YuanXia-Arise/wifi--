@@ -7,14 +7,17 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.vrem.wifianalyzer.wifi.model.WiFiDetail;
-import com.vrem.wifianalyzer.wifi.scanner.WifiDetailImpl;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+
+import static android.content.ContentValues.TAG;
 
 /**
  * Created by ZhenShiJie on 2018/4/2.
@@ -90,13 +93,14 @@ public class APInfoUpdater extends AsyncTask<Object, Object, List<WiFiDetail>>{
 
     public static boolean doScanStep1 (Context context, String devID) throws JSONException {
         int r1 = WiFiDetail.scanStep1(context);
+        Log.d(TAG, "doScanStep1: 123--5:" + r1);
         if (r1 < 0) {
             return false;
         }
 
         DevStatusDBUtils devStatusDBUtils = new DevStatusDBUtils(context);
         devStatusDBUtils.open();
-        devStatusDBUtils.scanStep1Done(devID);//扫描结束时的sql语句 更新1
+        devStatusDBUtils.scanStep1Done(devID); //扫描结束时的sql语句 更新1
         devStatusDBUtils.close();
 
         return true;
@@ -105,6 +109,7 @@ public class APInfoUpdater extends AsyncTask<Object, Object, List<WiFiDetail>>{
     @Override
     protected List<WiFiDetail> doInBackground(Object[] objects) {
         try {
+            Log.d(TAG, "doInBackground: 123--4:" + mStep1Needed);
             if (mStep1Needed) {
                 doScanStep1(mContext, mDevId);
                 return null;
@@ -115,13 +120,15 @@ public class APInfoUpdater extends AsyncTask<Object, Object, List<WiFiDetail>>{
                 return null;
             }
             List<WiFiDetail> apData = WiFiDetail.response2ApData(response, mTag, mSort);
+            Log.d(TAG, "doInBackground: 123--7" + new Gson().toJson(apData));
+
             if (apData == null) {
                 mError = true;
             }
             wiFiDetails = apData;
-            if (wiFiDetails != null && asyncResponse !=null){
-                asyncResponse.onDataReceivedSuccess(wiFiDetails);//将扫描结果存入asyncResponse接口当中，供其它类使用数据
-            }
+            if (wiFiDetails != null && asyncResponse != null){
+                asyncResponse.onDataReceivedSuccess(wiFiDetails); //将扫描结果存入asyncResponse接口当中，供其它类使用数据
+        }
             return wiFiDetails;
         } catch (JSONException e) {
             mError = true;
@@ -147,6 +154,7 @@ public class APInfoUpdater extends AsyncTask<Object, Object, List<WiFiDetail>>{
             try {
                 macSsidDBUtils.insertOrUpdate(mDevId, apInfo.getBSSID(), apInfo.getSSID());
             } catch (Exception e) {
+                e.printStackTrace();
             }
         }
         macSsidDBUtils.close();

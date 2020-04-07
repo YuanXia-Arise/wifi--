@@ -1,9 +1,11 @@
 package com.vrem.wifianalyzer.wifi.fragmentDataPack;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +33,8 @@ public class DataPackageFragment extends Fragment {
     private PackageInfo packageInfo;
     private Button dataPackRefreshBtn;
 
+    private SwipeRefreshLayout swipeRefreshLayout;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -42,6 +46,8 @@ public class DataPackageFragment extends Fragment {
             clickRefresh = view.findViewById(R.id.data_clickrefresh);
             dataPackListView = view.findViewById(R.id.data_pack_listview);
             dataPackRefreshBtn = view.findViewById(R.id.data_pack_refresh_btn);
+            swipeRefreshLayout = view.findViewById(R.id.accessRefresh); //绑定控件
+
             try {
                 PackageInfo.setPackageInfo(getContext(), PrefSingleton.getInstance().getString("device"),dataPackListView,progressBar,clickRefresh,noData);
             } catch (JSONException e) {
@@ -61,11 +67,18 @@ public class DataPackageFragment extends Fragment {
         dataPackRefreshBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                swipeRefreshLayout.setRefreshing(true);
                 try {
                     PackageInfo.setPackageInfo(getContext(), PrefSingleton.getInstance().getString("device"),dataPackListView,progressBar,clickRefresh,noData);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        swipeRefreshLayout.setRefreshing(false);
+                    }
+                }, 2000);
             }
         });
     }

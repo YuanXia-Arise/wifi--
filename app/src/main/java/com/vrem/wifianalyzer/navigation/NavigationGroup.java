@@ -26,9 +26,9 @@ import java.util.Arrays;
 import java.util.List;
 
 public enum NavigationGroup {
-    GROUP_FEATURE(NavigationMenu.ACCESS_POINTS,NavigationMenu.EXPORT, NavigationMenu.CHANNEL_AVAILABLE/*, NavigationMenu.CHANNEL_RATING, NavigationMenu.CHANNEL_GRAPH, NavigationMenu.TIME_GRAPH*/),
-    GROUP_OTHER(NavigationMenu.SNIFFER, NavigationMenu.VENDOR_LIST,NavigationMenu.FORGERY,NavigationMenu.WIFI_HOTSPOT),
-    GROUP_SETTINGS(NavigationMenu.SETTINGS, NavigationMenu.DATA_PACK);
+    GROUP_FEATURE(NavigationMenu.ACCESS_POINTS,NavigationMenu.EXPORT, NavigationMenu.CHANNEL_AVAILABLE /*, NavigationMenu.CHANNEL_RATING, NavigationMenu.CHANNEL_GRAPH, NavigationMenu.TIME_GRAPH*/),
+    GROUP_OTHER(NavigationMenu.SNIFFER, /*NavigationMenu.VENDOR_LIST,*/NavigationMenu.FORGERY, NavigationMenu.WIFI_HOTSPOT),
+    GROUP_SETTINGS(NavigationMenu.SETTINGS, NavigationMenu.DATA_PACK, NavigationMenu.TARGET_SEARCH);
 
     private final List<NavigationMenu> navigationMenus;
 

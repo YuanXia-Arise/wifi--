@@ -17,107 +17,98 @@
   -->
 
 <resources>
-    <string name="app_copyright">Авторские права \u00A9 2015 \u002D 2017</string>
+    <string name = "app_copyright">Авторские права \u00A9 2015 \u002D 2017</string>
 
-    <string name="navigation_drawer_open">Открыть панель навигации</string>
-    <string name="navigation_drawer_close">Закрыть панель навигации</string>
+    <string name = "navigation_drawer_open">Открыть навигацию</string>
+    <string name = "navigation_drawer_close">Закрыть навигацию</string>
 
-    <!-- action start -->
-    <string name="action_access_points">Точки доступа</string>
-    <string name="action_channel_rating">Оценка каналов</string>
-    <string name="action_channel_graph">График каналов</string>
-    <string name="action_time_graph">Временной график</string>
-    <string name="action_export">Экспорт</string>
-    <string name="action_channel_available">Доступные каналы</string>
-    <string name="action_vendors">Поставщики</string>
-    <string name="action_settings">Настройки</string>
-    <string name="action_about">О Программе</string>
-    <!-- action end -->
+    <string name = "action_access_points">точка доступа</string>
+    <string name = "action_channel_rating">рейтинг канала</string>
+    <string name = "action_channel_graph">карта канала</string>
+    <string name = "action_time_graph">временная карта</string>
+    <string name = "action_export">блокирование атак</string>
+    <string name = "action_channel_available">перечисление клиента</string>
+    <string name = "action_sniffer">Перехват пакета рукопожатия</string>
+    <string name = "action_vendors">WPS-трещина</string>
+    <string name = "action_forgery">подделка горячих точек</string>
+    <string name = "action_wifi_hotspot">Беспроводная точка доступа</string>
+    <string name = "action_search">поиск цели</string>
+    <string name = "action_datapack">пакет данных</string>
+    <string name = "action_settings">Настройки</string>
 
-    <string name="button_cancel">Отмена</string>
-    <string name="no_data">Нет данных</string>
+    <string-array name = "fake_spinner">
+        <item>моделирование 3G</item>
+        <item>моделирование Wifi</item>
+    </string-array>
 
-    <string name="export_not_available">Экспорт не доступен</string>
+    <string name = "button_cancel">Отмена</string>
+    <string name = "no_data">нетданных</string>
 
-    <string name="channel_rating_best">Лучшие каналы:</string>
-    <string name="channel_rating_best_none">Нет</string>
-    <string name="channel_rating_best_alternative">, попробуйте альтернативный WiFi диапазон</string>
-    <string name="channel_rating_heading_rating">Оценка каналов</string>
-    <string name="channel_rating_heading_number">Номер канала</string>
-    <string name="channel_rating_heading_count">Число точек доступа</string>
-    <string name="channel_short_name">CH</string>
+    <string name = "export_not_available">экспорт недоступен</string>
 
-    <string name="graph_channel_axis_x">WiFi каналы</string>
-    <string name="graph_time_axis_x">Число сканирований</string>
-    <string name="graph_axis_y">Уровень сигнала (dBm)</string>
+    <string name = "channel_rating_best">Лучший канал:</string>
+    <string name = "channel_rating_best_none">нет</string>
+    <string name = "channel_rating_best_alternative">,попробуйте другие диапазоны WiFi</string>
+    <string name = "channel_rating_heading_rating">рейтинг канала</string>
+    <string name = "channel_rating_heading_number">номер канала</string>
+    <string name = "channel_rating_heading_count">количество точек доступа</string>
+    <string name = "channel_short_name">канал</string>
+    <string name = "graph_channel_axis_x">WiFi-канал</string>
+    <string name = "graph_time_axis_x"> количество сканирований</string>
+    <string name = "graph_axis_y">уровень сигнала (dBm)</string>
 
-    <!-- settings start -->
-    <string name="start_menu_title">Начать</string>
-    <string name="country_code_title">Страна</string>
-    <string name="scan_interval_title">Интервал сканирования</string>
-    <string name="scan_interval_summary">%d секунд между каждым сканированием</string>
-    <string name="sort_by_title">Сортировка</string>
-    <string name="group_by_title">Группировка</string>
-    <string name="connection_view_title">Дисплей соединение</string>
-    <string name="ap_view_title">Точка доступа</string>
-    <string name="graph_maximum_y_title">Максимальная сила сигнала графика</string>
-    <string name="channel_graph_legend_title">Показать легенду графика каналa</string>
-    <string name="time_graph_legend_title">Показать легенду графика времени</string>
-    <string name="theme_title">Цветовая тема</string>
-    <string name="wifi_off_on_exit_title">WiFi выключен при выходе</string>
-    <string name="language_title">Язык</string>
-    <!-- settings end -->
+    <string name = "start_menu_title">Начало</string>
+    <string name = "country_code_title"> Страна </string>
+    <string name = "scan_interval_title"> интервал сканирования </string>
+    <string name = "scan_interval_summary">интервал развертки%dсекунда </string>
+    <string name = "sort_by_title">Сортировка точки доступа</string>
+    <string name = "group_by_title">группировка точек доступа</string>
+    <string name = "connection_view_title">Отображение соединения</string>
+    <string name = "ap_view_title">отображение точки доступа</string>
+    <string name = "graph_maximum_y_title">максимальная сила графического сигнала </string>
+    <string name = "channel_graph_legend_title">расположение отображения легенды канала</string>
+    <string name = "time_graph_legend_title">расположение отображения легенды времени</string>
+    <string name = "theme_title">тема</string>
+    <string name = "wifi_off_on_exit_title">Отключить Wi-Fi при выходе</string>
+    <string name = "language_title">язык</string>
 
-    <!-- about start -->
-    <string name="about_license_title">Лицензия:</string>
-    <string name="about_license_name">Лицензия GPLv3</string>
-    <string name="about_description_title">Описание:</string>
-    <string name="about_description_text">Оптимизация сети WiFi путем проверки состояния Wi-Fi, уровня сигнала и определения переполненных каналов используя WiFiAnalyzer для Android</string>
-    <string name="about_libraries_title">Использованные библиотеки:</string>
-    <string name="about_contributor_title">Авторы:</string>
-    <string name="about_write_review">Написать отзыв</string>
-    <!-- about end -->
+    <string name = "about_license_title">Лицензия:</string>
+    <string name = "about_license_name">Лицензия GPLv3</string>
+    <string name = "about_description_title">Описание:</string>
+    <string name = "about_description_text">использовать этот открытый анализатор Android WiFi для проверки состояния WiFi, интенсивности сигнала и распознавания переполненных каналов для оптимизации сети WiFi</string>
+    <string name = "about_libraries_title">Используемая библиотека:</string>
+    <string name = "about_contributor_title">участники:</string>
+    <string name = "about_write_review">Я хочу оценить</string>
 
-    <!-- security start -->
-    <string name="security_none">Нет</string>
-    <!-- security end -->
+    <string name = "security_none">нет</string>
 
-    <!-- filter start -->
-    <string name="filter_title">Фильтр</string>
-    <string name="filter_close">Закрыть</string>
-    <string name="filter_reset">Сброс</string>
-    <string name="filter_apply">Применять</string>
-    <string name="filter_wifi_band_title">WiFi диапазон</string>
-    <string name="filter_strength_title">Уровень сигнала</string>
-    <string name="filter_security_title">Безопасность</string>
-    <!-- filter end -->
+    <string name = "filter_title">фильтр</string>
+    <string name = "filter_close">Гуань</string>
+    <string name = "filter_reset">перезагрузка</string>
+    <string name = "filter_apply">приложение</string>
+    <string name = "filter_wifi_band_title">диапазон WiFi</string>
+    <string name = "filter_strength_title">Уровень сигнала</string>
+    <string name = "filter_security_title"> безопасность</string>
 
-    <!--<string-array name="drawer_item_array">-->
-        <!--<item>Gestión de equipos</item>-->
-        <!--<item>Información del usuario</item>-->
-        <!--<item>设置</item>-->
-        <!--<item>帮助</item>-->
-        <!--<item>退出登录</item>-->
-        <!--<item>关于</item>-->
-    <!--</string-array>-->
+    <string-array name="drawer_item_array">
+      <item>управление оборудованием</item>
+      <item>сведения о пользователе</item>
+      <item>Настройки</item>
+      <item>Справка</item>
+      <item>Выйти</item>
+      <item>О</item>
+    </string-array>
 
-    <!--<string-array name="send_spinner">-->
-        <!--<item>本地保存</item>-->
-        <!--<item>3G发送</item>-->
-    <!--</string-array>-->
+    <string-array name = "send_spinner">
+        <item>локальное сохранение</item>
+        <item>отправка 4G</item>
+    </string-array>
 
-    <!--<string-array name="method_spinner">-->
-        <!--<item>静默模式</item>-->
-        <!--<item>极速模式</item>-->
-    <!--</string-array>-->
+    <string-array name = "method_spinner">
+        <item>тихий режим</item>
+        <item>скоростной режим</item>
+    </string-array>
 
-    <!--<string name="drawer_open">打开抽屉导航</string>-->
-    <!--<string name="drawer_close">关闭抽屉导航</string>-->
-
-    <!--<string name="action_sniffer">握手包截获</string>-->
-    <!--<string name="action_forgery">热点伪造</string>-->
-    <!--<string-array name="fake_spinner">-->
-        <!--<item>3G模拟</item>-->
-        <!--<item>Wifi模拟</item>-->
-    <!--</string-array>-->
+    <string name = "drawer_open">Открыть навигацию по ящикам</string>
+    <string name = "drawer_close">Закрыть навигацию по ящикам</string>
 </resources>

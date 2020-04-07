@@ -12,6 +12,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.google.gson.JsonObject;
 import com.vrem.wifianalyzer.R;
 import com.vrem.wifianalyzer.wifi.common.PrefSingleton;
 import com.vrem.wifianalyzer.wifi.common.SnifferFile;
@@ -113,8 +114,7 @@ public class PackageInfo extends Base {
 	public static void setPackageInfo_bak(final Context context, DeviceInfo deviceInfo,
                                           final ListView listview, final ProgressBar progressBar, final TextView refresh, final TextView noData) throws JSONException {
 		progressBar.setVisibility(View.VISIBLE);
-		SharedPreferences userInfo = context.getSharedPreferences("user_info",
-				0);
+		SharedPreferences userInfo = context.getSharedPreferences("user_info", 0);
 		String token = userInfo.getString("token", "");
 		String username = userInfo.getString("username", "");
 		String ip = userInfo.getString("ip", "");
@@ -128,7 +128,6 @@ public class PackageInfo extends Base {
 				new Response.Listener<JSONObject>() {
 					public void onResponse(JSONObject response) {
 						// display response
-
 						try {
 							int length = response.getJSONArray("files")
 									.length();

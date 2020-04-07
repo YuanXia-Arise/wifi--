@@ -26,6 +26,7 @@ import com.vrem.wifianalyzer.MainActivity;
 import com.vrem.wifianalyzer.MainContext;
 import com.vrem.wifianalyzer.R;
 
+
 class ScannerSwitchOn implements NavigationOption {
 
     @Override
@@ -36,10 +37,10 @@ class ScannerSwitchOn implements NavigationOption {
             menuItem.setVisible(true);
             if (MainContext.INSTANCE.getScannerService().isRunning()) {
                 menuItem.setTitle(R.string.action_pause);
-                menuItem.setIcon(R.drawable.ic_pause_grey_500_48dp);
+//                menuItem.setIcon(R.drawable.ic_pause_grey_500_48dp);
             } else {
                 menuItem.setTitle(R.string.action_resume);
-                menuItem.setIcon(R.drawable.ic_play_arrow_grey_500_48dp);
+//                menuItem.setIcon(R.drawable.ic_play_arrow_grey_500_48dp);
             }
         }
     }

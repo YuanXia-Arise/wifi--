@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -15,6 +17,7 @@ import com.vrem.wifianalyzer.wifi.common.BackgroundTask;
 import com.vrem.wifianalyzer.wifi.common.DevStatusDBUtils;
 import com.vrem.wifianalyzer.wifi.common.DosUpdater;
 import com.vrem.wifianalyzer.wifi.common.PrefSingleton;
+import com.vrem.wifianalyzer.wifi.model.DeviceInfo;
 import com.vrem.wifianalyzer.wifi.model.WiFiDetail;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -29,6 +32,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import static android.content.ContentValues.TAG;
 
 
 public class DosActivity extends Activity {
@@ -52,28 +57,31 @@ public class DosActivity extends Activity {
 	private List<WiFiDetail> wiFiDetails;
 
 	private String dosSsid;
+	private String Cus;
+	private Button cusBotton;
 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_dos);
 
-		startButton 			= (Button) findViewById(R.id.startButton);//开始dos攻击按钮
-		cancelButton 			= (Button) findViewById(R.id.cancelButton);//取消攻击按钮
-		channelDosButton 		= (Button) findViewById(R.id.channeldos);//单频段按钮
-		mChannelDosButton 		= (Button) findViewById(R.id.mchanneldos);//多频段按钮
+		startButton = findViewById(R.id.startButton);//开始dos攻击按钮
+		cancelButton = findViewById(R.id.cancelButton);//取消攻击按钮
+		channelDosButton = findViewById(R.id.channeldos);//单频段按钮
+		mChannelDosButton = findViewById(R.id.mchanneldos);//多频段按钮
 
-		final Context context 	= this;
+		final Context context = this;
 
-		Intent intent 	= getIntent();
-		intentId 		= intent.getStringExtra("id");
+		Intent intent = getIntent();
+		intentId = intent.getStringExtra("id");
+		Cus = intent.getStringExtra("cus");
 
 		if (intentId.equals("1")){ //需要选择热点
-			String wifiDetailJson 	= getIntent().getStringExtra("wifiDetails");
-			Type type 				= new TypeToken<List<WiFiDetail>>(){}.getType();
-			Gson gson 				= new Gson();
-			wiFiDetails 			= gson.fromJson(wifiDetailJson,type);//将JSON数组转为对象
+			String wifiDetailJson = String.valueOf(new Gson().toJson(MainContext.INSTANCE.getScannerService().getWiFiData().getWiFiDetails()));
+			Type type = new TypeToken<List<WiFiDetail>>(){}.getType();
+			Gson gson = new Gson();
+			wiFiDetails = gson.fromJson(wifiDetailJson,type);//将JSON数组转为对象
 
-			apDosButton 			= findViewById(R.id.apdos);
+			apDosButton = findViewById(R.id.apdos);
 			apDosButton.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
@@ -81,72 +89,43 @@ public class DosActivity extends Activity {
 				}
 			});
 		}else { //不需要选择热点
-			ssid 		= intent.getStringExtra("ssid");
-			bssid 		= intent.getStringExtra("bssid");
-			channel		= Integer.parseInt(intent.getStringExtra("channel"));
+			ssid = intent.getStringExtra("ssid");
+			bssid = intent.getStringExtra("bssid");
+			channel	= Integer.parseInt(intent.getStringExtra("channel"));
 			apDosButton = findViewById(R.id.apdos);
 			apDosButton.setText(ssid);
+
+			cusBotton = findViewById(R.id.custom);
+			cusBotton.setText(Cus);
 		}
 
-		//单频段按钮事件
-		channelDosButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View arg0) {
-				// TODO Auto-generated method stub
-				channelButtonHandle(channelDosButton);
-			}
-		});
-
-		//多频段按钮事件
-		mChannelDosButton.setOnClickListener(new View.OnClickListener() {
-
-			@Override
-			public void onClick(View arg0) {
-				// TODO Auto-generated method stub
-				mChannelButtonHandle(mChannelDosButton);
-			}
-		});
+		MainContext.INSTANCE.getScannerService().pause();//暂停扫描，防止命令冲突
 
 		//开始按钮事件
 		startButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
 				try {
-					JSONObject jo 		= new JSONObject();
-					JSONObject obj 		= new JSONObject();
+					JSONObject jo = new JSONObject();
+					JSONObject obj = new JSONObject();
 					PrefSingleton.getInstance().Initialize(getApplicationContext());
-					int gId 			= PrefSingleton.getInstance().getInt("id");
+					int gId = PrefSingleton.getInstance().getInt("id");
 					PrefSingleton.getInstance().putInt("id", gId + 1);
 					obj.put("id", gId); // 1-1
-					JSONObject param	= new JSONObject(); // 2
-					JSONArray channels	= new JSONArray();
-					JSONArray wlist		= new JSONArray();
-					JSONArray blist 	= new JSONArray();
+					JSONObject param = new JSONObject(); // 2
+					JSONArray channels = new JSONArray();
+					JSONArray wlist	= new JSONArray();
+					JSONArray blist = new JSONArray();
 					param.put("action", "mdk"); // 2-1
 
-					if (channelDosButton.getText().toString().equals("选择目标频段") == false) {
-						jo.put("type", "single");
-						jo.put("detail", new Integer(channelId).toString());
-						channels.put(channelId);
-					} else if (mChannelDosButton.getText().toString().equals("选择多目标频段") == false) {
-						jo.put("type", "multi");
-						jo.put("detail", channelSelected);
-						String[] channelIDArr = channelSelected.split(",");
-						for (int i = 0; i < channelIDArr.length; i++) {
-							channels.put(Integer.parseInt(channelIDArr[i]));
-						}
-					} else if (apDosButton.getText().toString().equals("选择目标热点") == false) {
-						jo.put("type", "ap");
-						jo.put("detail", bssid);
-						blist.put(bssid);
-						channels.put(channel);
-						flag = true;
-						writeFile("DosFlag.txt",String.valueOf(flag),bssid);
-					}
-					else {
-						Toast.makeText(DosActivity.this, "请选择目标热点或频段！", Toast.LENGTH_SHORT).show();
-						return;
-					}
+					jo.put("type", "cus");
+					jo.put("detail", bssid);
+					channels.put(channel);
+
+					flag = true;
+					writeFile("DosFlag.txt",String.valueOf(flag),bssid);
+
+					blist.put(Cus);
 
 					param.put("channels", channels); // 2-3
 					param.put("wlist", wlist); // 2-4
@@ -157,9 +136,9 @@ public class DosActivity extends Activity {
 
 					final JSONObject jof = jo;
 
-					DevStatusDBUtils devStatusDBUtils 	= new DevStatusDBUtils(context);
+					DevStatusDBUtils devStatusDBUtils = new DevStatusDBUtils(context);
 					devStatusDBUtils.open();
-					final String devId 					= PrefSingleton.getInstance().getString("device");//获取设备ID
+					final String devId = PrefSingleton.getInstance().getString("device");//获取设备ID
 					devStatusDBUtils.preHandling(devId);
 					devStatusDBUtils.close();
 					BackgroundTask.clearAll();
@@ -170,7 +149,8 @@ public class DosActivity extends Activity {
 							runOnUiThread(new Runnable() {
 								@Override
 								public void run() {
-									new DosUpdater(DosActivity.this, devId, jof,null,false,null).execute();//开始阻断
+									new DosUpdater(DosActivity.this, devId, jof,null,false,
+											null,"106").execute(); //开始阻断
 								}
 							});
 						}
@@ -212,7 +192,7 @@ public class DosActivity extends Activity {
 	//选择热点事件
 	private void apDosButtonHandle(final Button apDosButton, final List<WiFiDetail> wiFiDetails) {
 		final String[] strings = new String[wiFiDetails.size()];
-		for (int i = 0;i<wiFiDetails.size();i++){
+		for (int i = 0; i < wiFiDetails.size(); i++){
 			strings[i] = wiFiDetails.get(i).getSSID() + " 信道："+ wiFiDetails.get(i).getWiFiSignal().getChannel();
 		}
 		new AlertDialog.Builder(DosActivity.this)
@@ -226,7 +206,6 @@ public class DosActivity extends Activity {
 						})
 				.setPositiveButton("确定", new DialogInterface.OnClickListener() {
 					private int index; // 表示选项的索引
-
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						// TODO Auto-generated method stub
@@ -234,7 +213,6 @@ public class DosActivity extends Activity {
 						dialog.dismiss();
 						apDosButton.setText(dosSsid);
 					}
-
 				})
 				.setNegativeButton("取消", new DialogInterface.OnClickListener() {
 					@Override
@@ -245,124 +223,22 @@ public class DosActivity extends Activity {
 				}).show();
 	}
 
-	//单频段事件
-	private void channelButtonHandle(final Button tmpButton) {
-
-		//final String[] channelString = { "频道1", "频道2", "频道3", "频道4", "频道5",
-		//		"频道6", "频道7", "频道8", "频道9", "频道10", "频道11" };
-		final String[] channelString = { "频道1","频道2","频道3","频道4","频道5","频道6","频道7","频道8","频道9","频道10","频道11","频道12","频道13","频道14",
-				"频道36","频道38","频道40","频道42","频道44","频道46","频道48","频道52","频道56","频道60","频道64","频道149","频道153","频道157","频道161","频道165"};
-		new AlertDialog.Builder(DosActivity.this)
-				.setTitle("选择频道")
-				.setSingleChoiceItems(channelString, 0,
-						new DialogInterface.OnClickListener() {
-
-							public void onClick(DialogInterface arg0, int arg1) {
-								// TODO Auto-generated method stub
-								if (arg1 >= 0) {
-									channelId = Integer.parseInt(channelString[arg1].replace("频道", ""));//arg1 + 1;
-
-								}
-							}
-						})
-				.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-					private int index; // 表示选项的索引
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						// TODO Auto-generated method stub
-						dialog.dismiss();
-						tmpButton.setText("所选频段为：" + channelId);
-//						apDosButton.setText("选择目标热点");
-						mChannelDosButton.setText("选择多目标频段");
-					}
-
-				})
-				.setNegativeButton("取消", new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						// TODO Auto-generated method stub
-						dialog.dismiss();
-					}
-				}).show();
-
+	@Override
+	protected void onStart() {
+		Log.d("DosActivity status：","Start");
+		super.onStart();
 	}
 
-	//多频段事件
-	private void mChannelButtonHandle(final Button button) {
-		//final String[] channelString = { "频道1", "频道2", "频道3", "频道4", "频道5",
-		//		"频道6", "频道7", "频道8", "频道9", "频道10", "频道11" };
-		final String[] channelString = { "频道1","频道2","频道3","频道4","频道5","频道6","频道7","频道8","频道9","频道10","频道11","频道12","频道13","频道14",
-				"频道36","频道38","频道40","频道42","频道44","频道46","频道48","频道52","频道56","频道60","频道64","频道149","频道153","频道157","频道161","频道165"};
-		//final boolean[] selected = new boolean[] { false, false, false, false,
-		//		false, false, false, false, false, false, false, false, false };
-		//final int[] channelIds = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-		//		-1, -1 };
-		final List<Integer> listInteger = new ArrayList();
-		new AlertDialog.Builder(DosActivity.this)
-				.setTitle("选择多频道")
-				.setMultiChoiceItems(channelString, null,
-						new DialogInterface.OnMultiChoiceClickListener() {
+	@Override
+	protected void onPause() {
+		BackgroundTask.clearAll();
+		Log.d("DosActivity status：","Pause");
+		super.onPause();
+	}
 
-							@Override
-							public void onClick(DialogInterface arg0, int arg1,
-												boolean arg2) {
-								// TODO Auto-generated method stub
-								if (arg2) {
-									listInteger.add(Integer.parseInt(channelString[arg1].replace("频道","")));
-								}
-								else {
-									Iterator<Integer> ii = listInteger.iterator();
-									while(ii.hasNext()){
-										Integer e = ii.next();
-										if(e.equals(Integer.parseInt(channelString[arg1].replace("频道","")))){
-											ii.remove();
-										}
-									}
-								}
-								//selected[arg1] = arg2;
-								//channelIds[arg1] = arg1 + 1;
-							}
-						})
-				.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						channelSelected = "";
-						Collections.sort(listInteger);
-						int count = listInteger.size();
-						for (int i = 0; i < count; i++) {
-							if (channelSelected.equals("")) {
-								channelSelected = channelSelected + listInteger.get(i).toString();
-							} else {
-								channelSelected = channelSelected + "," + listInteger.get(i).toString();
-							}
-						}
-						if (count == 0) {
-							dialog.dismiss();
-							button.setText("选择多目标频段");
-							apDosButton.setEnabled(true);
-							channelDosButton.setEnabled(true);
-							Toast.makeText(DosActivity.this, "未选择频段！",
-									Toast.LENGTH_SHORT).show();
-						} else if(count <= 3){
-							dialog.dismiss();
-							button.setText("所选频段为：" + channelSelected);
-//							apDosButton.setText("选择目标热点");
-							channelDosButton.setText("选择目标频段");
-						}else {
-							Toast.makeText(DosActivity.this, "请选择少于等于三个频段！",
-									Toast.LENGTH_SHORT).show();
-						}
-					}
-
-				})
-				.setNegativeButton("取消", new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						// TODO Auto-generated method stub
-						dialog.dismiss();
-					}
-				}).show();
+	@Override
+	protected void onResume() {
+		Log.d("DosActivity status：","Resume");
+		super.onResume();
 	}
 }

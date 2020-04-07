@@ -6,14 +6,14 @@
     android:orientation="vertical">
 
     <RelativeLayout
+        android:id="@+id/devices"
         android:layout_width="fill_parent"
         android:layout_height="80dp"
         android:layout_centerHorizontal="true"
         android:orientation="vertical">
 
 
-    <include layout="@layout/separator_line"
-        />
+    <include layout="@layout/separator_line" />
 
     <ImageView
         android:id="@+id/image_id"
@@ -34,8 +34,7 @@
         android:layout_toRightOf="@+id/image_id"
         android:layout_alignTop="@+id/image_id"
         android:layout_marginLeft="25dp"
-        android:textSize="16dp"
-        />
+        android:textSize="16dp" />
     <TextView
         android:id="@+id/mood"
         android:layout_width="fill_parent"
@@ -55,14 +54,31 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_marginLeft="260dp"
-        android:layout_marginTop="25dp"
-        />
+        android:layout_marginLeft="265dp"
+        android:layout_marginTop="25dp" />
         <ProgressBar
             android:id="@+id/deviceProgress"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="invisible"/>
+
     </RelativeLayout>
+
+    <!--<RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="80dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="80dp"
+        android:orientation="vertical">
+
+        <include layout="@layout/separator_line"/>
+
+        <Button
+            android:id="@+id/add_devices"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textSize="26sp"
+            android:text="添加设备"/>
+    </RelativeLayout>-->
 
 </RelativeLayout>

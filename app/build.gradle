@@ -20,13 +20,13 @@ apply plugin: 'com.android.application'
 apply plugin: 'jacoco-android'
 
 android {
-    compileSdkVersion 27
-    buildToolsVersion '27.0.3'
+    compileSdkVersion 26
+    buildToolsVersion '26.1.0'
 
     defaultConfig {
         applicationId "com.vrem.wifianalyzer"
         minSdkVersion 16
-        targetSdkVersion 22
+        targetSdkVersion 26
         versionCode
         versionName
         testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
@@ -53,7 +53,7 @@ android {
             all {
                 testLogging {
                     events "passed", "skipped", "failed", "standardOut", "standardError"
-                    outputs.upToDateWhen {false}
+                    outputs.upToDateWhen { false }
                     showStandardStreams = true
                 }
                 jacoco {
@@ -98,8 +98,8 @@ if (project.hasProperty('keyAlias')) {
 dependencies {
     // Compile Build Dependencies
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'com.android.support:appcompat-v7:27.0.2'
-    implementation 'com.android.support:design:27.0.2'
+    implementation 'com.android.support:appcompat-v7:26.1.0'
+    implementation 'com.android.support:design:26.1.0'
     implementation 'org.apache.commons:commons-lang3:3.7'
     implementation 'org.apache.commons:commons-collections4:4.1'
     implementation 'com.jjoe64:graphview:4.2.1'
@@ -107,7 +107,10 @@ dependencies {
     implementation 'com.mcxiaoke.volley:library:1.0.+'
     implementation 'com.google.code.gson:gson:2.8.0'
 
+    compileOnly files('src/main/libs/WifiAp8.jar')
+
     // Unit Test Dependencies
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.powermock:powermock-module-junit4:1.7.3'
     testImplementation 'org.powermock:powermock-api-mockito2:1.7.3'
@@ -188,4 +191,3 @@ def static writeProperties(propertiesFile, properties) {
     properties.store(writer, "Build Properties")
     writer.close()
 }
-

@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,11 +16,14 @@ import android.widget.ListView;
 import android.widget.TextView;
 import com.vrem.wifianalyzer.MainContext;
 import com.vrem.wifianalyzer.R;
+import com.vrem.wifianalyzer.wifi.common.BackgroundTask;
 import com.vrem.wifianalyzer.wifi.common.PrefSingleton;
 import com.vrem.wifianalyzer.wifi.model.ClientInfo;
 import com.vrem.wifianalyzer.wifi.model.WiFiDetail;
 import org.json.JSONException;
 import java.util.List;
+
+import static com.android.volley.VolleyLog.TAG;
 
 /**
  * Created by ZhenShiJie on 2018/5/7.
@@ -40,6 +44,7 @@ public class ClientEnumFragment extends Fragment {
         allEnumButton   = view.findViewById(R.id.allenum);//枚举所有热点按钮
         devId           = PrefSingleton.getInstance().getString("device");//获取设备ID
         wiFiDetailList  = MainContext.INSTANCE.getScannerService().getWiFiData().getWiFiDetails();
+        Log.d(TAG, "2020==>" + wiFiDetailList);
         return view;
     }
 
@@ -89,7 +94,7 @@ public class ClientEnumFragment extends Fragment {
                 .setSingleChoiceItems(strings, -1,new DialogInterface.OnClickListener() {
 
                     public void onClick(DialogInterface arg0, int arg1) {
-                        WiFiDetail wiFiDetail   = wiFiDetails.get(arg1);//获取某条wifi
+                        WiFiDetail wiFiDetail   = wiFiDetails.get(arg1); //获取某条wifi
                         View view               = getActivity().getLayoutInflater().inflate(R.layout.client_list_dialog, null);
                         Dialog dialog           = new Dialog(getContext());
                         dialog.setContentView(view);
@@ -112,5 +117,24 @@ public class ClientEnumFragment extends Fragment {
                         dialog.dismiss();
                     }
                 }).show();
+    }
+
+    @Override
+    public void onStart() {
+        Log.d("ClientFragment status：","Start");
+        super.onStart();
+    }
+
+    @Override
+    public void onResume() {
+        Log.d("ClientFragment status：", "Resume");
+        super.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        BackgroundTask.clearAll();
+        Log.d("ClientFragment status：","Pause");
+        super.onPause();
     }
 }

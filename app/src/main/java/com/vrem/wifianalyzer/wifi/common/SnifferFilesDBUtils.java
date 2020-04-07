@@ -13,13 +13,13 @@ public class SnifferFilesDBUtils {
     private static final String TAG = SnifferFilesDBUtils.class.getSimpleName();
     static final int DATABASE_VERSION = 3;
     // DB名
-    public static final String DATABASE_NAME = "SnifferFilesStatusDb";
+    public static final String DATABASE_NAME = "SnifferFilesStatus.Db";
 
     public static final String TABLE_SNIFFERFILES_TABLE ="snifferfiles";
     public static final String KEY_ROWID = "_id"; // integer 自增长，主key
-    public static final String DEVID = "devid"; // dev唯一识别号
-    public static final String FILE = "file";
-    public static final String ESSID = "essid";
+    public static final String DEVID = "devid"; // 设备ID
+    public static final String FILE = "file"; //握手包
+    public static final String ESSID = "essid";  //热点SSID
 
     final Context mContext;
 
@@ -81,38 +81,10 @@ public class SnifferFilesDBUtils {
         mDb.execSQL(sql.toString());
     }
 
-    public String getHandling(String devID) {
-        String sql = "select handling from " + TABLE_SNIFFERFILES_TABLE + " where devid='" + devID + "'";
-
-        String handling = "";
-        Cursor cursor = mDb.rawQuery(sql,null);
-        while (cursor.moveToNext()) {
-            handling = cursor.getString(0);
-            break;
-        }
-
-        return handling;
-    }
-
-    public int getScanstep1done(String devID) {
-        String sql = "select scanstep1done from " + TABLE_SNIFFERFILES_TABLE + " where devid='" + devID + "'";
-
-        int scanStep1Done = 0;
-        Cursor cursor = mDb.rawQuery(sql,null);
-        while (cursor.moveToNext()) {
-            scanStep1Done = cursor.getInt(0);
-            break;
-        }
-
-        return scanStep1Done;
-    }
-
     public Map<Integer,SnifferFile> getSnifferFiles(String devID){
         Map<Integer,SnifferFile> snifferFileMap = new HashMap<>();
-
         String sql = "select " + KEY_ROWID  + "," + DEVID + "," + FILE + "," + ESSID + " from " + TABLE_SNIFFERFILES_TABLE + " where devid='" + devID + "' order by " + KEY_ROWID + " desc" ;
         Log.w("SQL", sql);
-
         Cursor cursor = mDb.rawQuery(sql, null);
         while (cursor.moveToNext()) {
             SnifferFile snifferFile = new SnifferFile();
@@ -123,7 +95,7 @@ public class SnifferFilesDBUtils {
             snifferFileMap.put(snifferFile.rowID, snifferFile);
         }
         cursor.close();
-
         return snifferFileMap;
     }
+
 }

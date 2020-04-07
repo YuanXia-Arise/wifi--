@@ -19,9 +19,9 @@
 package com.vrem.wifianalyzer.wifi.accesspoint;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.widget.ExpandableListView;
 
-import com.vrem.wifianalyzer.MainActivity;
 import com.vrem.wifianalyzer.MainContext;
 import com.vrem.wifianalyzer.settings.Settings;
 import com.vrem.wifianalyzer.wifi.model.WiFiData;
@@ -29,10 +29,11 @@ import com.vrem.wifianalyzer.wifi.model.WiFiDetail;
 import com.vrem.wifianalyzer.wifi.predicate.FilterPredicate;
 
 import org.apache.commons.collections4.Predicate;
-import org.json.JSONException;
 
 import java.util.Collections;
 import java.util.List;
+
+import static android.content.ContentValues.TAG;
 
 class AccessPointsAdapterData {
     private AccessPointsAdapterGroup accessPointsAdapterGroup;

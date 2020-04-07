@@ -12,18 +12,23 @@ import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.RequestFuture;
+import com.vrem.wifianalyzer.MainActivity;
 import com.vrem.wifianalyzer.wifi.common.SnifferFilesDBUtils;
 
 import com.vrem.wifianalyzer.DeviceListActivity;
 import com.vrem.wifianalyzer.R;
+import com.vrem.wifianalyzer.wifi.model.DeviceInfo;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import static android.content.ContentValues.TAG;
 
 public class HandshakeUpdater extends AsyncTask<Object, Object, Void> {
     Context mContext;
@@ -38,11 +43,12 @@ public class HandshakeUpdater extends AsyncTask<Object, Object, Void> {
     boolean mExit;
     boolean mStep1Run; // dos
     boolean mStep2Run; // common hdsk step1
+    boolean mSnifferDos; //false(静默)，true(本地)
 
-
-    boolean mSnifferDos;
+    String handshakeFile;
 
     double mRate;
+
 
     public HandshakeUpdater(Context context, String bssid, int channelID, String devID, boolean snifferDos, double rate) {
         mContext = context;
@@ -82,26 +88,27 @@ public class HandshakeUpdater extends AsyncTask<Object, Object, Void> {
     @Override
     protected Void doInBackground  (Object... params) {
         try {
-            if (mSnifferDos && mStep1Needed) { // 极速模式且未dos, mStep1对应dos
+            Log.d(TAG, "123456==>0" + mSnifferDos + mStep1Needed + mStep2Needed);
+            if (mSnifferDos && mStep1Needed) { //极速模式且未dos, mStep1对应dos
+                Log.d(TAG, "123456==1>");
                 JSONObject jo = new JSONObject();
-
                 JSONObject obj = new JSONObject();
                 int gId = PrefSingleton.getInstance().getInt("id");
                 PrefSingleton.getInstance().putInt("id", gId + 1);
-                obj.put("id", gId); // 1-1
-                JSONObject param = new JSONObject(); // 2
+                obj.put("id", gId); //1-1
+                JSONObject param = new JSONObject(); //2
                 JSONArray channels = new JSONArray();
                 JSONArray wlist = new JSONArray();
                 JSONArray blist = new JSONArray();
-                param.put("action", "mdk"); // 2-1
+                param.put("action", "mdk"); //2-1
                 jo.put("type", "ap");
                 jo.put("detail", mBssid);
                 blist.put(mBssid);
                 channels.put(mChannelID);
 
-                param.put("channels", channels); // 2-3
-                param.put("wlist", wlist); // 2-4
-                param.put("blist", blist); // 2-5
+                param.put("channels", channels); //2-3
+                param.put("wlist", wlist); //2-4
+                param.put("blist", blist); //2-5
                 param.put("interval", 1.5);
                 obj.put("param", param);
                 jo.put("data", obj);
@@ -112,14 +119,13 @@ public class HandshakeUpdater extends AsyncTask<Object, Object, Void> {
 
                 RequestFuture<JSONObject> requestFuture = RequestFuture.newFuture();
                 JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url,  jo, requestFuture, requestFuture);
-                jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(10000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+                jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(10000,
+                        DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
                 VolleySingleton.getInstance(mContext).getRequestQueue().add(jsonObjectRequest);
 
                 try {
                     JSONObject response = requestFuture.get(10 - 1, TimeUnit.SECONDS);
-
-                    new InteractRecordDBUtils(mContext).easy_insert(obj.toString(), response.toString());//将请求命令、返回结果存入数据库
-
+                    new InteractRecordDBUtils(mContext).easy_insert(obj.toString(), response.toString()); //将请求命令、返回结果存入数据库
                     int status = response.getInt("status");
                     if (status == 0) {
                         Log.w("HDSK_DOS_STEP", "RESPONSE:" + response.toString());
@@ -139,12 +145,10 @@ public class HandshakeUpdater extends AsyncTask<Object, Object, Void> {
                 } catch (ExecutionException e) {
                     e.printStackTrace();
                 }
-                //Toast.makeText(mContext, "阻断出错啦", Toast.LENGTH_SHORT).show();
                 Log.w("HDSK_DOS_STEP", "阻断出错啦");
                 return null;
-            }
-
-            else if (mSnifferDos && (!mStep1Needed) && mStep2Needed) { // dos过但未step2（即未common hdsk第一步）
+            } else if (mSnifferDos && (!mStep1Needed) && mStep2Needed) { //dos过但未step2（即未common hdsk第一步）
+                Log.d(TAG, "123456==2>");
                 DevStatusDBUtils devStatusDBUtils = new DevStatusDBUtils(mContext);
                 devStatusDBUtils.open();
                 int handshakePrepareCount = devStatusDBUtils.getHandshakepreparecount(mDevId);
@@ -164,9 +168,8 @@ public class HandshakeUpdater extends AsyncTask<Object, Object, Void> {
                 devStatusDBUtils.close();
                 mStep2Run = true;
                 return null;
-            }
-
-            else if ((!mSnifferDos) && mStep2Needed) {
+            } else if ((!mSnifferDos) && mStep2Needed) {
+                Log.d(TAG, "123456==3>");
                 DevStatusDBUtils devStatusDBUtils = new DevStatusDBUtils(mContext);
                 devStatusDBUtils.open();
                 int r = handshakeStep2(mContext);
@@ -174,29 +177,30 @@ public class HandshakeUpdater extends AsyncTask<Object, Object, Void> {
                     devStatusDBUtils.close();
                     return null;
                 }
-                devStatusDBUtils.handshakeStep2Done(mDevId, new Integer(mChannelID).toString() + "-" + new Integer(r).toString() + "-" + mBssid + ".cap");
+                devStatusDBUtils.handshakeStep2Done(mDevId, new Integer(mChannelID).toString() + "-"
+                        + new Integer(r).toString() + "-" + mBssid + ".cap");
                 devStatusDBUtils.close();
                 mStep2Run = true;
                 return null;
-            }
-
-            else { // (mSnifferDos && (!mStep1Needed) && (!mStep2Needed)) || ((!mSnifferDos) && (!mStep2Needed))
+            } else { //(mSnifferDos && (!mStep1Needed) && (!mStep2Needed)) || ((!mSnifferDos) && (!mStep2Needed))
+                Log.d(TAG, "123456==4>");
                 JSONObject response = handshakeStep3(mContext);
                 if (response == null) {
                     return null;
                 }
                 JSONObject jo = response.getJSONObject("data");
-                boolean handshakeComplete = jo.getBoolean("handshake_complete");
+                Log.d(TAG, "666666==000>" + jo);
+                boolean handshakeComplete = jo.optBoolean("handshake_complete");
                 if (!handshakeComplete) {
                     Log.w("HDSK STATUS", "not completed");
                 } else {
-                    String handshakeFile = jo.getString("handshake_file");
+                    //String handshakeFile = jo.getString("handshake_file");
+                    handshakeFile = jo.getString("handshake_file");
                     String mac = handshakeFile.split("-")[1].split("\\.")[0];
                     MacSsidDBUtils macSsidDBUtils = new MacSsidDBUtils(mContext);
                     macSsidDBUtils.open();
                     String essid = macSsidDBUtils.getSSID(mDevId, mac);
                     macSsidDBUtils.close();
-
 
                     SnifferFilesDBUtils snifferFilesDBUtils = new SnifferFilesDBUtils(mContext);
                     snifferFilesDBUtils.open();
@@ -207,15 +211,12 @@ public class HandshakeUpdater extends AsyncTask<Object, Object, Void> {
                 }
             }
         } catch (JSONException e) {
-            mExit = true;
             e.printStackTrace();
-
             Log.w("HDSK_ERROR", "STEP3 INVALID RESPONS");
             DevStatusDBUtils devStatusDBUtils = new DevStatusDBUtils(mContext);
             devStatusDBUtils.open();
             devStatusDBUtils.handshakeCancel(mDevId);
             devStatusDBUtils.close();
-
             return null;
         }
         return null;
@@ -240,18 +241,30 @@ public class HandshakeUpdater extends AsyncTask<Object, Object, Void> {
 
             BackgroundTask.clearAll();
 
-            new AlertDialog.Builder(mContext).setTitle("状态").setMessage("截获成功！").setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            new AlertDialog.Builder(mContext).setTitle("状态").setMessage("握手包" + handshakeFile.
+                    split("-")[1] + "\n截获成功！").setPositiveButton("确定",
+                    new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    ((Activity) mContext).overridePendingTransition(R.anim.slide_left_in,R.anim.slide_right_out);
+                    /*((Activity) mContext).overridePendingTransition(R.anim.slide_left_in,R.anim.slide_right_out);
                     BackgroundTask.clearAll();
+                    ((Activity) mContext).finish();*/
+
+                    DevStatusDBUtils devStatusDBUtils = new DevStatusDBUtils(mContext);
+                    devStatusDBUtils.open();
+                    devStatusDBUtils.handshakeCancel(mDevId); //将数据改为原始状态
+                    devStatusDBUtils.close();
+                    BackgroundTask.clearAll();//取消异步任务
+                    Intent intent = new Intent();
+                    intent.setClass(mContext, MainActivity.class);
+                    mContext.startActivity(intent);
                     ((Activity) mContext).finish();
                 }
             }).show();
         }
     }
 
-    public int handshakeStep2(final Context context) throws JSONException { // 对应数据表step2, 数据表step1对应dos, mStep1对应dos
+    private int handshakeStep2(final Context context) throws JSONException { //对应数据表step2,数据表step1对应dos,mStep1对应dos
         String url = PrefSingleton.getInstance().getString("url");
 
         JSONObject obj = new JSONObject();
@@ -277,7 +290,7 @@ public class HandshakeUpdater extends AsyncTask<Object, Object, Void> {
         try {
             JSONObject response = requestFuture.get(5 - 1, TimeUnit.SECONDS);
 
-            new InteractRecordDBUtils(mContext).easy_insert(obj.toString(), response.toString());//将请求命令、返回结果存入数据库
+            new InteractRecordDBUtils(mContext).easy_insert(obj.toString(), response.toString()); //将请求命令、返回结果存入数据库
 
             int status = response.getInt("status");
             if (status == 0) {
@@ -298,7 +311,7 @@ public class HandshakeUpdater extends AsyncTask<Object, Object, Void> {
         return -3;
     }
 
-    public JSONObject handshakeStep3(final Context context) throws JSONException {
+    private JSONObject handshakeStep3(final Context context) throws JSONException {
         String url = PrefSingleton.getInstance().getString("url");
 
         JSONObject obj = new JSONObject();

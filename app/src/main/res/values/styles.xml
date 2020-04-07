@@ -53,6 +53,13 @@
         <item name="android:textSize">26sp</item>
     </style>
 
+    <style name="ButtonTarget">
+        <item name="android:layout_width">85dp</item>
+        <item name="android:layout_height">50dp</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">24sp</item>
+    </style>
+
     <string-array name="drawer_item_array">
         <item>设备管理</item>
         <item>用户信息</item>

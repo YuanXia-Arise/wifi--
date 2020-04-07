@@ -21,6 +21,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import static android.content.ContentValues.TAG;
+
 public class WpsCrackUpdater extends AsyncTask<Object, Object, Void> {
     Context mContext;
     String mDevId;
@@ -45,6 +47,7 @@ public class WpsCrackUpdater extends AsyncTask<Object, Object, Void> {
 
     @Override  //1
     protected void onPreExecute() {
+        Log.d(TAG, "onPreExecute: 333--0");
         DevStatusDBUtils devStatusDBUtils = new DevStatusDBUtils(mContext);
         devStatusDBUtils.open();
         int dosStep1Done = devStatusDBUtils.getCrackstep1done(mDevId);//第一次进来就等于1了，所以无法执行true操作
@@ -75,7 +78,10 @@ public class WpsCrackUpdater extends AsyncTask<Object, Object, Void> {
                 return null;
             }
 
+            Log.d(TAG, "doInBackground: 333--5");
             JSONObject response = dosStep2(mContext);
+            Log.d(TAG, "doInBackground: 333--6");
+            Log.d(TAG, "doInBackground: 333--7:" + response);
             if (response == null) {
                 return null;
             }
@@ -91,7 +97,6 @@ public class WpsCrackUpdater extends AsyncTask<Object, Object, Void> {
             devStatusDBUtils.open();
             devStatusDBUtils.dosCancel(mDevId);
             devStatusDBUtils.close();
-
             return null;
         }
         return null;
@@ -122,8 +127,7 @@ public class WpsCrackUpdater extends AsyncTask<Object, Object, Void> {
             BackgroundTask.clearAll();
 
             Intent intent = new Intent();
-            intent.setClass(mContext,
-                    DeviceListActivity.class);
+            intent.setClass(mContext, DeviceListActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             mContext.startActivity(intent);
             ((Activity) mContext).overridePendingTransition(R.anim.slide_left_in,R.anim.slide_right_out);
@@ -132,7 +136,8 @@ public class WpsCrackUpdater extends AsyncTask<Object, Object, Void> {
     }
 
     public int dosStep1(final Context context, JSONObject jo) throws JSONException {
-        String url ="http://192.168.100.1:9494";
+//        String url ="http://192.168.100.1:9494";
+        String url = PrefSingleton.getInstance().getString("url");
 
         JSONObject obj = jo;
         Log.w("DOS_STEP_1_REQUEST", obj.toString());
@@ -169,7 +174,9 @@ public class WpsCrackUpdater extends AsyncTask<Object, Object, Void> {
     }
 
     public JSONObject dosStep2(final Context context) throws JSONException {
-        String url ="http://192.168.100.1:9494";
+        Log.d(TAG, "dosStep2: 333--4");
+//        String url ="http://192.168.100.1:9494";
+        String url = PrefSingleton.getInstance().getString("url");
 
         JSONObject obj = new JSONObject();
         JSONObject param = new JSONObject();

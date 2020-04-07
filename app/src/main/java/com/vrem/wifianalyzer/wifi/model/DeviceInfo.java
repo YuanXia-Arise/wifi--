@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -28,6 +30,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+
+
 
 public class DeviceInfo extends Base {
 
@@ -103,27 +107,22 @@ public class DeviceInfo extends Base {
 	public static int handlingToWorkType(String handling) {
 		if (handling.equals("")) {
 			return 100; // 空闲
-		}
-		else if (handling.equals("handshake")) {
-			return 103; // 密码强度测试 - 抓包
-		}
-		else if (handling.equals("wps_crack")){
+		} else if (handling.equals("handshake")) {
+			return 103; // 密码强度测试-抓包
+		} else if (handling.equals("wps_crack")){
 			return 104;
-		}
-		else if (handling.equals("fakeap_4g")) {
+		} else if (handling.equals("fakeap_4g")) {
 			return 105;
-		}
-		else if (handling.equals("fakeap_wifi")) {
+		} else if (handling.equals("fakeap_wifi")) {
 			return 201;
-		}
-		else if (handling.equals("dos_ap")) {
+		} else if (handling.equals("dos_ap")) {
 			return 101;
-		}
-		else if (handling.equals("dos_single")) {
+		} else if (handling.equals("dos_single")) {
 			return 102;
-		}
-		else if (handling.equals("dos_multi")) {
+		} else if (handling.equals("dos_multi")) {
 			return 110;
+		} else if (handling.equals("dos_cus")) {
+			return 106;
 		}
 		else return 2017;
 	}
@@ -148,8 +147,7 @@ public class DeviceInfo extends Base {
 
 		JSONObject response = new JSONObject("{\"devices\":[{\"status\":\"{}\",\"work_type\":" + new Integer(workType).toString() + ",\"uid\":1,\"dev_type\":51,\"devid\":\"" + devID + "\",\"st_lasttime\":1627174220,\"commit\":\"" + devID + "\",\"is_alive\":true,\"cmd_param\":{}}],\"error\":0}");
 
-		int length = response.getJSONArray("devices")
-				.length();
+		int length = response.getJSONArray("devices").length();
 		for (int i = 0; i < length; i++) {
 			DeviceInfo deviceInfo = new DeviceInfo();
 			deviceInfo.setDevId(((JSONObject) response.getJSONArray("devices").get(i)).getString("devid"));
@@ -195,8 +193,7 @@ public class DeviceInfo extends Base {
 		DeviceListActivity.flag = 0;
 		((Activity) context).invalidateOptionsMenu();
 		mainContainer.setVisibility(View.GONE);
-		SharedPreferences userInfo = context.getSharedPreferences("user_info",
-				0);
+		SharedPreferences userInfo = context.getSharedPreferences("user_info", 0);
 		String token = userInfo.getString("token", "");
 		String username = userInfo.getString("username", "");
 		String ip = userInfo.getString("ip", "");
@@ -271,22 +268,20 @@ public class DeviceInfo extends Base {
 						noData.setVisibility(View.GONE);
 					}
 				});
-
 		// add it to the RequestQueue
-		getRequest.setRetryPolicy(new DefaultRetryPolicy(30000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+		getRequest.setRetryPolicy(new DefaultRetryPolicy(30000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+				DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 		if(VolleySingleton.getInstance(context).getRequestQueue() != null)
 			VolleySingleton.getInstance(context).getRequestQueue().add(getRequest);
 	}
 
-	public static void setCommit(final Context context, String devId, String commit, final ListView listview, final ProgressBar progressBar, final TextView refresh, final TextView noData, final RelativeLayout bottomLayout) throws JSONException {
-		SharedPreferences userInfo = context.getSharedPreferences(
-						"user_info", 0);
-		String token = userInfo.getString(
-				"token", "");
-		String username = userInfo.getString(
-				"username", "");
-		String ip = userInfo.getString(
-				"ip", "");
+	public static void setCommit(final Context context, String devId, String commit, final ListView listview,
+								 final ProgressBar progressBar, final TextView refresh, final TextView noData,
+								 final RelativeLayout bottomLayout) throws JSONException {
+		SharedPreferences userInfo = context.getSharedPreferences("user_info", 0);
+		String token = userInfo.getString("token", "");
+		String username = userInfo.getString("username", "");
+		String ip = userInfo.getString("ip", "");
 		JSONObject obj = new JSONObject();
 		obj.put("username", username);
 		obj.put("token", token);
@@ -297,8 +292,7 @@ public class DeviceInfo extends Base {
 				Request.Method.POST, url, obj,
 				new Response.Listener<JSONObject>() {
 					public void onResponse(JSONObject response) {
-						Toast.makeText(context, "设置成功", Toast.LENGTH_SHORT)
-								.show();
+						Toast.makeText(context, "设置成功", Toast.LENGTH_SHORT).show();
 						try {
 							setDeviceInfo(context, listview, progressBar, refresh, noData, bottomLayout);
 						} catch (JSONException e) {
@@ -308,8 +302,7 @@ public class DeviceInfo extends Base {
 				}, new Response.ErrorListener() {
 					@Override
 					public void onErrorResponse(VolleyError error) {
-						Toast.makeText(context, "设置失败", Toast.LENGTH_SHORT)
-								.show();
+						Toast.makeText(context, "设置失败", Toast.LENGTH_SHORT).show();
 					}
 				});
 		getRequest.setRetryPolicy(new DefaultRetryPolicy(30000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
@@ -321,8 +314,7 @@ public class DeviceInfo extends Base {
 	public static void sendCommand(final Context context,
 			final DeviceInfo deviceInfo, final JSONObject params,
 			final String command) throws JSONException {
-		SharedPreferences sharedPreferences = context.getSharedPreferences(
-				"user_info", 0);
+		SharedPreferences sharedPreferences = context.getSharedPreferences("user_info", 0);
 		String token = sharedPreferences.getString("token", "");
 		String username = sharedPreferences.getString("username", "");
 		String ip = sharedPreferences.getString("ip", "");
@@ -340,12 +332,10 @@ public class DeviceInfo extends Base {
 		JsonObjectRequest getRequest = new JsonObjectRequest(
 				Request.Method.POST, url, obj,
 				new Response.Listener<JSONObject>() {
-					public void onResponse(JSONObject response) {
-						// display response
+					public void onResponse(JSONObject response) {// display response
 						int errorCode = 1;
 						try {
 							errorCode = response.getInt("error");
-
 						} catch (JSONException e) {
 							e.printStackTrace();
 						}
@@ -413,8 +403,7 @@ public class DeviceInfo extends Base {
 	public static void sendCommand(final Context context,
                                    final DeviceInfo deviceInfo, final JSONObject params,
                                    final String command, final ListView listview, final ProgressBar progressBar, final TextView refresh, final TextView noData, final RelativeLayout bottomLayout) throws JSONException {
-		SharedPreferences sharedPreferences = context.getSharedPreferences(
-				"user_info", 0);
+		SharedPreferences sharedPreferences = context.getSharedPreferences("user_info", 0);
 		String token = sharedPreferences.getString("token", "");
 		String username = sharedPreferences.getString("username", "");
 		String ip = sharedPreferences.getString("ip", "");
@@ -476,5 +465,6 @@ public class DeviceInfo extends Base {
 	public static void updateView(){
 		deviceListAdapter.notifyDataSetChanged();
 	}
+
 
 }

@@ -19,6 +19,7 @@
 package com.vrem.wifianalyzer.wifi.predicate;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.vrem.util.EnumUtils;
 import com.vrem.wifianalyzer.settings.Settings;
@@ -37,11 +38,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import static android.content.ContentValues.TAG;
+
 public class FilterPredicate implements Predicate<WiFiDetail> {
 
     private final Predicate<WiFiDetail> predicate;
 
-    private FilterPredicate(Settings settings, Set<WiFiBand> wiFiBands) {
+    private FilterPredicate(@NonNull Settings settings, @NonNull Set<WiFiBand> wiFiBands) {
         Predicate<WiFiDetail> ssidPredicate = makeSSIDPredicate(settings.getSSIDs());
         Predicate<WiFiDetail> wiFiBandPredicate = EnumUtils.predicate(WiFiBand.class, wiFiBands, new WiFiBandTransformer());
         Predicate<WiFiDetail> strengthPredicate = EnumUtils.predicate(Strength.class, settings.getStrengths(), new StrengthTransformer());
@@ -50,11 +53,13 @@ public class FilterPredicate implements Predicate<WiFiDetail> {
         this.predicate = PredicateUtils.allPredicate(CollectionUtils.select(predicates, new NoTruePredicate()));
     }
 
+    @NonNull
     public static Predicate<WiFiDetail> makeAccessPointsPredicate(@NonNull Settings settings) {
         return new FilterPredicate(settings, settings.getWiFiBands());
     }
 
-    public static Predicate<WiFiDetail> makeOtherPredicate(Settings settings) {
+    @NonNull
+    public static Predicate<WiFiDetail> makeOtherPredicate(@NonNull Settings settings) {
         return new FilterPredicate(settings, Collections.singleton(settings.getWiFiBand()));
     }
 
@@ -63,10 +68,12 @@ public class FilterPredicate implements Predicate<WiFiDetail> {
         return predicate.evaluate(object);
     }
 
+    @NonNull
     Predicate<WiFiDetail> getPredicate() {
         return predicate;
     }
 
+    @NonNull
     private Predicate<WiFiDetail> makeSSIDPredicate(Set<String> ssids) {
         if (ssids.isEmpty()) {
             return PredicateUtils.truePredicate();

@@ -30,7 +30,7 @@ public enum AccessPointViewType {
         this.layout = layout;
     }
 
-    int getLayout() {
+    public int getLayout() {
         return layout;
     }
 

@@ -4,9 +4,6 @@ import android.content.res.AssetManager;
 import android.os.Handler;
 import android.util.Log;
 
-import com.vrem.wifianalyzer.MainContext;
-import com.vrem.wifianalyzer.wifi.common.ApLinkInfoUpdater;
-import com.vrem.wifianalyzer.wifi.common.PrefSingleton;
 import com.vrem.wifianalyzer.wifi.fragmentWiFiHotspot.ApLinkInfoAdapter;
 
 import org.json.JSONException;
@@ -97,7 +94,7 @@ public class HTTPServer extends NanoHTTPD {
         return new NanoHTTPD.Response(new String(buffer,0,len));
     }
 
-    /*    @Override
+    /*@Override
     public Response serve(IHTTPSession session) {
         Method method = session.getMethod();
         Log.e("EEEEEEE","Method:"+method.toString());

@@ -28,20 +28,28 @@
     <string name="action_channel_rating">頻道評分</string>
     <string name="action_channel_graph">頻道圖</string>
     <string name="action_time_graph">時間圖</string>
-    <string name="action_export">分享</string>
-    <string name="action_channel_available">可用頻道</string>
-    <string name="action_vendors">製造商</string>
-    <string name="action_datapack">数据包</string>
+    <string name="action_export">阻斷攻擊 </string>
+    <string name="action_channel_available">客戶端枚舉 </string>
+    <string name="action_sniffer">握手包截獲</string>
+    <string name="action_vendors">WPS破解</string>
+    <string name="action_forgery">熱點偽造 </string>
+    <string name="action_wifi_hotspot">無線熱點 </string>
+    <string name="action_search">目標蒐索</string>
+    <string name="action_datapack">數据包 </string>
     <string name="action_settings">設定</string>
-    <string name="action_about">關於</string>
     <!-- action end -->
+
+    <string-array name="fake_spinner">
+        <item>3G類比 </item>
+        <item>Wifi類比</item>
+    </string-array>
 
     <string name="button_cancel">取消</string>
     <string name="no_data">無資料</string>
 
     <string name="export_not_available">無法匯出</string>
 
-    <string name="channel_rating_best">最佳頻道：</string>
+    <string name="channel_rating_best">最佳頻道:</string>
     <string name="channel_rating_best_none">無</string>
     <string name="channel_rating_best_alternative">，嘗試其他WiFi頻段</string>
     <string name="channel_rating_heading_rating">頻道評分</string>
@@ -60,7 +68,7 @@
     <string name="sort_by_title">接入點排序依據</string>
     <string name="group_by_title">接入點分組依據</string>
     <string name="connection_view_title">連接顯示</string>
-    <string name="ap_view_title">顯示AP</string>
+    <string name="ap_view_title">接入點顯示 </string>
     <string name="graph_maximum_y_title">圖形最大信號強度</string>
     <string name="channel_graph_legend_title">頻道圖例顯示位置</string>
     <string name="time_graph_legend_title">時間圖例顯示位置</string>
@@ -70,12 +78,12 @@
     <!-- settings end -->
 
     <!-- about start -->
-    <string name="about_license_title">授權：</string>
-    <string name="about_license_name">根據 GPLv3 授權</string>
-    <string name="about_description_title">描述：</string>
-    <string name="about_description_text">使用此開源的Android WiFi分析儀來檢查WiFi狀態、訊號強度並識別擁擠的頻道從而最佳化您的WiFi網路</string>
-    <string name="about_libraries_title">使用的庫：</string>
-    <string name="about_contributor_title">貢獻者：</string>
+    <string name="about_license_title">授權:</string>
+    <string name="about_license_name">GPLv3的許可</string>
+    <string name="about_description_title">描述:</string>
+    <string name="about_description_text">使用此開源的Android WiFi分析儀來檢查WiFi狀態，信號強度並識別擁擠的通道從而優化您的WiFi網絡 </string>
+    <string name="about_libraries_title">使用的庫:</string>
+    <string name="about_contributor_title">貢獻者:</string>
     <string name="about_write_review">撰寫評論</string>
     <!-- about end -->
 
@@ -94,32 +102,25 @@
     <!-- filter end -->
 
     <string-array name="drawer_item_array">
-        <item>Gestión de equipos</item>
-        <item>Información del usuario</item>
-        <item>设置</item>
-        <item>帮助</item>
-        <item>退出登录</item>
-        <item>关于</item>
+        <item>設備管理</item>
+        <item>用戶資訊 </item>
+        <item>設定</item>
+        <item>幫助</item>
+        <item>登出 </item>
+        <item>關於 </item>
     </string-array>
 
     <string-array name="send_spinner">
         <item>本地保存</item>
-        <item>3G发送</item>
+        <item>4G發送 </item>
     </string-array>
 
     <string-array name="method_spinner">
-        <item>静默模式</item>
-        <item>极速模式</item>
+        <item>靜默模式 </item>
+        <item>極速模式 </item>
     </string-array>
 
-    <string name="drawer_open">打开抽屉导航</string>
-    <string name="drawer_close">关闭抽屉导航</string>
+    <string name="drawer_open">打開抽屜導航</string>
+    <string name="drawer_close">關閉抽屜導航</string>
 
-    <string name="action_sniffer">握手包截获</string>
-    <string name="action_forgery">热点伪造</string>
-    <string name="action_wifi_hotspot">无线热点</string>
-    <string-array name="fake_spinner">
-        <item>3G模拟</item>
-        <item>Wifi模拟</item>
-    </string-array>
 </resources>

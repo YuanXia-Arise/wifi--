@@ -38,6 +38,4 @@
         android:title="@string/action_pause"
         app:showAsAction="ifRoom"/>
 
-
-
 </menu>

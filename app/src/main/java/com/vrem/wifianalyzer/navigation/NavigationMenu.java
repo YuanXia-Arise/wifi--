@@ -41,13 +41,14 @@ public enum NavigationMenu {
 //    FRAGMENT_TEST(R.drawable.ic_show_chart_grey_500_48dp,R.string.action_forgery,NavigationItemFactory.FRAGMENTTEST,NavigationOptionFactory.FRAGMENTTEST),
     EXPORT(R.drawable.ic_import_export_grey_500_48dp, R.string.action_export, NavigationItemFactory.EXPORT),
     CHANNEL_AVAILABLE(R.drawable.ic_location_on_grey_500_48dp, R.string.action_channel_available, NavigationItemFactory.CHANNEL_AVAILABLE),
-    VENDOR_LIST(R.drawable.ic_list_grey_500_48dp, R.string.action_vendors, NavigationItemFactory.VENDOR_LIST),
+//    VENDOR_LIST(R.drawable.ic_list_grey_500_48dp, R.string.action_vendors, NavigationItemFactory.VENDOR_LIST),
     FORGERY(R.drawable.ic_location_on_forgery_500_48dp,R.string.action_forgery,NavigationItemFactory.FORGERY),
     SNIFFER(R.drawable.ic_location_on_sniffer_500_48dp,R.string.action_sniffer,NavigationItemFactory.SNIFFER),
     WIFI_HOTSPOT(R.drawable.wifi_hotspot,R.string.action_wifi_hotspot,NavigationItemFactory.WIFI_HOTSPOT),
+    TARGET_SEARCH(R.drawable.ic_target_search_500_48dp, R.string.action_search, NavigationItemFactory.TARGET_SEARCH),
     DATA_PACK(R.drawable.data_pack_icon,R.string.action_datapack,NavigationItemFactory.DATA_PACK),
     SETTINGS(R.drawable.ic_settings_grey_500_48dp, R.string.action_settings, NavigationItemFactory.SETTINGS);
-//    ABOUT(R.drawable.ic_info_outline_grey_500_48dp, R.string.action_about, NavigationItemFactory.ABOUT);
+    //ABOUT(R.drawable.ic_info_outline_grey_500_48dp, R.string.action_about, NavigationItemFactory.ABOUT);
 
     private final int icon;
     private final int title;

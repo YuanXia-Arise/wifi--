@@ -27,6 +27,7 @@ import com.vrem.wifianalyzer.Configuration;
 import com.vrem.wifianalyzer.MainContext;
 import com.vrem.wifianalyzer.R;
 import com.vrem.wifianalyzer.settings.Settings;
+import com.vrem.wifianalyzer.settings.ThemeStyle;
 import com.vrem.wifianalyzer.wifi.band.WiFiBand;
 import com.vrem.wifianalyzer.wifi.graphutils.GraphConstants;
 import com.vrem.wifianalyzer.wifi.graphutils.GraphViewBuilder;
@@ -97,9 +98,10 @@ class TimeGraphView implements GraphViewNotifier {
     private GraphViewWrapper makeGraphViewWrapper() {
         MainContext mainContext = MainContext.INSTANCE;
         Settings settings = mainContext.getSettings();
+        ThemeStyle themeStyle = settings.getThemeStyle();
         Configuration configuration = mainContext.getConfiguration();
         GraphView graphView = makeGraphView(mainContext, settings);
-        graphViewWrapper = new GraphViewWrapper(graphView, settings.getTimeGraphLegend());
+        graphViewWrapper = new GraphViewWrapper(graphView, settings.getTimeGraphLegend(),themeStyle);
         configuration.setSize(graphViewWrapper.getSize(graphViewWrapper.calculateGraphType()));
         graphViewWrapper.setViewport();
         return graphViewWrapper;

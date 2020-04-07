@@ -1,11 +1,12 @@
 package com.vrem.wifianalyzer.wifi.fragmentWiFiHotspot;
 
-import android.annotation.SuppressLint;
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.res.Configuration;
+import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
@@ -16,7 +17,10 @@ import android.os.Message;
 import android.os.ResultReceiver;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,12 +28,11 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.vrem.wifianalyzer.MainContext;
 import com.vrem.wifianalyzer.R;
-import com.vrem.wifianalyzer.navigation.items.FragmentItem;
-import com.vrem.wifianalyzer.wifi.accesspoint.AccessPointsFragment;
 import com.vrem.wifianalyzer.wifi.common.ApLinkInfoUpdater;
 import com.vrem.wifianalyzer.wifi.common.InfoUpdater;
 import com.vrem.wifianalyzer.wifi.common.PrefSingleton;
@@ -42,6 +45,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.content.ContentValues.TAG;
+
 
 public class WIFIHotspotFragment extends Fragment implements ApLinkInfoAdapter.Callback{
 
@@ -56,11 +62,13 @@ public class WIFIHotspotFragment extends Fragment implements ApLinkInfoAdapter.C
     private static List<String> promptList;//提示信息
     private static ApLinkInfoAdapter listAdapter; //ap连接适配器
     private View view;//用于判断当前的view是否为空 #解决再次进入的时候回界面数据为空
+    private TextView tips;
 
     private HTTPServer server;//web服务
     private Handler mainHandler;
 
     private ProgressDialog progressDialog;//连接进度条
+    private ConnectivityManager mConnectivityManager;
 
     public WIFIHotspotFragment(){
 
@@ -117,8 +125,16 @@ public class WIFIHotspotFragment extends Fragment implements ApLinkInfoAdapter.C
             linkInfoLv       = view.findViewById(R.id.link_info_list_view);
             promptList       = new ArrayList<>();
             listAdapter      = new ApLinkInfoAdapter(getContext(),promptList,this);
-            wifiManager      = (WifiManager) MainContext.INSTANCE.getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-
+            wifiManager = (WifiManager) MainContext.INSTANCE.getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+            mConnectivityManager = (ConnectivityManager)MainContext.INSTANCE.getContext().getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+            tips = view.findViewById(R.id.Tips);
+            initBroadcastReceiver();
+            if (Build.VERSION.SDK_INT >= 26) {
+                hotspotNname.setEnabled(false);
+                password.setEnabled(false);
+            } else {
+                tips.setVisibility(View.INVISIBLE);
+            }
             linkInfoLv.setAdapter(listAdapter);
         } else {
             return view;
@@ -136,34 +152,44 @@ public class WIFIHotspotFragment extends Fragment implements ApLinkInfoAdapter.C
             public void onClick(View v) {
                 boolean isAP = MainContext.INSTANCE.getScannerService().isWifiApStatus();
                 if (!isAP) {
-                    strHotspotName = hotspotNname.getText().toString();
-                    strPassword     = password.getText().toString();
-                    if (strHotspotName.equals("")){
-                        Toast.makeText(getContext(),"请输入名称",Toast.LENGTH_SHORT).show();
-                    }else if (strPassword.equals("")){
-                        Toast.makeText(getContext(),"请输入密码",Toast.LENGTH_SHORT).show();
-                    }else if(strPassword.length()<8){
-                        Toast.makeText(getContext(),"密码长度不能少于8位",Toast.LENGTH_SHORT).show();
-                    }else {
+                    if (Build.VERSION.SDK_INT >= 26){ //Build.VERSION_CODES.O
                         try {
-                            server           = new HTTPServer(mHandler,listAdapter,promptList);
+                            server = new HTTPServer(mHandler,listAdapter,promptList);
                             server.asset_mgr = MainContext.INSTANCE.getContext().getAssets();
                             server.start();//启动web服务
-                            Log.d("httpServer","start");
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-                        WiFiData data = MainContext.INSTANCE.getScannerService().getWiFiData();
-                        if (data.getWiFiDetails().size() == 0){ //如果用户第一次启动app,直接启动ap模式的话
-                            createWifiHotspot(strHotspotName,strPassword);
-                            //                    createWifiHotspot8(getContext(),true);
+                        openHotspot8();
+                    } else {
+                        strHotspotName = hotspotNname.getText().toString();
+                        strPassword = password.getText().toString();
+                        if (strHotspotName.equals("")){
+                            Toast.makeText(getContext(),"请输入名称",Toast.LENGTH_SHORT).show();
+                        }else if (strPassword.equals("")){
+                            Toast.makeText(getContext(),"请输入密码",Toast.LENGTH_SHORT).show();
+                        }else if(strPassword.length() < 8){
+                            Toast.makeText(getContext(),"密码长度不能少于8位",Toast.LENGTH_SHORT).show();
                         }else {
-                            new InfoUpdater(getContext(),true,true,mHandler,strHotspotName,strPassword).execute();//直连模式下的热点启动方式
-                        }
-                        try {
-                            Thread.sleep(2000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
+                            try {
+                                server = new HTTPServer(mHandler,listAdapter,promptList);
+                                server.asset_mgr = MainContext.INSTANCE.getContext().getAssets();
+                                server.start();//启动web服务
+                                Log.d("httpServer","start");
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            WiFiData data = MainContext.INSTANCE.getScannerService().getWiFiData();
+                            if (data.getWiFiDetails().size() == 0){ //如果用户第一次启动app,直接启动ap模式的话
+                                createWifiHotspot(strHotspotName,strPassword);
+                            }else {
+                                new InfoUpdater(getContext(),true,true, mHandler, strHotspotName,strPassword).execute();//直连模式下的热点启动方式
+                            }
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
                         }
                     }
                 } else {
@@ -179,8 +205,14 @@ public class WIFIHotspotFragment extends Fragment implements ApLinkInfoAdapter.C
             public void onClick(View v) {
                 boolean isAp = MainContext.INSTANCE.getScannerService().isWifiApStatus();
                 if (isAp) {
-                    closeWifiHotspot();
-//                createWifiHotspot8(getContext(),false);
+                    if (Build.VERSION.SDK_INT >= 26){
+                        //closeHotspot8();
+                        mConnectivityManager.stopTethering(ConnectivityManager.TETHERING_WIFI);
+                    } else {
+                        closeWifiHotspot();
+                    }
+                    hotspotNname.setText("");
+                    password.setText("");
                     MainContext.INSTANCE.getScannerService().resume();
                     Log.d("wifiScanStatus","resume");
                     server.stop();
@@ -190,7 +222,6 @@ public class WIFIHotspotFragment extends Fragment implements ApLinkInfoAdapter.C
                 } else {
                     Toast.makeText(getContext(),"热点没有启用，如有需求请先启用热点",Toast.LENGTH_SHORT).show();
                 }
-
                 if (server != null){
                     server.stop();
                 }
@@ -237,8 +268,7 @@ public class WIFIHotspotFragment extends Fragment implements ApLinkInfoAdapter.C
     public void createWifiHotspot(String name,String psw) {
         MainContext.INSTANCE.getScannerService().pause();//打开热点时暂停wifi扫描
         WifiManager wifiManager = (WifiManager) MainContext.INSTANCE.getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        if (wifiManager.isWifiEnabled()) {
-            //如果wifi处于打开状态，则关闭wifi,
+        if (wifiManager.isWifiEnabled()) { //如果wifi处于打开状态，则关闭wifi,
             wifiManager.setWifiEnabled(false);
         }
         WifiConfiguration config = new WifiConfiguration();
@@ -254,19 +284,37 @@ public class WIFIHotspotFragment extends Fragment implements ApLinkInfoAdapter.C
         config.status = WifiConfiguration.Status.ENABLED;// 网络配置的可能状态  获取当前网络的状态。
         //通过反射调用设置热点
         try {
-            Method method = wifiManager.getClass().getMethod(
-                    "setWifiApEnabled", WifiConfiguration.class, Boolean.TYPE);
+            Method method = wifiManager.getClass().getMethod("setWifiApEnabled", WifiConfiguration.class, Boolean.TYPE);
             boolean enable = (Boolean) method.invoke(wifiManager, config, true);
             if (enable) {
-//                Toast.makeText(getContext(),"热点已开启 SSID:" +name+ " password:"+psw+"",Toast.LENGTH_LONG).show();
                 Log.d("","热点已开启 SSID:" +name+ " password:"+psw+"");
+                promptList.add("热点已开启");
+                listAdapter.notifyDataSetChanged();
             } else {
-//                Toast.makeText(getContext(),"创建热点失败",Toast.LENGTH_LONG).show();
                 Log.d("","创建热点失败");
             }
+        } catch (IllegalArgumentException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            promptList.add("创建热点失败,非法参数异常");
+        } catch (IllegalAccessException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            promptList.add("创建热点失败,非法访问异常");
+        } catch (InvocationTargetException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            promptList.add("创建热点失败,调用目标异常");
+        } catch (SecurityException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            promptList.add("创建热点失败,安全异常");
+        } catch (NoSuchMethodException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            promptList.add("创建热点失败,空指针异常");
         } catch (Exception e) {
             e.printStackTrace();
-//            Toast.makeText(getContext(),"创建热点失败",Toast.LENGTH_LONG).show();
             Log.d("","创建热点失败");
         }
     }
@@ -290,16 +338,14 @@ public class WIFIHotspotFragment extends Fragment implements ApLinkInfoAdapter.C
         } catch (InvocationTargetException e) {
             e.printStackTrace();
         }
-//        Toast.makeText(getContext(),"热点已关闭",Toast.LENGTH_LONG).show();
         if (server != null){
-            // 在程序退出时关闭web服务器
-            server.stop();
+            server.stop(); //在程序退出时关闭web服务器
             Log.w("Httpd", "The server stopped.");
         }
-        if(PrefSingleton.getInstance().getString("url") != null){
+        if (PrefSingleton.getInstance().getString("url") != null) {
             PrefSingleton.getInstance().remove("url");//移除ap模式下的url
-
-            PrefSingleton.getInstance().putString("url", "http://192.168.100.1:9494");//还原直连模式下的url
+//            PrefSingleton.getInstance().putString("url", "http://192.168.100.1:9494");//还原直连模式下的url
+            PrefSingleton.getInstance().putString("url", PrefSingleton.getInstance().getString("url"));//还原直连模式下的url
         }
     }
 
@@ -311,7 +357,7 @@ public class WIFIHotspotFragment extends Fragment implements ApLinkInfoAdapter.C
     /*暂用*/
     @TargetApi(Build.VERSION_CODES.O)
     public void createWifiHotspot8(Context context,boolean isEnable){
-        MainContext.INSTANCE.getScannerService().pause();//暂停wifi扫描
+        MainContext.INSTANCE.getScannerService().pause(); //暂停wifi扫描
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         Field iConnmgrField = null;
         try {
@@ -344,9 +390,8 @@ public class WIFIHotspotFragment extends Fragment implements ApLinkInfoAdapter.C
     * */
     @Override
     public void click(final View view) {
-//        Toast.makeText(this,"listview的内部的按钮被点击了！，位置是-->" + v.getTag() + ",内容是-->" + promptList.get((Integer) v.getTag()),
-//                                 Toast.LENGTH_SHORT).show();
-
+//        Toast.makeText(this,"listview的内部的按钮被点击了！，位置是-->" + v.getTag() + ",内容是-->"
+//        + promptList.get((Integer) v.getTag()),Toast.LENGTH_SHORT).show();
         progressDialog = new ProgressDialog(getActivity());
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progressDialog.setTitle("提示");
@@ -356,28 +401,25 @@ public class WIFIHotspotFragment extends Fragment implements ApLinkInfoAdapter.C
         progressDialog.setIndeterminate(false);
         progressDialog.setCancelable(false);
 
-        // 设置ProgressDialog 的一个Button
+        //设置ProgressDialog 的一个Button
         progressDialog.setButton("取消", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int i) {
-                // 点击“取消”按钮取消对话框
-                dialog.cancel();
+                dialog.cancel(); //点击“取消”按钮取消对话框
             }
         });
-        // 让ProgressDialog显示
-        progressDialog.show();
-        // 创建线程实例
-        new Thread() {
+        progressDialog.show(); //显示ProgressDialog
+        new Thread() { //创建线程实例
             public void run() {
                 try {
                     String str = promptList.get((Integer) view.getTag());
                     String ip = splitData(str,":",":");
                     String tmp = str.substring(9);
                     String port = tmp.substring(tmp.indexOf(":")+1);
-                    PrefSingleton.getInstance().putString("url", "http://"+ip+":"+port+"");//将ip port存入存储类中，方便ApLinkInfoUpdater调用
-                    new ApLinkInfoUpdater(MainContext.INSTANCE.getContext(),true).execute();//执行异步任务，发送数据给前置
-                    if (PrefSingleton.getInstance().getString("deviceInfo") !=null){
+                    PrefSingleton.getInstance().putString("url", "http://"+ip+":"+port+""); //将ip port存入存储类中，方便ApLinkInfoUpdater调用
+                    new ApLinkInfoUpdater(MainContext.INSTANCE.getContext(),true).execute(); //执行异步任务，发送数据给前置
+                    if (PrefSingleton.getInstance().getString("deviceInfo") != null){
                         Message message = new Message();
-                        message.what =100;
+                        message.what = 100;
                         mHandler.sendMessage(message);
                         progressDialog.cancel();
                     }
@@ -390,10 +432,81 @@ public class WIFIHotspotFragment extends Fragment implements ApLinkInfoAdapter.C
 
     /*
     * 截取ip字符串
-    * */
+    **/
     public static String splitData(String str, String strStart, String strEnd) {
         String tempStr;
         tempStr = str.substring(str.indexOf(strStart)+1, str.lastIndexOf(strEnd));
         return tempStr;
     }
+
+    /**
+     * Android 8.0之后，打开热点
+     * 开启的热点的名称和密码是系统随机生产的，无法自定义名称和密码
+     */
+    String SSID;
+    String preSharedKey;
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void openHotspot8(){
+        MainContext.INSTANCE.getScannerService().pause();//打开热点时暂停wifi扫描
+        wifiManager.startLocalOnlyHotspot(new WifiManager.LocalOnlyHotspotCallback() {
+            @Override
+            public void onStarted(WifiManager.LocalOnlyHotspotReservation reservation) {
+                super.onStarted(reservation);
+                SSID = reservation.getWifiConfiguration().SSID;
+                preSharedKey = reservation.getWifiConfiguration().preSharedKey;
+                hotspotNname.setText(SSID);
+                password.setText(preSharedKey);
+                strHotspotName = hotspotNname.getText().toString();
+                strPassword = password.getText().toString();
+                promptList.add("热点已开启");
+                listAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onStopped() {
+                super.onStopped();
+            }
+            @Override
+            public void onFailed(int reason) {
+                super.onFailed(reason);
+            }
+        }, null);
+    }
+
+    /**
+     * Android 8.0之后，关闭热点
+     */
+    public void closeHotspot8() {
+        ConnectivityManager connManager = (ConnectivityManager) MainContext.INSTANCE.getContext().getApplicationContext().
+                getSystemService(Context.CONNECTIVITY_SERVICE);
+        Field iConnMgrField;
+        try {
+            iConnMgrField = connManager.getClass().getDeclaredField("mService");
+            iConnMgrField.setAccessible(true);
+            Object iConnMgr = iConnMgrField.get(connManager);
+            Class<?> iConnMgrClass = Class.forName(iConnMgr.getClass().getName());
+            Method stopTethering = iConnMgrClass.getMethod("stopTethering", int.class);
+            stopTethering.invoke(iConnMgr, 0);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (server != null){
+            server.stop(); // 在程序退出时关闭web服务器
+            Log.w("Httpd", "The server stopped.");
+        }
+        if(PrefSingleton.getInstance().getString("url") != null){
+            PrefSingleton.getInstance().remove("url");//移除ap模式下的url
+//            PrefSingleton.getInstance().putString("url", "http://192.168.100.1:9494");//还原直连模式下的url
+            PrefSingleton.getInstance().putString("url", PrefSingleton.getInstance().getString("url"));//还原直连模式下的url
+        }
+    }
+
+    private void initBroadcastReceiver() {
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+        intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+        intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+        intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+    }
+
 }

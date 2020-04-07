@@ -3,18 +3,26 @@ package com.vrem.wifianalyzer.wifi.deviceList;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.support.annotation.NonNull;
+import android.util.Log;
+import android.view.MenuInflater;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.vrem.wifianalyzer.MainContext;
 import com.vrem.wifianalyzer.R;
 import com.vrem.wifianalyzer.wifi.common.DevStatusDBUtils;
+import com.vrem.wifianalyzer.wifi.common.InfoUpdater;
 import com.vrem.wifianalyzer.wifi.common.PrefSingleton;
 import com.vrem.wifianalyzer.wifi.deviceList.adapter.DeviceAdapter;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
+
+import static android.content.ContentValues.TAG;
 import static com.vrem.wifianalyzer.wifi.model.DeviceInfo.handlingToWorkType;
 
 public class Deviece {
@@ -23,6 +31,7 @@ public class Deviece {
 //    private static int[] image = {R.drawable.wifigreen,R.drawable.wifigreen,R.drawable.wifigreen};
     private static String[] deviceStatus;//设备状态
     private static int[] deviceBtty;//电量
+
 
     public Deviece(@NonNull AlertDialog alertDialog) {
         this.alertDialog = alertDialog;
@@ -36,10 +45,9 @@ public class Deviece {
         View view = MainContext.INSTANCE.getLayoutInflater().inflate(R.layout.device_list, null); //获取页面对象
         String deviceInfo = PrefSingleton.getInstance().getString("deviceInfo");//获取存储的数据
         PrefSingleton.getInstance().remove("deviceInfo");//及时移除数据，避免二次获取的时候数据冲突
-        JSONObject jsonObject = null;
         int workType = 100;
         try {
-            jsonObject = new JSONObject(deviceInfo);
+            JSONObject jsonObject = new JSONObject(deviceInfo);
             String data = jsonObject.getString("data");
             JSONObject dataJson = new JSONObject(data);
             int battery = dataJson.getInt("battery");
@@ -55,7 +63,7 @@ public class Deviece {
             devStatusDBUtils.close();
             workType = handlingToWorkType(handling);
             String status = reDeviceStatus(workType);
-            deviceStatus =new String[]{status};
+            deviceStatus = new String[]{status};
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -68,8 +76,7 @@ public class Deviece {
                     .setAdapter(myAdapter, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            Toast.makeText(MainContext.INSTANCE.getContext(), "我动了"+myAdapter.getItem(which)+"！",
-                                    Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(MainContext.INSTANCE.getContext(), "我动了"+ myAdapter.getItem(which) + "！", Toast.LENGTH_SHORT).show();
                         }
                     })
                     .create();
@@ -90,7 +97,7 @@ public class Deviece {
     }
 
     private static String reDeviceStatus(int workType){
-        if (workType>0){
+        if (workType > 0){
             if (workType == 100){
                 return "空闲";
             }else if (workType == 103){
@@ -107,6 +114,8 @@ public class Deviece {
                 return "正在攻击热点信道";
             }else if (workType == 110){
                 return "正在攻击多热点";
+            }else if (workType == 106){
+                return "正在攻击客户端";
             }
         }
         return "error";

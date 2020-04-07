@@ -9,6 +9,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,6 +27,7 @@ import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.vrem.wifianalyzer.MainActivity;
 import com.vrem.wifianalyzer.MainContext;
 import com.vrem.wifianalyzer.R;
 import com.vrem.wifianalyzer.wifi.common.BackgroundTask;
@@ -32,12 +35,15 @@ import com.vrem.wifianalyzer.wifi.common.CommonUpdater;
 import com.vrem.wifianalyzer.wifi.common.DevStatusDBUtils;
 import com.vrem.wifianalyzer.wifi.common.HandshakeUpdater;
 import com.vrem.wifianalyzer.wifi.common.PrefSingleton;
+import com.vrem.wifianalyzer.wifi.model.DeviceInfo;
 import com.vrem.wifianalyzer.wifi.model.WiFiDetail;
 
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import static android.content.ContentValues.TAG;
 
 /**
  * Created by ZhenShiJie on 2018/5/7.
@@ -69,6 +75,7 @@ public class SnifferFragment extends Fragment {
     private Context context;
     private String devId;
     private Bundle bundle;
+    private String Name = "";
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -94,13 +101,56 @@ public class SnifferFragment extends Fragment {
             channelId = bundle.getInt("channel",0);
             rate      = bundle.getDouble("rate",0.0);
         }
+        String name = bundle.getString("Fragment");
+        if (name == null){
+            Name = "sniffer";
+        } else {
+            Name = name;
+        }
         SpinnerAdapter adapter1 = ArrayAdapter.createFromResource(getContext(),R.array.send_spinner, R.layout.dropdown_listitem);
         spinner1.setAdapter(adapter1);//绑定保存方式数据
 
         SpinnerAdapter adapter2 = ArrayAdapter.createFromResource(getContext(),R.array.method_spinner, R.layout.dropdown_listitem);
         spinner2.setAdapter(adapter2);//绑定抓取方式数据
+
         MainContext.INSTANCE.getScannerService().pause();//暂停扫描服务，避免命令冲突
         return view;
+    }
+
+
+    @Override
+    public void onStart() {
+        Log.d("SnifferFragment status：","Start");
+        super.onStart();
+    }
+
+    @Override
+    public void onResume() {
+        Log.d("SnifferFragment status：","Resume");
+        super.onResume();
+        if (Name.equals("Sniffer")){
+            getView().setFocusableInTouchMode(true);
+            getView().requestFocus();
+            getView().setOnKeyListener(new View.OnKeyListener() {
+                @Override
+                public boolean onKey(View view, int i, KeyEvent keyEvent) {
+                    if(i == KeyEvent.KEYCODE_BACK && keyEvent.getAction() == KeyEvent.ACTION_UP){
+                        Intent intent = new Intent();
+                        intent.setClass(getActivity(), MainActivity.class);
+                        startActivity(intent);
+                        getActivity().finish();
+                    }
+                    return false;
+                }
+            });
+        }
+    }
+
+    @Override
+    public void onPause() {
+        BackgroundTask.clearAll();
+        Log.d("SnifferFragment status：","Pause");
+        super.onPause();
     }
 
     @Override
@@ -153,6 +203,7 @@ public class SnifferFragment extends Fragment {
                     BackgroundTask.mTimerHandling.schedule(BackgroundTask.mTimerTaskHandling, 0);
                 }else{
                     Toast.makeText(getContext(), "请选择目标热点！", Toast.LENGTH_SHORT).show();
+                    return;
                 }
             }
         });
@@ -191,7 +242,8 @@ public class SnifferFragment extends Fragment {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    new CommonUpdater(getContext(), listview, devId, 0, progressBar, 1, 0, refresh, noData, true).execute();
+                                    new CommonUpdater(getContext(), listview, devId, 0, progressBar, 1,
+                                            0, refresh, noData, true).execute();
                                 }
                             });
                         }
@@ -219,7 +271,8 @@ public class SnifferFragment extends Fragment {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            new CommonUpdater(getContext(), listview, devId, 0, progressBar, 1, 0, refresh, noData, true).execute();
+                            new CommonUpdater(getContext(), listview, devId, 0, progressBar, 1,
+                                    0, refresh, noData, true).execute();
                         }
                     });
                 }
@@ -234,10 +287,11 @@ public class SnifferFragment extends Fragment {
                 BackgroundTask.clearAll();
                 TextView ssid       = arg1.findViewById(R.id.ssid);
                 WiFiDetail apInfo = (WiFiDetail) ssid.getTag();
-                if (apInfo.getSSID().length() >= 13)
+                if (apInfo.getSSID().length() >= 13) {
                     apChooseButton.setText(apInfo.getSSID().substring(0, 13));
-                else
+                } else {
                     apChooseButton.setText(apInfo.getSSID());
+                }
                 dialog.dismiss();
                 ssidText    = apInfo.getSSID();
                 bssidText   = apInfo.getBSSID();

@@ -21,7 +21,7 @@
             android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="热点定向阻断"
+            android:text="热点客户端定向阻断"
             android:textColor="@android:color/white"
             android:textSize="32sp" />
         </LinearLayout>
@@ -36,7 +36,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/title"
-            android:text="使用前置设备对选定的目标无线热点或者频段发动拒绝服务攻击，使目标无线热点或则相应频段下的客户端无法正常连接。"
+            android:text="使用前置设备对选定的目标无线热点客户端发动拒绝服务攻击，使目标无线热点客户端无法正常连接。"
             android:textColor="@android:color/white" />
         </LinearLayout>
     <LinearLayout
@@ -58,7 +58,27 @@
             android:textSize="28sp" 
             android:singleLine="true"/>
         </LinearLayout>
-    <LinearLayout
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="10dp"
+            android:layout_weight="1"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/custom"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:layout_below="@id/apdos"
+                android:layout_marginLeft="10dp"
+                android:gravity="center"
+                android:text="选择目标客户端"
+                android:textColor="@android:color/white"
+                android:textSize="28sp"
+                android:singleLine="true" />
+        </LinearLayout>
+    <!--<LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="10dp"
@@ -94,7 +114,7 @@
             android:textColor="@android:color/white"
             android:textSize="28sp"
             android:singleLine="true" />
-        </LinearLayout>
+        </LinearLayout>-->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"

@@ -87,14 +87,14 @@
         android:summary="@string/time_graph_legend_summary"
         android:title="@string/time_graph_legend_title"/>
 
-    <ListPreference
+    <!--<ListPreference
         android:defaultValue="@string/theme_default"
         android:entries="@array/theme_array"
         android:entryValues="@array/theme_index_array"
         android:key="@string/theme_key"
         android:persistent="true"
         android:summary="@string/theme_summary"
-        android:title="@string/theme_title"/>
+        android:title="@string/theme_title"/>-->
 
     <CheckBoxPreference
         android:defaultValue="@bool/wifi_off_on_exit_default"

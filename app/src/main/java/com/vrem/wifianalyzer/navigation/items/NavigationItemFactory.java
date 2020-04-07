@@ -28,8 +28,8 @@ import com.vrem.wifianalyzer.wifi.fragmentDataPack.DataPackageFragment;
 import com.vrem.wifianalyzer.wifi.fragmentDos.DosFragment;
 import com.vrem.wifianalyzer.wifi.fragmentFakeAp.FakeApFragment;
 import com.vrem.wifianalyzer.wifi.fragmentSniffer.SnifferFragment;
+import com.vrem.wifianalyzer.wifi.fragmentTargetSearch.TargetSearchFragment;
 import com.vrem.wifianalyzer.wifi.fragmentWiFiHotspot.WIFIHotspotFragment;
-import com.vrem.wifianalyzer.wifi.fragmentWpsCrack.WpsCrackFragment;
 import com.vrem.wifianalyzer.wifi.timegraph.TimeGraphFragment;
 
 public class NavigationItemFactory {
@@ -40,13 +40,15 @@ public class NavigationItemFactory {
     public static final NavigationItem SETTINGS = new ActivityItem(SettingActivity.class);
     public static final NavigationItem ABOUT = new ActivityItem(AboutActivity.class);
 
-    public static final NavigationItem EXPORT = new FragmentItem(new DosFragment(),true);//DosActivity
-    public static final NavigationItem CHANNEL_AVAILABLE = new FragmentItem(new ClientEnumFragment(),true);//ClientEnum
-    public static final NavigationItem VENDOR_LIST = new FragmentItem(new WpsCrackFragment(),true);//wpsCrack
-    public static final NavigationItem SNIFFER = new FragmentItem(new SnifferFragment(),true);//sniffer
-    public static final NavigationItem FORGERY = new FragmentItem(new FakeApFragment(),true);//fakeAp
-    public static final NavigationItem WIFI_HOTSPOT = new FragmentItem(new WIFIHotspotFragment(),true);
-    public static final NavigationItem DATA_PACK = new FragmentItem(new DataPackageFragment(),true);
+    public static final NavigationItem EXPORT = new FragmentItem(new DosFragment(),true); //DosActivity
+    public static final NavigationItem CHANNEL_AVAILABLE = new FragmentItem(new ClientEnumFragment(),true); //ClientEnum
+//    public static final NavigationItem VENDOR_LIST = new FragmentItem(new WpsCrackFragment(),true); //wpsCrack
+    public static final NavigationItem SNIFFER = new FragmentItem(new SnifferFragment(),true); //sniffer
+    public static final NavigationItem FORGERY = new FragmentItem(new FakeApFragment(),true); //fakeAp
+    public static final NavigationItem WIFI_HOTSPOT = new FragmentItem(new WIFIHotspotFragment(),true); //wifi_hostpot
+    public static final NavigationItem TARGET_SEARCH = new FragmentItem(new TargetSearchFragment(),true);  //target_search
+    public static final NavigationItem DATA_PACK = new FragmentItem(new DataPackageFragment(),true); //data_pack
+    //public static final NavigationItem CLIENT = new FragmentItem(new ClientFragment(),true);  //client
 
     private NavigationItemFactory() {
         throw new IllegalStateException("Factory class");

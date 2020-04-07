@@ -35,6 +35,12 @@ allprojects {
         jcenter()
         mavenCentral()
     }
+    gradle.projectsEvaluated {
+        tasks.withType(JavaCompile) {
+            //设置jar相对包路径或绝对路径
+            options.compilerArgs.add('-Xbootclasspath/p:app/src/main/libs/WifiAp8.jar')
+        }
+    }
 }
 
 task clean(type: Delete) {

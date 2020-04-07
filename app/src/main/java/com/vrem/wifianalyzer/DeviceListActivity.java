@@ -2,6 +2,9 @@ package com.vrem.wifianalyzer;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
@@ -18,19 +21,24 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.vrem.wifianalyzer.wifi.common.BackgroundTask;
 import com.vrem.wifianalyzer.wifi.common.BaseUtils;
+import com.vrem.wifianalyzer.wifi.common.DevStatusDBUtils;
 import com.vrem.wifianalyzer.wifi.model.DeviceInfo;
 
 import org.json.JSONException;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
 
+
 public class DeviceListActivity extends Activity {
 	private DrawerLayout mDrawerLayout;
-	private RelativeLayout mLeftContainer;
-	private ListView mDrawerList;
+//	private RelativeLayout mLeftContainer;
+//	private ListView mDrawerList;
 	private ActionBarDrawerToggle mDrawerToggle;
 	
 
@@ -59,9 +67,9 @@ public class DeviceListActivity extends Activity {
 		mPageTitles 	= mDrawerTitle = getTitle();
 		mDrawerItems 	= getResources().getStringArray(R.array.drawer_item_array);
 		mDrawerLayout 	= findViewById(R.id.drawer_layout);
-		mLeftContainer 	= findViewById(R.id.left_container);
-		mDrawerList 	= findViewById(R.id.left_drawer);
-		
+//		mLeftContainer 	= findViewById(R.id.left_container);
+//		mDrawerList 	= findViewById(R.id.left_drawer);
+
 		progressBar 	= findViewById(R.id.progressbar);
 
 //		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow,GravityCompat.START);
@@ -71,8 +79,8 @@ public class DeviceListActivity extends Activity {
 		SimpleAdapter drawerAdapter = new SimpleAdapter(this, mData,
 				R.layout.drawer_listitem, new String[] { "icon", "item" },
 				new int[] { R.id.icon, R.id.item });
-		mDrawerList.setAdapter(drawerAdapter);
-		mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+//		mDrawerList.setAdapter(drawerAdapter);
+//		mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 		mDrawerToggle = new ActionBarDrawerToggle(this,
 		mDrawerLayout,  R.drawable.ic_drawer,  R.string.drawer_open, R.string.drawer_close) {
 			public void onDrawerClosed(View view) {
@@ -137,7 +145,7 @@ public class DeviceListActivity extends Activity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		
+
 		if (mDrawerToggle.onOptionsItemSelected(item)) {
 			return true;
 		}
@@ -155,7 +163,7 @@ public class DeviceListActivity extends Activity {
 			bottomLayout.setVisibility(View.GONE);
 			return true;
 
-		
+
 		default:
 			return super.onOptionsItemSelected(item);
 		}
@@ -193,24 +201,47 @@ public class DeviceListActivity extends Activity {
 		default:
 			break;
 		}
-		mDrawerList.setItemChecked(position, true);
+//		mDrawerList.setItemChecked(position, true);
 		setTitle(mDrawerItems[position]);
-		mDrawerLayout.closeDrawer(mLeftContainer);
+//		mDrawerLayout.closeDrawer(mLeftContainer);
 
 	}
 	@SuppressLint("WrongConstant")
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 	    if(keyCode == KeyEvent.KEYCODE_BACK) {
-	    	if(bottomLayout.getVisibility() == 0){
-	    		isChoosing = 1;
-	    		DeviceInfo.updateView();
-	    	}
-	    	else{
-		    	finish();
-				overridePendingTransition(R.anim.slide_left_in,R.anim.slide_right_out);
-	    	}
-	        return false;
+			new AlertDialog.Builder(this)
+					.setTitle("确认").setMessage("确定停止吗？").setPositiveButton("是",
+					new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface arg0, int arg1) {
+							DevStatusDBUtils devStatusDBUtils = new DevStatusDBUtils(getApplicationContext());
+							devStatusDBUtils.open();
+							devStatusDBUtils.handshakeCancel(new DeviceInfo().getDevId());//将数据改为原始状态
+							devStatusDBUtils.close();
+							BackgroundTask.clearAll();//取消异步任务
+
+							String path = "/data/data/com.vrem.wifianalyzer/files/DosFlag.txt";
+							File file = new File(path);
+							if (file.exists()){
+								boolean en = file.delete();
+								Log.e("","DELETE FILE "+ en);
+							}
+							Intent intent = new Intent();
+							intent.setClass(getApplicationContext(), MainActivity.class);
+							startActivity(intent);
+							finish();
+						}
+					})
+					.setNegativeButton("否", new DialogInterface.OnClickListener() {
+								@Override
+								public void onClick(DialogInterface arg0, int arg1) {
+									// TODO Auto-generated method stub
+									arg0.dismiss();
+								}
+
+							}).show();
+			return true;
 	    }
 	    return super.onKeyDown(keyCode, event);
 	}
@@ -242,4 +273,5 @@ public class DeviceListActivity extends Activity {
 		Log.d("DeviceListActivity status:","Destroy");
 		super.onDestroy();
 	}
+
 }

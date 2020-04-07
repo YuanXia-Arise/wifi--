@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -60,13 +61,24 @@ public class DeviceAdapter extends BaseAdapter {
 //        myClass.imageView.setBackgroundResource(image[position]);
         myClass.nameView.setText(deviceName[position]);
         myClass.moodView.setText(deviceStatus[position]);
-        myClass.battyView.setText(Integer.toString(deviceBtty[position]));
-        myClass.nameView.setTextColor(Color.BLACK);
+        int Battery = deviceBtty[position];
+        if (Battery > 99) {
+            Battery = 100;
+            myClass.battyView.setText(Integer.toString(Battery));
+        } else if (Battery == 0) {
+            myClass.battyView.setText(Battery);
+        } else if (Battery == -1) {
+            myClass.battyView.setText("未连接电池");
+        } else {
+            myClass.battyView.setText(Integer.toString(deviceBtty[position]));
+        }
+        //myClass.battyView.setText(Integer.toString(deviceBtty[position]));
+        myClass.nameView.setTextColor(Color.WHITE);
         myClass.moodView.setTextColor(Color.RED);
 
-        if (deviceBtty[position] <70 && deviceBtty[position]>40){
+        if (deviceBtty[position] < 70 && deviceBtty[position] > 40){
             myClass.battyView.setTextColor(Color.GRAY);
-        }else if (deviceBtty[position]<=40&& deviceBtty[position]>0){
+        }else if (deviceBtty[position] <= 40 && deviceBtty[position] > 0){
             myClass.battyView.setTextColor(Color.RED);
         }else {
             myClass.battyView.setTextColor(Color.GREEN);
@@ -75,8 +87,10 @@ public class DeviceAdapter extends BaseAdapter {
 //        Log.v("deviceStatusFlag:",deviceStatusFlag);
 
         if (workType == 100){
+            myClass.moodView.setTextColor(Color.GREEN);
             myClass.imageView.setBackgroundResource(R.drawable.wifigreen);
         }else{
+            myClass.moodView.setTextColor(Color.RED);
             myClass.imageView.setBackgroundResource(R.drawable.wifiblue);
         }
         return convertView;

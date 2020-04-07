@@ -10,7 +10,7 @@ public class DevStatusDBUtils {
     private static final String TAG = DevStatusDBUtils.class.getSimpleName();
     static final int DATABASE_VERSION = 4;
     // DB名
-    public static final String DATABASE_NAME = "DevStatusDb";
+    public static final String DATABASE_NAME = "DevStatus.db";
 
     public static final String TABLE_DEVSTATUS_TABLE ="devstatus";
     public static final String KEY_ROWID = "_id"; // integer 自增长，主key
@@ -106,7 +106,7 @@ public class DevStatusDBUtils {
     public void wpscrackStep1Done(String devID) {
         String sql = "update " + TABLE_DEVSTATUS_TABLE + " set scanstep1done=1, handling='', handlingdetail='', handshakestep1done=0, handshakestep2done=0, handshakepreparecount=0, fakeapstep1done=0, dosstep1done=0, wpscrack=0 where devid='" + devID + "'";
         mDb.execSQL(sql);
-        Log.w("更新1：SQL：", sql);
+        Log.w("wps更新1：SQL：", sql);
     }
 
     public void scanStep2Error(String devID) {
@@ -154,17 +154,17 @@ public class DevStatusDBUtils {
             h = cursor.getInt(0);
             break;
         }
-
         return h;
     }
 
-    public void handshakeCancel(String devID) {
-        String sql = "update " + TABLE_DEVSTATUS_TABLE + " set handling='', handlingdetail='', handshakestep1done=0, handshakestep2done=0, handshakepreparecount=0 where devid='" + devID + "'";
+    public void handshakeCancel(String devID) { //数据状态初始化
+//        String sql = "update " + TABLE_DEVSTATUS_TABLE + " set handling='', handlingdetail='', handshakestep1done=0, handshakestep2done=0, handshakepreparecount=0 where devid='" + devID + "'";
+        String sql = "update " + TABLE_DEVSTATUS_TABLE + " set handling='', handlingdetail='', scanstep1done=1, handshakestep1done=0, handshakestep2done=0, handshakepreparecount=0, fakeapstep1done=0, wpscrack=0,dosstep1done=0 where devid='" + devID + "'";
         mDb.execSQL(sql);
         Log.w("更新7：SQL", sql);
     }
 
-    public void fakeAPStep1Done(String devID, String out, String detail) { // other's step1done set 0 needn't be handled here, but in 空闲 dev ops, which is in main thread, scanStep1Done
+    public void fakeAPStep1Done(String devID, String out, String detail) { //other's step1done set 0 needn't be handled here, but in 空闲 dev ops, which is in main thread, scanStep1Done
         String sql = "update " + TABLE_DEVSTATUS_TABLE + " set scanstep1done=0, handling='fakeap_" + out + "', handlingdetail='" + detail + "', fakeapstep1done=1 where devid='" + devID + "'";
         mDb.execSQL(sql);
         Log.w("更新8：SQL", sql);
@@ -176,16 +176,16 @@ public class DevStatusDBUtils {
         Log.w("更新9：SQL", sql);
     }
 
-    public void crackStep1Done(String devID) { // other's step1done set 0 needn't be handled here, but in 空闲 dev ops, which is in main thread
+    public void crackStep1Done(String devID) { //other's step1done set 0 needn't be handled here, but in 空闲 dev ops, which is in main thread
         String sql = "update " + TABLE_DEVSTATUS_TABLE + " set scanstep1done=0, handling='', handlingdetail='', dosstep1done=0 , wpscrack=1 where devid='" + devID + "'";
         mDb.execSQL(sql);
         Log.w("更新10：SQL：", sql);
     }
 
-    public void dosStep1Done(String devID, String type, String detail) { // other's step1done set 0 needn't be handled here, but in 空闲 dev ops, which is in main thread
+    public void dosStep1Done(String devID, String type, String detail) { //other's step1done set 0 needn't be handled here, but in 空闲 dev ops, which is in main thread
         String sql = "update " + TABLE_DEVSTATUS_TABLE + " set scanstep1done=0, handling='dos_" + type + "', handlingdetail='" + detail + "', dosstep1done=1 where devid='" + devID + "'";
         mDb.execSQL(sql);
-        Log.w("更新10：SQL：", sql);
+        Log.w("dos更新10：SQL：", sql);
     }
 
     public void dosCancel(String devID) {
@@ -199,12 +199,6 @@ public class DevStatusDBUtils {
         mDb.execSQL(sql);
         Log.w("更新12：SQL", sql);
     }
-
-    /*public void statusClear(String devID) {
-        String sql = "update " + TABLE_DEVSTATUS_TABLE + " set scanstep1done=0,handling='',handshakestep1done=0 where devid='" + devID + "'";
-        mDb.execSQL(sql);
-        Log.w("SQL", sql);
-    }*/
 
     public String getHandling(String devID) {
         String sql = "select handling from " + TABLE_DEVSTATUS_TABLE + " where devid='" + devID + "'";
@@ -220,7 +214,6 @@ public class DevStatusDBUtils {
             handling = cursor.getString(0);
             break;
         }
-
         return handling;
     }
 
@@ -233,7 +226,6 @@ public class DevStatusDBUtils {
             handlingdetail = cursor.getString(0);
             break;
         }
-
         return handlingdetail;
     }
 
@@ -246,7 +238,6 @@ public class DevStatusDBUtils {
             scanStep1Done = cursor.getInt(0);
             break;
         }
-
         return scanStep1Done;
     }
 
@@ -259,7 +250,6 @@ public class DevStatusDBUtils {
             crackStep1Done = cursor.getInt(0);
             break;
         }
-
         return crackStep1Done;
     }
 
@@ -272,7 +262,6 @@ public class DevStatusDBUtils {
             handshakeStep1Done = cursor.getInt(0);
             break;
         }
-
         return handshakeStep1Done;
     }
 
@@ -285,20 +274,19 @@ public class DevStatusDBUtils {
             handshakeStep2Done = cursor.getInt(0);
             break;
         }
-
         return handshakeStep2Done;
     }
 
     public int getFakeapstep1done(String devID) {
         String sql = "select fakeapstep1done from " + TABLE_DEVSTATUS_TABLE + " where devid='" + devID + "'";
 
+        Log.v("查询语句:",sql);
         int fakeAPStep1Done = 0;
         Cursor cursor = mDb.rawQuery(sql,null);
         while (cursor.moveToNext()) {
             fakeAPStep1Done = cursor.getInt(0);
             break;
         }
-
         return fakeAPStep1Done;
     }
 
@@ -312,7 +300,14 @@ public class DevStatusDBUtils {
             dosStep1Done = cursor.getInt(0);
             break;
         }
-
         return dosStep1Done;
+    }
+
+    //删除数据库
+    public void delete_sql(Context context) {
+        DatabaseHelper dbHelper = new DatabaseHelper(context);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        db.execSQL("delete from devstatus");
+        db.close();
     }
 }

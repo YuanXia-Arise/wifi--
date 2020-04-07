@@ -20,11 +20,14 @@ package com.vrem.wifianalyzer.wifi.accesspoint;
 
 import android.app.Dialog;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 
 import com.vrem.wifianalyzer.R;
 import com.vrem.wifianalyzer.wifi.model.WiFiDetail;
+
+import static android.content.ContentValues.TAG;
 
 public class AccessPointPopup {
 
@@ -41,7 +44,7 @@ public class AccessPointPopup {
         }
     }
 
-    void attach(@NonNull View view, @NonNull WiFiDetail wiFiDetail) {
+    public void attach(@NonNull View view, @NonNull WiFiDetail wiFiDetail) {
         view.setOnClickListener(new PopupDialogOpenListener(wiFiDetail));
     }
 

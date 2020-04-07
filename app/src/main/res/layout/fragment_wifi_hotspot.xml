@@ -2,6 +2,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true">
+
+        <TextView
+            android:id="@+id/Tips"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:textColor="#FF4081"
+            android:text="设备版本无法设置热点信息，点击启动热点创建热点"
+            android:layout_below="@+id/relativeLayout3"/>
+    </LinearLayout>
+
     <RelativeLayout
         android:id="@+id/relativeLayout1"
         android:layout_width="300dp"
@@ -48,7 +63,7 @@
                 android:layout_height="40dp"
                 android:layout_marginLeft="2dp"
                 android:layout_toRightOf="@+id/view1"
-                android:textColor="#000000"
+                android:textColor="#FF4081"
                 android:ems="19"
                 android:background="@null"
                 android:hint="请输入名称"
@@ -109,9 +124,9 @@
                 android:layout_toRightOf="@+id/view2"
                 android:background="@drawable/transparent"
                 android:ems="19"
-                android:textColor="#000000"
+                android:textColor="#FF4081"
                 android:hint="请输入密码"
-                android:inputType="textPassword"
+                android:inputType="text"
                 android:padding="1dp"
                 android:textSize="12sp" >
 
@@ -144,6 +159,14 @@
 
     </RelativeLayout>
 
+    <!--<TextView
+        android:id="@+id/Tips"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:textColor="#FF4081"
+        android:text="设备版本无法设置热点信息，点击启动热点创建热点"
+        android:layout_below="@+id/relativeLayout3"/>-->
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

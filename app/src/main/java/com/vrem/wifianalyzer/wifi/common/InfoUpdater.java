@@ -2,6 +2,7 @@ package com.vrem.wifianalyzer.wifi.common;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -22,6 +23,9 @@ import org.json.JSONObject;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import static android.content.ContentValues.TAG;
+
 /**
  * 获取前置信息：电量%、4G信号强度%
  * */
@@ -38,7 +42,7 @@ public class InfoUpdater extends AsyncTask<Object, Object, JSONObject> {
         mContext = context;
         mIsFirst = isFirst;
     }
-    public InfoUpdater(Context context, boolean isFirst,boolean isAp,Handler handler,String hotspotName,String hotspotPsw) {
+    public InfoUpdater(Context context, boolean isFirst,boolean isAp, Handler handler, String hotspotName, String hotspotPsw) {
         mContext            = context;
         mIsFirst            = isFirst;
         this.isAp           = isAp;
@@ -67,9 +71,7 @@ public class InfoUpdater extends AsyncTask<Object, Object, JSONObject> {
         if (mIsFirst == false) {
             return;
         }
-
 //        mProgressBar.setVisibility(View.GONE);
-
         if (param == null) {
             Toast.makeText(mContext, "出错啦", Toast.LENGTH_SHORT).show();
             return;
@@ -91,9 +93,7 @@ public class InfoUpdater extends AsyncTask<Object, Object, JSONObject> {
                 String devID = "HEHE2017";
 //                Intent it = new Intent();
 //                it.setClass(mContext, DeviceListActivity.class);
-
                 PrefSingleton.getInstance().putString("device", devID);
-
 //                mContext.startActivity(it);
 //                ((Activity)mContext).overridePendingTransition(R.anim.slide_right_in,
 //                        R.anim.slide_left_out);
@@ -149,7 +149,12 @@ public class InfoUpdater extends AsyncTask<Object, Object, JSONObject> {
                         message.what = 101;
                         handler.sendMessage(message);
                         WIFIHotspotFragment wifiHotspotFragment = new WIFIHotspotFragment();
-                        wifiHotspotFragment.createWifiHotspot(hotspotName,hotspotPsw);
+                        if (Build.VERSION.SDK_INT >= 26){
+                            wifiHotspotFragment.openHotspot8();
+                        } else {
+                            wifiHotspotFragment.createWifiHotspot(hotspotName,hotspotPsw);
+                        }
+//                        wifiHotspotFragment.createWifiHotspot(hotspotName,hotspotPsw);
                     }
                 });
 //                wifiHotspotFragment.createWifiHotspot8(MainContext.INSTANCE.getContext(),true);

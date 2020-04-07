@@ -15,9 +15,7 @@
         <ImageView 
             android:id="@+id/icon"
             android:layout_width="30dp"
-            android:layout_height="30dp"
-
-            />
+            android:layout_height="30dp" />
     <TextView 
         android:id="@+id/title"
         android:layout_width="wrap_content"
@@ -34,24 +32,20 @@
         android:id="@+id/blueline"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-
-        android:layout_below="@id/top"
-        />
+        android:layout_below="@id/top" />
     <EditText 
-        android:id="@+id/commit"
+        android:id="@+id/commit_device"
         android:layout_width="match_parent"
         android:layout_height="45dp"
         android:layout_margin="5dp"
         android:textColor="@android:color/white"
         android:textSize="20sp"
-        android:layout_below="@id/blueline"
-        />
+        android:layout_below="@id/blueline" />
     <RelativeLayout 
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/bottom"
-        android:layout_below="@id/commit"
-        >
+        android:layout_below="@id/commit_device">
     <LinearLayout 
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

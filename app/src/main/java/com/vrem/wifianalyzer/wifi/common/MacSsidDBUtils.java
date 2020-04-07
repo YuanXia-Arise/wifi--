@@ -6,17 +6,19 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import static android.content.ContentValues.TAG;
+
 public class MacSsidDBUtils {
     private static final String TAG = MacSsidDBUtils.class.getSimpleName();
     static final int DATABASE_VERSION = 1;
     // DB名
-    public static final String DATABASE_NAME = "MacSsidDb";
+    public static final String DATABASE_NAME = "MacSsid.Db";
 
     public static final String TABLE_MACSSID_TABLE ="macssid";
     public static final String KEY_ROWID = "_id"; // integer 自增长，主key
     public static final String DEVID = "devid"; // dev唯一识别号
-    public static final String MAC = "mac";
-    public static final String SSID = "ssid";
+    public static final String MAC = "mac"; //热点MAC
+    public static final String SSID = "ssid"; //热点SSID
 
     final Context mContext;
 
@@ -65,7 +67,7 @@ public class MacSsidDBUtils {
         mDBHelper.close();
     }
 
-    public void insertOrUpdate(String devID, String mac, String ssid) {
+    /*public void insertOrUpdate(String devID, String mac, String ssid) {
         StringBuilder sql1 = new StringBuilder();
         sql1.append("insert or ignore into ").append(TABLE_MACSSID_TABLE).append(" (")
                 .append(DEVID).append(", ")
@@ -81,6 +83,23 @@ public class MacSsidDBUtils {
         String sql2 = "update macssid set ssid='" + ssid + "' where devid='" + devID + "' and mac='" + mac + "'";
         mDb.execSQL(sql2);
         //Log.w("SQL", sql2.toString());
+    }*/
+    public void insertOrUpdate(String devID, String mac, String ssid){
+        String sql = "insert or ignore into "+TABLE_MACSSID_TABLE+" ("+DEVID+","+MAC+","+SSID+") values ('"+devID+"','"+mac+"','"+ssid+"')";
+        Cursor cursor = null;
+        try{
+            cursor = mDb.rawQuery(sql,null);
+            while (cursor.moveToNext()){
+                if (cursor.getCount() > 0){}
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        return;
     }
 
     public String getSSID(String devID, String mac) {
@@ -92,7 +111,7 @@ public class MacSsidDBUtils {
             ssid = cursor.getString(0);
             break;
         }
-
         return ssid;
     }
+
 }

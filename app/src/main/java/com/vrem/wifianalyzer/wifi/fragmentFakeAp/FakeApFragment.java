@@ -34,11 +34,14 @@ import com.vrem.wifianalyzer.wifi.common.FakeAPUpdater;
 import com.vrem.wifianalyzer.wifi.common.PrefSingleton;
 import com.vrem.wifianalyzer.wifi.model.WiFiDetail;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Timer;
 import java.util.TimerTask;
+
+import static android.content.ContentValues.TAG;
 
 /**
  * Created by ZhenShiJie on 2018/4/24.
@@ -47,11 +50,11 @@ import java.util.TimerTask;
 public class FakeApFragment extends Fragment {
 
 
-    private TextView ssidEdit;
+    private EditText ssidEdit;
     private RelativeLayout ssidLayout;
     private TextView encryEdit;
     private RelativeLayout encryLayout;
-    private TextView passEdit;
+    private EditText passEdit;
     private RelativeLayout passLayout;
     private TextView channelEdit;
     private RelativeLayout channelLayout;
@@ -92,38 +95,36 @@ public class FakeApFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-
-        View view       = inflater.inflate(R.layout.fragment_fakeap, container, false);
-
-        ssidEdit    = view.findViewById(R.id.ssidedit);
-        ssidLayout  = view.findViewById(R.id.ssidlayout);
-        encryEdit   = view.findViewById(R.id.encryedit);
+        View view = inflater.inflate(R.layout.fragment_fakeap, container, false);
+        ssidEdit = view.findViewById(R.id.ssidedit);
+        ssidLayout = view.findViewById(R.id.ssidlayout);
+        encryEdit = view.findViewById(R.id.encryedit);
         encryLayout = view.findViewById(R.id.encrylayout);
-        passEdit    = view.findViewById(R.id.passedit);
-        passLayout  = view.findViewById(R.id.passlayout);
+        passEdit = view.findViewById(R.id.passedit);
+        passLayout = view.findViewById(R.id.passlayout);
         channelEdit = view.findViewById(R.id.channeledit);
-        channelLayout           = view.findViewById(R.id.channellayout);
-        encryMethodEdit         = view.findViewById(R.id.encrymethodedit);
-        encryMethodLayout       = view.findViewById(R.id.encrymethodlayout);
-        startButton             = view.findViewById(R.id.startButton);
-        openOptionLayout        = view.findViewById(R.id.openoptionlayout);
-        encryOptionLayout       = view.findViewById(R.id.encryoptionlayout);
-        openChoose              = view.findViewById(R.id.openchoose);
-        encryChoose             = view.findViewById(R.id.encrychoose);
-        openButton              = view.findViewById(R.id.openbtn);
-        encryButton             = view.findViewById(R.id.encrybtn);
-        openSsidEdit            = view.findViewById(R.id.openssidedit);
-        fakeSpinner             = view.findViewById(R.id.fakespinner);
+        channelLayout = view.findViewById(R.id.channellayout);
+        encryMethodEdit = view.findViewById(R.id.encrymethodedit);
+        encryMethodLayout = view.findViewById(R.id.encrymethodlayout);
+        startButton = view.findViewById(R.id.startButton);
+        openOptionLayout = view.findViewById(R.id.openoptionlayout);
+        encryOptionLayout = view.findViewById(R.id.encryoptionlayout);
+        openChoose = view.findViewById(R.id.openchoose);
+        encryChoose = view.findViewById(R.id.encrychoose);
+        openButton = view.findViewById(R.id.openbtn);
+        encryButton = view.findViewById(R.id.encrybtn);
+        openSsidEdit = view.findViewById(R.id.openssidedit);
+        fakeSpinner = view.findViewById(R.id.fakespinner);
         SpinnerAdapter adapter1 = ArrayAdapter.createFromResource(view.getContext(), R.array.fake_spinner, R.layout.dropdown_listitem);
         fakeSpinner.setAdapter(adapter1);
-        fakeLayout          = view.findViewById(R.id.fakelayout);
-        inputLayout         = view.findViewById(R.id.inputlayout);
-        apchooseLayout      = view.findViewById(R.id.apchooseLayout);
-        wifiPassLayout      = view.findViewById(R.id.wifiapsslayout);
-        openChannelLayout   = view.findViewById(R.id.openchannellayout);
-        openChannelEdit     = view.findViewById(R.id.openchanneledit);
-        apchooseButton      =view.findViewById(R.id.apchooseButton);
-        wifipassedit        = view.findViewById(R.id.wifipassedit);
+        fakeLayout = view.findViewById(R.id.fakelayout);
+        inputLayout = view.findViewById(R.id.inputlayout);
+        apchooseLayout = view.findViewById(R.id.apchooseLayout);
+        wifiPassLayout = view.findViewById(R.id.wifiapsslayout);
+        openChannelLayout = view.findViewById(R.id.openchannellayout);
+        openChannelEdit = view.findViewById(R.id.openchanneledit);
+        apchooseButton =view.findViewById(R.id.apchooseButton);
+        wifipassedit = view.findViewById(R.id.wifipassedit);
         devId = PrefSingleton.getInstance().getString("device");//获取设备ID
         MainContext.INSTANCE.getScannerService().pause();//暂停扫描，防止命令冲突
         return view;
@@ -139,8 +140,7 @@ public class FakeApFragment extends Fragment {
             @Override
             public void onClick(View arg0) {
                 // TODO Auto-generated method stub
-                View view = FakeApFragment.this.getLayoutInflater().inflate(
-                        R.layout.scan_dialog_list, null);
+                View view = FakeApFragment.this.getLayoutInflater().inflate(R.layout.scan_dialog_list, null);
                 final Dialog dialog = new Dialog(context);
                 dialog.setContentView(view);
                 dialog.setTitle("热点列表");
@@ -150,7 +150,6 @@ public class FakeApFragment extends Fragment {
                 final TextView refresh = view.findViewById(R.id.clickrefresh);
                 final TextView noData = view.findViewById(R.id.nodata);
                 refresh.setOnClickListener(new View.OnClickListener() {
-
                     @Override
                     public void onClick(View arg0) {
                         // TODO Auto-generated method stub
@@ -171,7 +170,8 @@ public class FakeApFragment extends Fragment {
                                     getActivity().runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
-                                            new CommonUpdater(context, listview, devId, 0, progressBar, 1, 0, refresh, noData, true).execute();
+                                            new CommonUpdater(context, listview, devId, 0, progressBar, 1,
+                                                    0, refresh, noData, true).execute();
                                         }
                                     });
                                 }
@@ -200,7 +200,8 @@ public class FakeApFragment extends Fragment {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    new CommonUpdater(context, listview, devId, 0, progressBar, 1, 0, refresh, noData, true).execute();
+                                    new CommonUpdater(context, listview, devId, 0, progressBar, 1,
+                                            0, refresh, noData, true).execute();
                                 }
                             });
                         }
@@ -228,19 +229,14 @@ public class FakeApFragment extends Fragment {
 
                         if (apPrivacy.equals("OPEN")) {
                             wifiPassLayout.setVisibility(View.GONE);
-                            Toast.makeText(context, "选择为开放网络", Toast.LENGTH_SHORT).show();
                         } else {
                             wifiPassLayout.setVisibility(View.VISIBLE);
-                            Toast.makeText(context, "选择为加密网络,请输入密码", Toast.LENGTH_SHORT).show();
                         }
                         dialog.dismiss();
-
                     }
                 });
-
             }
         });
-
 
         fakeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -255,9 +251,7 @@ public class FakeApFragment extends Fragment {
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
+            public void onNothingSelected(AdapterView<?> adapterView) {}
         });
         openChoose.setOnClickListener(new View.OnClickListener() {
 
@@ -318,10 +312,9 @@ public class FakeApFragment extends Fragment {
             @Override
             public void onClick(View arg0) {
                 // TODO Auto-generated method stub
-                //final String[] channelString = { "频道1", "频道2", "频道3", "频道4",
-                //		"频道5", "频道6", "频道7", "频道8", "频道9", "频道10", "频道11" };
-                final String[] channelString = {"频道1", "频道2", "频道3", "频道4", "频道5", "频道6", "频道7", "频道8", "频道9", "频道10", "频道11", "频道12", "频道13", "频道14",
-                        "频道36", "频道38", "频道40", "频道42", "频道44", "频道46", "频道48", "频道52", "频道56", "频道60", "频道64", "频道149", "频道153", "频道157", "频道161", "频道165"};
+                final String[] channelString = {"频道1", "频道2", "频道3", "频道4", "频道5", "频道6", "频道7", "频道8", "频道9",
+                        "频道10", "频道11", "频道12", "频道13", "频道14", "频道36", "频道38", "频道40", "频道42", "频道44", "频道46",
+                        "频道48", "频道52", "频道56", "频道60", "频道64", "频道149", "频道153", "频道157", "频道161", "频道165"};
                 new AlertDialog.Builder(context)
                         .setTitle("选择频道")
                         .setSingleChoiceItems(channelString, openChannelId - 1,
@@ -332,7 +325,6 @@ public class FakeApFragment extends Fragment {
                                         // TODO Auto-generated method stub
                                         if (arg1 >= 0) {
                                             openChannelId = Integer.parseInt(channelString[arg1].replace("频道", ""));//arg1 + 1;
-
                                         }
                                     }
                                 })
@@ -344,8 +336,7 @@ public class FakeApFragment extends Fragment {
                                                         int which) {
                                         // TODO Auto-generated method stub
                                         dialog.dismiss();
-                                        openChannelEdit
-                                                .setText("频道 " + openChannelId);//channelString[openChannelId - 1]);
+                                        openChannelEdit.setText("频道" + openChannelId);//channelString[openChannelId - 1]);
                                     }
 
                                 })
@@ -356,87 +347,6 @@ public class FakeApFragment extends Fragment {
                                                         int which) {
                                         // TODO Auto-generated method stub
                                         dialog.dismiss();
-                                    }
-                                }).show();
-            }
-        });
-
-
-        ssidLayout.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View arg0) {
-                // TODO Auto-generated method stub
-                final EditText et = new EditText(context);
-                et.setSingleLine();
-                new AlertDialog.Builder(context)
-                        .setTitle("请输入")
-                        .setIcon(android.R.drawable.ic_dialog_info)
-                        .setView(et)
-                        .setPositiveButton("确定",
-                                new DialogInterface.OnClickListener() {
-
-                                    @Override
-                                    public void onClick(DialogInterface arg0,
-                                                        int arg1) {
-                                        ssidEdit.setText(et.getText());
-                                    }
-
-                                })
-                        .setNegativeButton("取消",
-                                new DialogInterface.OnClickListener() {
-
-                                    @Override
-                                    public void onClick(DialogInterface arg0,
-                                                        int arg1) {
-                                        arg0.dismiss();
-                                    }
-                                }).show();
-            }
-        });
-
-        passLayout.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View arg0) {
-                // TODO Auto-generated method stub
-                final EditText et = new EditText(context);
-                et.setSingleLine();
-                new AlertDialog.Builder(context)
-                        .setTitle("请输入")
-                        .setIcon(android.R.drawable.ic_dialog_info)
-                        .setView(et)
-                        .setPositiveButton("确定",
-                                new DialogInterface.OnClickListener() {
-
-                                    @Override
-                                    public void onClick(DialogInterface arg0,
-                                                        int arg1) {
-                                        // TODO Auto-generated method stub
-                                        if (et.getText().length() < 8) {
-                                            Toast.makeText(context,
-                                                    "密码长度太短，请重新填写！",
-                                                    Toast.LENGTH_SHORT).show();
-                                            passEdit.setText("");
-                                        } else if (et.getText().length() > 63) {
-                                            Toast.makeText(context,
-                                                    "密码长度太长，请重新填写！",
-                                                    Toast.LENGTH_SHORT).show();
-                                            passEdit.setText("");
-                                        } else {
-                                            passEdit.setText(et.getText());
-                                        }
-                                    }
-
-                                })
-                        .setNegativeButton("取消",
-                                new DialogInterface.OnClickListener() {
-
-                                    @Override
-                                    public void onClick(DialogInterface arg0,
-                                                        int arg1) {
-                                        // TODO Auto-generated method stub
-                                        arg0.dismiss();
                                     }
                                 }).show();
             }
@@ -446,8 +356,7 @@ public class FakeApFragment extends Fragment {
             @Override
             public void onClick(View arg0) {
                 // TODO Auto-generated method stub
-                final String[] encryString = {"WPA", "WPA2", "WPA2WPA"};
-
+                final String[] encryString = {"WPA", "WPA2", "WPA2 WPA"}; //WPA-PSK
                 new AlertDialog.Builder(context)
                         .setTitle("选择加密方式")
                         .setSingleChoiceItems(encryString, encryId - 1,
@@ -458,7 +367,6 @@ public class FakeApFragment extends Fragment {
                                         // TODO Auto-generated method stub
                                         if (arg1 >= 0) {
                                             encryId = arg1 + 1;
-
                                         }
                                     }
                                 })
@@ -493,10 +401,9 @@ public class FakeApFragment extends Fragment {
             @Override
             public void onClick(View arg0) {
                 // TODO Auto-generated method stub
-                //final String[] channelString = { "频道1", "频道2", "频道3", "频道4",
-                //		"频道5", "频道6", "频道7", "频道8", "频道9", "频道10", "频道11" };
-                final String[] channelString = {"频道1", "频道2", "频道3", "频道4", "频道5", "频道6", "频道7", "频道8", "频道9", "频道10", "频道11", "频道12", "频道13", "频道14",
-                        "频道36", "频道38", "频道40", "频道42", "频道44", "频道46", "频道48", "频道52", "频道56", "频道60", "频道64", "频道149", "频道153", "频道157", "频道161", "频道165"};
+                final String[] channelString = {"频道1", "频道2", "频道3", "频道4", "频道5", "频道6", "频道7", "频道8", "频道9",
+                        "频道10", "频道11", "频道12", "频道13", "频道14", "频道36", "频道38", "频道40", "频道42", "频道44", "频道46",
+                        "频道48", "频道52", "频道56", "频道60", "频道64", "频道149", "频道153", "频道157", "频道161", "频道165"};
                 new AlertDialog.Builder(context)
                         .setTitle("选择频道")
                         .setSingleChoiceItems(channelString, channelId - 1,
@@ -507,7 +414,6 @@ public class FakeApFragment extends Fragment {
                                         // TODO Auto-generated method stub
                                         if (arg1 >= 0) {
                                             channelId = Integer.parseInt(channelString[arg1].replace("频道", ""));//arg1 + 1;
-
                                         }
                                     }
                                 })
@@ -519,8 +425,7 @@ public class FakeApFragment extends Fragment {
                                                         int which) {
                                         // TODO Auto-generated method stub
                                         dialog.dismiss();
-                                        channelEdit
-                                                .setText("频道 " + channelId);//channelString[channelId - 1]);
+                                        channelEdit.setText("频道" + channelId); //channelString[channelId - 1]);
                                     }
 
                                 })
@@ -541,8 +446,7 @@ public class FakeApFragment extends Fragment {
             @Override
             public void onClick(View arg0) {
                 // TODO Auto-generated method stub
-                final String[] encryMethodString = {"TKIP", "CCMP",
-                        "TKIP CCMP"};
+                final String[] encryMethodString = {"TKIP", "CCMP", "TKIP CCMP"};
 
                 new AlertDialog.Builder(context)
                         .setTitle("选择加密算法")
@@ -554,7 +458,6 @@ public class FakeApFragment extends Fragment {
                                         // TODO Auto-generated method stub
                                         if (arg1 >= 0) {
                                             encryMethodId = arg1 + 1;
-
                                         }
                                     }
                                 })
@@ -566,9 +469,7 @@ public class FakeApFragment extends Fragment {
                                                         int which) {
                                         // TODO Auto-generated method stub
                                         dialog.dismiss();
-                                        encryMethodEdit
-                                                .setText(encryMethodString[encryMethodId - 1]);
-
+                                        encryMethodEdit.setText(encryMethodString[encryMethodId - 1]);
                                     }
 
                                 })
@@ -589,7 +490,7 @@ public class FakeApFragment extends Fragment {
 
             @Override
             public void onClick(View arg0) {
-                getFragmentManager().beginTransaction().addToBackStack(null).commit();//加入回退栈
+                getFragmentManager().beginTransaction().addToBackStack(null).commit(); //加入回退栈
                 if (fakeSpinner.getSelectedItemId() == 0) {
                     sendCommand("wifi_fake_ap");
                 } else if (fakeSpinner.getSelectedItemId() == 1) {
@@ -599,6 +500,7 @@ public class FakeApFragment extends Fragment {
                         sendCommand("connect_wifi_and_fake");
                     } else {
                         Toast.makeText(context, "请选择连接热点并输入密码！", Toast.LENGTH_SHORT).show();
+                        return;
                     }
 
                 }
@@ -608,26 +510,25 @@ public class FakeApFragment extends Fragment {
 
     @Override
     public void onStart() {
-        Log.d("Fragment status：","Start");
+        Log.d("FakeAp status：","Start");
         super.onStart();
     }
 
     @Override
     public void onResume() {
-        Log.d("Fragment status：","Resumen");
+        Log.d("FakeAp status：","Resume");
         super.onResume();
     }
 
     @Override
     public void onPause() {
         BackgroundTask.clearAll();
-        Log.d("Fragment status：","Pause");
+        Log.d("FakeAp status：","Pause");
         super.onPause();
     }
 
     private  void sendCommand(String command){
         final Context context1 = getView().getContext();
-
         JSONObject jo = new JSONObject();
 
         if (openOptionLayout.getVisibility() == View.VISIBLE ) { // 模拟开放网络
@@ -654,8 +555,8 @@ public class FakeApFragment extends Fragment {
                     }
                 }
             }else{
-                Toast.makeText(context1, "请填写热点SSID！",
-                        Toast.LENGTH_SHORT).show();
+                Toast.makeText(context1, "请填写热点SSID！", Toast.LENGTH_SHORT).show();
+                return;
             }
         } else if (encryOptionLayout.getVisibility() == View.VISIBLE && !(ssidEdit.getText().toString().equals(""))
                 && !(encryEdit.getText().toString().equals(""))
@@ -663,15 +564,26 @@ public class FakeApFragment extends Fragment {
                 && !(channelEdit.getText().toString().equals(""))
                 && !(encryMethodEdit.getText().toString().equals(""))) { // 加密网络
 
+            String ssid = ssidEdit.getText().toString();
+            String password = passEdit.getText().toString();
+            if (password.length() < 8) {
+                passEdit.setText("");
+                Toast.makeText(getContext(), "密码长度小于8位，请重新填写！", Toast.LENGTH_SHORT).show();
+                return;
+            } else if (password.length() > 63) {
+                passEdit.setText("");
+                Toast.makeText(getContext(), "密码长度大于63位，请重新填写！", Toast.LENGTH_SHORT).show();
+                return;
+            }
             // 4G 和 wifi 通用
             try {
                 jo.put("net", "enc");
                 jo.put("out", "4g" );
-                jo.put("essid", ssidEdit.getText().toString());
+                jo.put("essid", ssid); //jo.put("essid", ssidEdit.getText().toString());
                 jo.put("channel", channelId);
-                jo.put("security", encryEdit.getText().toString()); // wap wap2 wap2wap
-                jo.put("password", passEdit.getText().toString());
-                jo.put("encryption", encryMethodEdit.getText().toString()); // TKIP CCMP "TCIP CCMP"
+                jo.put("security", encryEdit.getText().toString()); //wap,wap2,wap2-wap
+                jo.put("password", password); //jo.put("password", passEdit.getText().toString());
+                jo.put("encryption", encryMethodEdit.getText().toString()); // TKIP,CCMP,TCIP-CCMP
             } catch (JSONException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -689,8 +601,8 @@ public class FakeApFragment extends Fragment {
                 }
             }
         } else {
-            Toast.makeText(context1, "信息填写不完整！",
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(context1, "信息填写不完整！", Toast.LENGTH_SHORT).show();
+            return;
         }
 
         final JSONObject jof = jo;
@@ -717,6 +629,6 @@ public class FakeApFragment extends Fragment {
                 });
             }
         };
-        BackgroundTask.mTimerHandling.schedule(BackgroundTask.mTimerTaskHandling, 0, 30000);
+        BackgroundTask.mTimerHandling.schedule(BackgroundTask.mTimerTaskHandling, 0, 30000); //延迟时间0ms,执行的间隔30000ms
     }
 }

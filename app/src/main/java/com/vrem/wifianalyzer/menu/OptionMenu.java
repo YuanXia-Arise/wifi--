@@ -19,6 +19,7 @@
 package com.vrem.wifianalyzer.menu;
 
 import android.app.Activity;
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -30,6 +31,8 @@ import com.vrem.wifianalyzer.wifi.common.InfoUpdater;
 import com.vrem.wifianalyzer.wifi.common.PrefSingleton;
 import com.vrem.wifianalyzer.wifi.deviceList.Deviece;
 import com.vrem.wifianalyzer.wifi.filter.Filter;
+
+
 
 public class OptionMenu {
     private Menu menu;
@@ -43,17 +46,22 @@ public class OptionMenu {
     public void select(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_scanner:
+                MenuItem menuItem = menu.findItem(R.id.action_scanner);
                 if (MainContext.INSTANCE.getScannerService().isRunning()) {
                     pause();
                 } else {
                     resume();
+                }
+                if (MainContext.INSTANCE.getScannerService().isRunning()){
+                    menuItem.setIcon(R.drawable.ic_pause_grey_500_48dp);
+                } else {
+                    menuItem.setIcon(R.drawable.ic_play_arrow_grey_500_48dp);
                 }
                 break;
             case R.id.action_filter:
                 Filter.build().show();//打开过滤器
                 break;
             case R.id.action_device:
-
                 new InfoUpdater(MainContext.INSTANCE.getContext(),true).execute();//获取前置信息
                 String deviceInfo = PrefSingleton.getInstance().getString("deviceInfo");
                 if (deviceInfo.equals(null)){

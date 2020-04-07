@@ -32,6 +32,7 @@ import com.vrem.wifianalyzer.R;
 
 import java.util.Locale;
 
+
 public class SettingActivity extends PreferenceActivity {
 
     @Override
@@ -48,11 +49,8 @@ public class SettingActivity extends PreferenceActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setCustomTheme();
-
         super.onCreate(savedInstanceState);
-
         getFragmentManager().beginTransaction().replace(android.R.id.content, new SettingPreferenceFragment()).commit();
-
         ActionBar actionBar = getActionBar();
         if (actionBar != null) {
             actionBar.setHomeButtonEnabled(true);
@@ -82,6 +80,7 @@ public class SettingActivity extends PreferenceActivity {
         public void onCreate(final Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.preferences);
+
         }
     }
 }

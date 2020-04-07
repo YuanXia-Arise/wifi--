@@ -1,0 +1,86 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:gravity="center">
+        <TextView
+            android:id="@+id/desc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="使用前置设备根据目标MAC进行目标搜索,点击热点/客户进行切换显示目标热点和客户端"
+            android:textColor="@android:color/white"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:gravity="center">
+    <RelativeLayout
+        android:id="@+id/btnlayout_zero"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center" >
+        <Button
+            android:id="@+id/Target"
+            android:text="添加"
+            style="@style/ButtonTarget" />
+        <Button
+            android:id="@+id/startButton"
+            android:text="开始"
+            style="@style/ButtonTarget"
+            android:layout_toRightOf="@+id/Target"/>
+
+        <Button
+            android:id="@+id/clientButton"
+            android:text="热点"
+            style="@style/ButtonTarget"
+            android:layout_toRightOf="@+id/startButton"/>
+    </RelativeLayout>
+    </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center">
+            <ListView
+                android:id="@+id/ap_search"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:dividerHeight="0.5pt"
+                android:divider="#535353"/>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/line"
+            android:layout_width="match_parent"
+            android:layout_height="1pt"
+            android:background="#535353"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="0pt"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center">
+            <ListView
+                android:id="@+id/client_search"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:dividerHeight="0.5pt"
+                android:divider="#535353"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

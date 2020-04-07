@@ -82,14 +82,14 @@
                 <TextView
                     android:id="@+id/level"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content" />
 
                 <ImageView
                     android:id="@+id/levelImage"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:contentDescription="@null"/>
+                    android:contentDescription="@null" />
 
             </LinearLayout>
 
@@ -112,7 +112,7 @@
                         android:layout_marginRight="@dimen/list_view_item_horizontal_spacer"
                         android:text="@string/channel_short_name"
                         android:textColor="@color/channel"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/channel"
@@ -121,7 +121,7 @@
                         android:layout_marginEnd="@dimen/list_view_item_horizontal_spacer"
                         android:layout_marginRight="@dimen/list_view_item_horizontal_spacer"
                         android:textColor="@color/channel_number"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/primaryFrequency"
@@ -129,14 +129,15 @@
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="@dimen/list_view_item_horizontal_spacer"
                         android:layout_marginRight="@dimen/list_view_item_horizontal_spacer"
-                        android:textColor="@color/frequency"/>
+                        android:textColor="@color/frequency" />
 
                     <TextView
                         android:id="@+id/distance"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textColor="@color/distance"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold" />
+
                 </LinearLayout>
 
                 <!-- Row 2 optional -->
@@ -151,7 +152,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="@dimen/list_view_item_horizontal_spacer"
                         android:layout_marginRight="@dimen/list_view_item_horizontal_spacer"
-                        android:textColor="@color/frequency"/>
+                        android:textColor="@color/frequency" />
 
                     <TextView
                         android:id="@+id/width"
@@ -159,13 +160,13 @@
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="@dimen/list_view_item_horizontal_spacer"
                         android:layout_marginRight="@dimen/list_view_item_horizontal_spacer"
-                        android:textColor="@color/frequency"/>
+                        android:textColor="@color/frequency" />
 
                     <TextView
                         android:id="@+id/vendorShort"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:visibility="gone"/>
+                        android:visibility="gone" />
                 </LinearLayout>
 
                 <!-- Row 3 -->
@@ -180,14 +181,14 @@
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="@dimen/list_view_item_horizontal_spacer"
                         android:layout_marginRight="@dimen/list_view_item_horizontal_spacer"
-                        android:contentDescription="@null"/>
+                        android:contentDescription="@null" />
 
                     <TextView
                         android:id="@+id/capabilities"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textColor="@color/security"
-                        android:textStyle="italic"/>
+                        android:textStyle="italic" />
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>

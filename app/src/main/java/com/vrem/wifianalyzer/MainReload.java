@@ -18,14 +18,21 @@
 
 package com.vrem.wifianalyzer;
 
+import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.v4.app.NavUtils;
+import android.util.Log;
 
+import com.vrem.wifianalyzer.settings.SettingActivity;
 import com.vrem.wifianalyzer.settings.Settings;
 import com.vrem.wifianalyzer.settings.ThemeStyle;
 import com.vrem.wifianalyzer.wifi.accesspoint.AccessPointViewType;
 import com.vrem.wifianalyzer.wifi.accesspoint.ConnectionViewType;
 
 import java.util.Locale;
+
+import static com.android.volley.VolleyLog.TAG;
 
 class MainReload {
     private ThemeStyle themeStyle;//主题风格

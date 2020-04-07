@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="50dp"
+    android:gravity="center_vertical"
+    android:padding="2dp">
+
+    <RelativeLayout
+        android:id="@+id/maclayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="15dp">
+
+        <TextView
+            android:id="@+id/mactext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:padding="1dp"
+            android:text="MAC："
+            android:textSize="14sp"
+            android:singleLine="true"
+            android:textColor="@android:color/white"/>
+
+        <TextView
+            android:id="@+id/mac"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/mactext"
+            android:padding="1dp"
+            android:textSize="14sp"
+            android:singleLine="true"
+            android:textColor="@android:color/white"/>
+    </RelativeLayout>
+
+
+    <RelativeLayout
+        android:id="@+id/probelayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/maclayout"
+        android:layout_marginLeft="15dp">
+
+        <TextView
+            android:id="@+id/probetext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:padding="1dp"
+            android:text="首选ap："
+            android:textSize="14sp"
+            android:textColor="@android:color/white"/>
+
+        <TextView
+            android:id="@+id/probe"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/probetext"
+            android:padding="1dp"
+            android:textSize="14sp"
+            android:textColor="@android:color/white"/>
+    </RelativeLayout>
+
+
+    <RelativeLayout
+        android:id="@+id/companylayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/probelayout"
+        android:layout_marginLeft="15dp">
+
+        <TextView
+            android:id="@+id/companytext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:padding="1dp"
+            android:text="厂商:"
+            android:textSize="14sp"
+            android:textColor="@android:color/white"/>
+
+        <TextView
+            android:id="@+id/company"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/companytext"
+            android:padding="1dp"
+            android:textSize="14sp"
+            android:singleLine="true"
+            android:textColor="@android:color/white"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:focusable="false"
+            android:focusableInTouchMode="true"
+            android:scrollHorizontally="true"
+            android:scaleType="centerInside"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/client_ap"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/companylayout"
+        android:layout_marginLeft="15dp">
+
+        <TextView
+            android:id="@+id/clienttext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:padding="1dp"
+            android:text="客户端连接热点："
+            android:textSize="14sp"
+            android:textColor="@android:color/white"/>
+
+        <TextView
+            android:id="@+id/client_hotspot"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/clienttext"
+            android:padding="1dp"
+            android:textSize="14sp"
+            android:textColor="@android:color/white"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/client_ap"
+        android:layout_marginLeft="15dp">
+
+        <TextView
+            android:id="@+id/power"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:padding="1dp"
+            android:text="客户端信号："
+            android:textSize="14sp"
+            android:textColor="@android:color/white"/>
+
+        <TextView
+            android:id="@+id/client_power"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/power"
+            android:padding="1dp"
+            android:textSize="14sp"
+            android:textColor="@android:color/white" />
+    </RelativeLayout>
+
+</RelativeLayout>

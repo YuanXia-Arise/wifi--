@@ -57,7 +57,6 @@ public class PackageDownloadAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         ListItemView listItemView = null;
         if(convertView == null){
-
             convertView = listContainer.inflate(this.itemViewResource, null);
             listItemView = new ListItemView();
             listItemView.ssid       = convertView.findViewById(R.id.pack_ssid_tv);

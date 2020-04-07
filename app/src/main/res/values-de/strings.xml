@@ -20,104 +20,107 @@
 <resources>
     <string name="app_copyright">Copyright \u00A9 2015 \u002D 2017</string>
 
-    <string name="navigation_drawer_open">Navigationsleiste öffnen</string>
-    <string name="navigation_drawer_close">Navigationsleiste schließen</string>
+    <string name="navigation_drawer_open">Tour öffnen</string>
+    <string name="navigation_drawer_close">关闭导览</string>
 
     <!-- action start -->
-    <string name="action_access_points">Access Points</string>
+    <string name="action_access_points">Zugangspunkt</string>
     <string name="action_channel_rating">Kanalbewertung</string>
-    <string name="action_channel_graph">Kanalübersicht</string>
-    <string name="action_time_graph">Signalverlauf</string>
-    <string name="action_export">Export</string>
-    <string name="action_channel_available">Verfügbare Kanäle</string>
-    <string name="action_vendors">Hersteller</string>
-    <string name="action_settings">Einstellungen</string>
-    <string name="action_about">Über</string>
+    <string name="action_channel_graph">Kanalkarte</string>
+    <string name="action_time_graph">Zeitkarte</string>
+    <string name="action_export">Angriffe blockieren</string>
+    <string name="action_channel_available">Client-Aufzählung</string>
+    <string name="action_sniffer">Handshake-Paket abfangen</string>
+    <string name="action_vendors">WPS knacken</string>
+    <string name="action_forgery">Hot Spot Fälschung</string>
+    <string name="action_wifi_hotspot">WLAN-Hotspot</string>
+    <string name = "action_search">Suche nach Zielen</string>
+    <string name="action_datapack">Paket</string>
+    <string name="action_settings">Einstellung</string>
     <!-- action end -->
+
+    <string-array name="fake_spinner">
+        <item>4G-Simulation</item>
+        <item>WiFi-Simulation</item>
+    </string-array>
 
     <string name="button_cancel">Abbrechen</string>
     <string name="no_data">Keine Daten</string>
 
-    <string name="export_not_available">Export nicht verfügbar</string>
+    <string name="export_not_available">Export ist nicht möglich</string>
 
-    <string name="channel_rating_best">Beste Kanäle:</string>
-    <string name="channel_rating_best_none">Keine</string>
-    <string name="channel_rating_best_alternative">, probiere ein anderes WLAN-Frequenzband</string>
+    <string name="channel_rating_best">Optimaler Kanal:</string>
+    <string name="channel_rating_best_none">Nein</string>
+    <string name="channel_rating_best_alternative">,Probieren Sie andere WiFi-Bänder aus</string>
     <string name="channel_rating_heading_rating">Kanalbewertung</string>
-    <string name="channel_rating_heading_number">Kanal</string>
-    <string name="channel_rating_heading_count">Anzahl Access Points</string>
-    <string name="channel_short_name">CH</string>
-
-    <string name="graph_channel_axis_x">WLAN-Kanäle</string>
-    <string name="graph_time_axis_x">Scans</string>
+    <string name="channel_rating_heading_number">Anzahl der Kanäle</string>
+    <string name="channel_rating_heading_count">Anzahl der Zugriffspunkte</string>
+    <string name="channel_short_name">Kanal</string>
+    <string name="graph_channel_axis_x">WiFi-Kanal</string>
+    <string name="graph_time_axis_x">Anzahl der Scans</string>
     <string name="graph_axis_y">Signalstärke (dBm)</string>
 
     <!-- settings start -->
-    <string name="start_menu_title">Beim Start anzeigen</string>
+    <string name="start_menu_title">Starten Sie</string>
     <string name="country_code_title">Land</string>
     <string name="scan_interval_title">Scan-Intervall</string>
-    <string name="scan_interval_summary">%d Sekunden zwischen den Scans</string>
-    <string name="sort_by_title">Sortiere Access Points nach</string>
-    <string name="group_by_title">Gruppiere Access Points nach</string>
-    <string name="connection_view_title">Verbindungs-Darstellung</string>
-    <string name="ap_view_title">Access Point-Darstellung</string>
-    <string name="graph_maximum_y_title">Maximale Signalstärke in Grafik</string>
-    <string name="channel_graph_legend_title">Anzeige der Legende in Kanalübersicht</string>
-    <string name="time_graph_legend_title">Anzeige der Legende in Signalverlauf</string>
+    <string name="scan_interval_summary">Jedes Scanintervall%dSekunden</string>
+    <string name="sort_by_title">Zugriffspunkt-Sortierbasis</string>
+    <string name="group_by_title">Zugriffspunktgruppierung</string>
+    <string name="connection_view_title">Verbindungsanzeige</string>
+    <string name="ap_view_title">Access Point-Anzeige</string>
+    <string name="graph_maximum_y_title">Grafik maximale Signalstärke</string>
+    <string name="channel_graph_legend_title">Anzeigeposition der Kanallegende</string>
+    <string name="time_graph_legend_title">Anzeigeposition der Zeitlegende</string>
     <string name="theme_title">Theme</string>
-    <string name="wifi_off_on_exit_title">WLAN beim Verlassen deaktivieren</string>
+    <string name="wifi_off_on_exit_title">Beim Verlassen schließen WiFi</string>
     <string name="language_title">Sprache</string>
     <!-- settings end -->
 
     <!-- about start -->
-    <string name="about_license_title">Lizenz:</string>
-    <string name="about_license_name">Lizenziert unter der GPLv3</string>
+    <string name="about_license_title">License:</string>
+    <string name="about_license_name">GPLv3-Lizenz</string>
     <string name="about_description_title">Beschreibung:</string>
-    <string name="about_description_text">Verbessere dein WLAN Netzwerk, indem du den Zustand und die Stärke des Signals misst und überlastete Kanäle mit einem freien WiFiAnalyzer für Android erkennst.</string>
-    <string name="about_libraries_title">Benutzte Bibliotheken:</string>
-    <string name="about_contributor_title">Beitragende:</string>
-    <string name="about_write_review">Rezension schreiben</string>
+    <string name="about_description_text">Verwenden Sie diesen Open Source Android WiFi Analyzer, um den WiFi-Status und die Signalstärke zu überprüfen und überfüllte Kanäle zu identifizieren, um Ihr WiFi-Netzwerk zu optimieren</string>
+    <string name="about_libraries_title">Bibliothek verwendet:</string>
+    <string name="about_contributor_title">Mitwirkender:</string>
+    <string name="about_write_review">Ich möchte auswerten</string>
     <!-- about end -->
 
     <!-- security start -->
-    <string name="security_none">Keiner</string>
+    <string name="security_none">Nein</string>
     <!-- security end -->
 
     <!-- filter start -->
     <string name="filter_title">Filter</string>
-    <string name="filter_close">Schließen</string>
-    <string name="filter_reset">Zurücksetzen</string>
-    <string name="filter_apply">Anwenden</string>
-    <string name="filter_wifi_band_title">WLAN Frequenzbänder</string>
+    <string name="filter_close">Aus</string>
+    <string name="filter_reset">Neustart</string>
+    <string name="filter_apply">Bewerbung</string>
+    <string name="filter_wifi_band_title">WiFi-Band</string>
     <string name="filter_strength_title">Signalstärke</string>
     <string name="filter_security_title">Sicherheit</string>
     <!-- filter end -->
 
-    <!--<string-array name="drawer_item_array">-->
-        <!--<item>Gerätemanagement</item>-->
-        <!--<item>Benutzerinformationen</item>-->
-        <!--<item>Einstellungen</item>-->
-        <!--<item>Hilft</item>-->
-        <!--<item>Abmelden</item>-->
-        <!--<item>Über</item>-->
-    <!--</string-array>-->
+    <string-array name="drawer_item_array">
+        <item>Gestión de equipos</item>
+        <item>Información del usuario</item>
+        <item>Einstellung</item>
+        <item>Hilfe</item>
+        <item>Abmelden</item>
+        <item>Über</item>
+    </string-array>
 
-    <!--<string-array name="send_spinner">-->
-        <!--<item>Lokal speichern</item>-->
-        <!--<item>3G senden</item>-->
-    <!--</string-array>-->
+    <string-array name="send_spinner">
+        <item>Lokale Speicherung</item>
+        <item>3G-Übertragung</item>
+    </string-array>
 
-    <!--<string-array name="method_spinner">-->
-        <!--<item>Leiser Modus</item>-->
-        <!--<item>Geschwindigkeitsmodus</item>-->
-    <!--</string-array>-->
+    <string-array name="method_spinner">
+        <item>Lautloser Modus</item>
+        <item>Extremgeschwindigkeitsmodus</item>
+    </string-array>
 
-    <!--<string name="drawer_open">Öffnen Sie die Schubladennavigation</string>-->
-    <!--<string name="drawer_close">Schließen Sie die Schubladennavigation</string>-->
-    <!--<string name="action_sniffer">握手包截获</string>-->
-    <!--<string name="action_forgery">热点伪造</string>-->
-    <!--<string-array name="fake_spinner">-->
-        <!--<item>3G模拟</item>-->
-        <!--<item>Wifi模拟</item>-->
-    <!--</string-array>-->
+    <string name="drawer_open">Schubladennavigation öffnen</string>
+    <string name="drawer_close">Schubladennavigation schließen</string>
+
 </resources>

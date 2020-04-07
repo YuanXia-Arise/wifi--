@@ -21,6 +21,7 @@ package com.vrem.wifianalyzer.wifi.accesspoint;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,13 +40,16 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.Locale;
 
+import static android.content.ContentValues.TAG;
+
+
 //接入点详情
 public class AccessPointDetail {
     private static final int VENDOR_SHORT_MAX = 12;
     private static final int VENDOR_LONG_MAX = 30;
 
     //制作视图，调用下面的makeView方法
-    View makeView(View convertView, ViewGroup parent, @NonNull WiFiDetail wiFiDetail, boolean isChild) {
+    public View makeView(View convertView, ViewGroup parent, @NonNull WiFiDetail wiFiDetail, boolean isChild) {
         AccessPointViewType accessPointViewType = MainContext.INSTANCE.getSettings().getAccessPointView();//设置页面
         return makeView(convertView, parent, wiFiDetail, isChild, accessPointViewType);
     }
@@ -72,19 +76,15 @@ public class AccessPointDetail {
         setViewCompact(view, wiFiDetail, false);
         setViewExtra(view, wiFiDetail);
         setViewVendorLong(view, wiFiDetail.getWiFiAdditional());
-
         return view;
     }
 
     //设置压缩视图 view传入的页面 WiFiDetail 传入的单条wifi记录 isChild 判断是否是子项
     private void setViewCompact(@NonNull View view, @NonNull WiFiDetail wiFiDetail, boolean isChild) {
         Context context = view.getContext();
-
         ((TextView) view.findViewById(R.id.ssid)).setText(wiFiDetail.getTitle());//设置SSID and BSSID
-
         WiFiSignal wiFiSignal = wiFiDetail.getWiFiSignal();//获取这条wifi信号对象
         Strength strength = wiFiSignal.getStrength();//获取这条wifi的信号强度等级 Strength：枚举类，枚举信号强度等级
-
         Security security = wiFiDetail.getSecurity();//获取这条wifi的信号安全等级 Security：枚举类，枚举信号安全等级
         ImageView securityImage = view.findViewById(R.id.securityImage);//绑定安全等级图片控件
         securityImage.setImageResource(security.getImageResource());//设置安全等级图片
@@ -93,7 +93,6 @@ public class AccessPointDetail {
         TextView textLevel = view.findViewById(R.id.level);//绑定dBm值控件
         textLevel.setText(String.format(Locale.ENGLISH, "%ddBm", wiFiSignal.getLevel()));//设置dBm值
         textLevel.setTextColor(ContextCompat.getColor(context, strength.colorResource()));//设置dBm值颜色
-
         ((TextView) view.findViewById(R.id.channel)).setText(wiFiSignal.getChannelDisplay());//设置信道
         ((TextView) view.findViewById(R.id.primaryFrequency))
             .setText(String.format(Locale.ENGLISH, "%d%s", wiFiSignal.getPrimaryFrequency(), WiFiSignal.FREQUENCY_UNITS));//设置主频率

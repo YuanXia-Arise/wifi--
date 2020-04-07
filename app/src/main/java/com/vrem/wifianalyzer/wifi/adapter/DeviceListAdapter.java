@@ -3,6 +3,8 @@ package com.vrem.wifianalyzer.wifi.adapter;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.Fragment;
+import android.app.NativeActivity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -11,6 +13,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.Display;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -24,7 +27,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.ImageButton;
@@ -35,19 +37,24 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.vrem.util.TextUtils;
 import com.vrem.wifianalyzer.DeviceFunctionActivity;
 import com.vrem.wifianalyzer.DeviceListActivity;
+import com.vrem.wifianalyzer.DosActivity;
 import com.vrem.wifianalyzer.MainActivity;
 import com.vrem.wifianalyzer.MainContext;
 import com.vrem.wifianalyzer.R;
+import com.vrem.wifianalyzer.SplashActivity;
+import com.vrem.wifianalyzer.WifiInfoActivity;
+import com.vrem.wifianalyzer.wifi.accesspoint.AccessPointsFragment;
 import com.vrem.wifianalyzer.wifi.common.BackgroundTask;
 import com.vrem.wifianalyzer.wifi.common.DevStatusDBUtils;
 import com.vrem.wifianalyzer.wifi.common.DosUpdater;
 import com.vrem.wifianalyzer.wifi.common.FakeAPUpdater;
 import com.vrem.wifianalyzer.wifi.common.HandshakeUpdater;
 import com.vrem.wifianalyzer.wifi.common.MacSsidDBUtils;
+import com.vrem.wifianalyzer.wifi.common.PrefSingleton;
 import com.vrem.wifianalyzer.wifi.common.ScanStep1;
+import com.vrem.wifianalyzer.wifi.common.SnifferFilesDBUtils;
 import com.vrem.wifianalyzer.wifi.common.WpsCrackUpdater;
 import com.vrem.wifianalyzer.wifi.model.DeviceInfo;
 
@@ -63,6 +70,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import static android.content.ContentValues.TAG;
 
 public class DeviceListAdapter extends BaseAdapter {
 	private Context context;
@@ -86,10 +95,12 @@ public class DeviceListAdapter extends BaseAdapter {
 
 	private int visibleCount = 0;
 	private boolean isAvaliable = true;
-
 	private boolean flag = false;
 	private boolean classFlag = false; //用于来判断当前是Activity还是Fragment,他俩停止的方法不一样
 	private String bssid = "";
+
+	private String Detail;
+	private String Run;
 
 	static class ListItemView {
 		public TextView commit;
@@ -97,7 +108,7 @@ public class DeviceListAdapter extends BaseAdapter {
 		public ImageView devIcon;
 		public RelativeLayout deviceLayout;
 		public ImageButton stopButton;
-		public CheckBox choose;
+//		public CheckBox choose;
 		public ExpandableListView expandableListView;
 	}
 
@@ -141,10 +152,10 @@ public class DeviceListAdapter extends BaseAdapter {
 		return handlingDetail;
 	}
 
+	final String Cus = null;
 	public View getView(final int position, View convertView,final ViewGroup parent) {
 		View view;
 		if (map.get(position) == null) {
-
 			LayoutInflater mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			view = mInflater.inflate(this.itemViewResource, null);
 			listItemView = new ListItemView();
@@ -155,19 +166,17 @@ public class DeviceListAdapter extends BaseAdapter {
 			listItemView.expandableListView = view.findViewById(R.id.clientExpandableLV);
 			listItemView.stopButton = view.findViewById(R.id.stop);
 
-			listItemView.choose = view.findViewById(R.id.choose);
-
+//			listItemView.choose = view.findViewById(R.id.choose);
 			map.put(position, view);
-			listItemView.choose.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View arg0) {
-					// TODO Auto-generated method stub
-					// listItemView.ok.getY());
-					CheckBox cb = (CheckBox) arg0;
-					mChecked.set(position, cb.isChecked());
-
-				}
-			});
+//			listItemView.choose.setOnClickListener(new OnClickListener() {
+//				@Override
+//				public void onClick(View arg0) {
+//					// TODO Auto-generated method stub
+//					// listItemView.ok.getY());
+//					CheckBox cb = (CheckBox) arg0;
+//					mChecked.set(position, cb.isChecked());
+//				}
+//			});
 			view.setTag(listItemView);
 		} else {
 			view = map.get(position);
@@ -178,34 +187,34 @@ public class DeviceListAdapter extends BaseAdapter {
 		final DeviceInfo device = listItems.get(position);
 		listItemView.commit.setTag(device);
 
-		listItemView.choose.setChecked(mChecked.get(position));
+//		listItemView.choose.setChecked(mChecked.get(position));
 		final String id;
 		id = device.getDevId();
-		if (device.getCommit().equals(""))
+		if (device.getCommit().equals("")) {
 			listItemView.commit.setText(id);
-		else
+		} else {
 			listItemView.commit.setText(device.getCommit());
+		}
 		if (!(device.getAlive())) {
 			listItemView.deviceLayout.setEnabled(true);
 			listItemView.devStatus.setText("离线");
-			// listItemView.stateView.setBackgroundColor(Color
-			// .parseColor("#B5B5B5"));
+			// listItemView.stateView.setBackgroundColor(Color.parseColor("#B5B5B5"));
 			listItemView.stopButton.setVisibility(View.GONE);//设置隐藏按钮
 			listItemView.devIcon.setBackgroundResource(R.drawable.wifiwhite);
 
 		} else {
 			// 设备活着，启动周期info
 //			BackgroundTask.timerInfoStart(context);
-
 			DevStatusDBUtils devStatusDBUtils = null;
+			final TextView moreView = (TextView) view.findViewById(R.id.moreview);
+			moreView.setSelected(true);
 
 			switch (device.getWorkType()) {
 				case 100:
 					listItemView.devStatus.setText("空闲");
 					listItemView.deviceLayout.setEnabled(true);
 					listItemView.stopButton.setVisibility(View.GONE);//设置隐藏按钮
-					// listItemView.stateView.setBackgroundColor(Color
-					// .parseColor("#00EE00"));
+					//listItemView.stateView.setBackgroundColor(Color.parseColor("#00EE00"));
 					listItemView.devIcon.setBackgroundResource(R.drawable.wifigreen);
 
 //					devStatusDBUtils = new DevStatusDBUtils(context);
@@ -221,7 +230,6 @@ public class DeviceListAdapter extends BaseAdapter {
 					BackgroundTask.clearAll();
 					BackgroundTask.mScanStep1 = new ScanStep1(context, device.getDevId());
 					BackgroundTask.mScanStep1.execute();
-
 					break;
 				case 101:
 					classFlag = true;
@@ -229,6 +237,19 @@ public class DeviceListAdapter extends BaseAdapter {
 					listItemView.deviceLayout.setEnabled(true);
 					listItemView.stopButton.setVisibility(View.VISIBLE);//设置按钮可见
 					listItemView.devIcon.setBackgroundResource(R.drawable.wifiblue);
+
+					try {
+						String handlingDetail = getHandlingDetail(device.getDevId());
+						MacSsidDBUtils macSsidDBUtils = null;
+						macSsidDBUtils = new MacSsidDBUtils(context);
+						macSsidDBUtils.open();
+						String Ssid = macSsidDBUtils.getSSID(device.getDevId(),handlingDetail);
+						macSsidDBUtils.close();
+//						moreView.setText("定向阻断热点为:" + handlingDetail);
+						moreView.setText("定向阻断热点为:" + Ssid);
+					} catch (/*JSON*/Exception e) {
+						e.printStackTrace();
+					}
 
 					devStatusDBUtils = new DevStatusDBUtils(context);
 					devStatusDBUtils.open();
@@ -239,7 +260,6 @@ public class DeviceListAdapter extends BaseAdapter {
 					try {
 						//打开文件输入流
 						FileInputStream input = MainContext.INSTANCE.getContext().openFileInput("DosFlag.txt");
-
 						DataInputStream dataInputStream = new DataInputStream(input);
 						String strLine = null;
 						while ((strLine = dataInputStream.readLine())!= null){
@@ -268,21 +288,29 @@ public class DeviceListAdapter extends BaseAdapter {
 							((Activity) context).runOnUiThread(new Runnable() {
 								@Override
 								public void run() {
-									new DosUpdater(context, device.getDevId(), null,listItemView.expandableListView,flag,bssid).execute();
+									new DosUpdater(context, device.getDevId(), null,listItemView.expandableListView,flag,bssid,null).execute();
 								}
 							});
 						}
 					};
 					BackgroundTask.mTimerHandling.schedule(BackgroundTask.mTimerTaskHandling, 0, 3000);
-
 					break;
 				case 102:
 					listItemView.devStatus.setText("正在进行单频段定向阻断");
 					listItemView.deviceLayout.setEnabled(true);
 					listItemView.stopButton.setVisibility(View.VISIBLE);//设置按钮可见
-					// listItemView.stateView.setBackgroundColor(Color
-					// .parseColor("#EE0000"));
+					// listItemView.stateView.setBackgroundColor(Color .parseColor("#EE0000"));
 					listItemView.devIcon.setBackgroundResource(R.drawable.wifiblue);
+
+					try {
+						String handlingDetail = getHandlingDetail(device.getDevId());
+						moreView.setText("定向阻断频段为:" + handlingDetail);
+									/*+ (new JSONObject(device.getParams()))
+											.getString("channeltext"));*/
+					} catch (/*JSON*/Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 
 					devStatusDBUtils = new DevStatusDBUtils(context);
 					devStatusDBUtils.open();
@@ -297,7 +325,7 @@ public class DeviceListAdapter extends BaseAdapter {
 							((Activity) context).runOnUiThread(new Runnable() {
 								@Override
 								public void run() {
-									new DosUpdater(context, device.getDevId(), null,listItemView.expandableListView,false,null).execute();
+									new DosUpdater(context, device.getDevId(), null,listItemView.expandableListView,false,null,null).execute();
 								}
 							});
 						}
@@ -310,9 +338,9 @@ public class DeviceListAdapter extends BaseAdapter {
 					listItemView.deviceLayout.setEnabled(true);
 					listItemView.stopButton.setVisibility(View.VISIBLE);
 					listItemView.expandableListView.setVisibility(View.VISIBLE);
-					// listItemView.stateView.setBackgroundColor(Color
-					// .parseColor("#EE0000"));
+					// listItemView.stateView.setBackgroundColor(Color.parseColor("#EE0000"));
 					listItemView.devIcon.setBackgroundResource(R.drawable.wifiblue);
+
 					devStatusDBUtils = new DevStatusDBUtils(context);
 					devStatusDBUtils.open();
 					devStatusDBUtils.preHandling(device.getDevId());
@@ -354,14 +382,44 @@ public class DeviceListAdapter extends BaseAdapter {
 					};
 					BackgroundTask.mTimerHandling.schedule(BackgroundTask.mTimerTaskHandling, 0, 3000);
 
+					try {
+						devStatusDBUtils.open();
+						String handlingDetail = devStatusDBUtils.getHandlingDetail(device.getDevId());
+						devStatusDBUtils.close();
+
+						if (handshakeStep1Done == 1 && handshakeStep2Done == 0) {
+							moreView.setText("阻断中");
+						}
+						else {
+							String macTmp = handlingDetail.split("-")[2];
+							MacSsidDBUtils macSsidDBUtils = new MacSsidDBUtils(context);
+							macSsidDBUtils.open();
+							String ssidTmp = macSsidDBUtils.getSSID(device.getDevId(), macTmp);
+							macSsidDBUtils.close();
+							//moreView.setText("截获握手包AP为:" + handlingDetail.split("-")[1] + "-" + ssidTmp + ".cap");
+							//moreView.setText("截获握手包AP为:" + handlingDetail.split("-")[1] + "-" + macTmp);
+							moreView.setText("正在截获握手包");
+						}
+					} catch (/*JSON*/Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+
 					break;
 				case 104:
 					listItemView.devStatus.setText("正在进行Wps破解");
 					listItemView.deviceLayout.setEnabled(true);
 					listItemView.stopButton.setVisibility(View.VISIBLE);
-					// listItemView.stateView.setBackgroundColor(Color
-					// .parseColor("#EE0000"));
+					// listItemView.stateView.setBackgroundColor(Color.parseColor("#EE0000"));
 					listItemView.devIcon.setBackgroundResource(R.drawable.wifiblue);
+
+					try {
+						String handlingDetail = getHandlingDetail(device.getDevId());
+						moreView.setText("wps破解为:" + handlingDetail);
+					} catch (/*JSON*/Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 
 					devStatusDBUtils = new DevStatusDBUtils(context);
 					devStatusDBUtils.open();
@@ -382,16 +440,21 @@ public class DeviceListAdapter extends BaseAdapter {
 						}
 					};
 					BackgroundTask.mTimerHandling.schedule(BackgroundTask.mTimerTaskHandling, 0, 3000);
-
 					break;
 				case 105:
 					classFlag = true;
-					listItemView.devStatus.setText("正在进行3G热点伪造");
+					listItemView.devStatus.setText("正在进行4G热点伪造");
 					listItemView.deviceLayout.setEnabled(true);
 					listItemView.stopButton.setVisibility(View.VISIBLE);
-					// listItemView.stateView.setBackgroundColor(Color
-					// .parseColor("#EE0000"));
+					// listItemView.stateView.setBackgroundColor(Color.parseColor("#EE0000"));
 					listItemView.devIcon.setBackgroundResource(R.drawable.wifiblue);
+
+					try {
+						moreView.setText("模拟4G热点ssid为:" + getHandlingDetail(device.getDevId()));
+					} catch (/*JSON*/Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 
 					devStatusDBUtils = new DevStatusDBUtils(context);
 					devStatusDBUtils.open();
@@ -412,16 +475,19 @@ public class DeviceListAdapter extends BaseAdapter {
 						}
 					};
 					BackgroundTask.mTimerHandling.schedule(BackgroundTask.mTimerTaskHandling, 0, 3000);
-
 					break;
 				case 201:
 					listItemView.devStatus.setText("正在进行WIFI热点伪造");
 					listItemView.deviceLayout.setEnabled(true);
 					listItemView.stopButton.setVisibility(View.VISIBLE);
-					// listItemView.stateView.setBackgroundColor(Color
-					// .parseColor("#EE0000"));
+//					listItemView.stateView.setBackgroundColor(Color.parseColor("#EE0000"));
 					listItemView.devIcon.setBackgroundResource(R.drawable.wifiblue);
-
+					try {
+						moreView.setText("模拟WIFI热点ssid为:" + getHandlingDetail(device.getDevId()));
+					} catch (/*JSON*/Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					devStatusDBUtils = new DevStatusDBUtils(context);
 					devStatusDBUtils.open();
 					devStatusDBUtils.preHandling(device.getDevId());
@@ -441,15 +507,19 @@ public class DeviceListAdapter extends BaseAdapter {
 						}
 					};
 					BackgroundTask.mTimerHandling.schedule(BackgroundTask.mTimerTaskHandling, 0, 3000);
-
 					break;
 				case 110:
 					listItemView.devStatus.setText("正在进行多频段定向阻断");
 					listItemView.deviceLayout.setEnabled(true);
 					listItemView.stopButton.setVisibility(View.VISIBLE);
-					// listItemView.stateView.setBackgroundColor(Color
-					// .parseColor("#EE0000"));
+					// listItemView.stateView.setBackgroundColor(Color.parseColor("#EE0000"));
 					listItemView.devIcon.setBackgroundResource(R.drawable.wifiblue);
+					try {
+						moreView.setText("定向阻断频段为:" + getHandlingDetail(device.getDevId()));
+					} catch (/*JSON*/Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 
 					devStatusDBUtils = new DevStatusDBUtils(context);
 					devStatusDBUtils.open();
@@ -464,21 +534,77 @@ public class DeviceListAdapter extends BaseAdapter {
 							((Activity) context).runOnUiThread(new Runnable() {
 								@Override
 								public void run() {
-									new DosUpdater(context, device.getDevId(), null,listItemView.expandableListView,false,null).execute();
+									new DosUpdater(context, device.getDevId(), null,listItemView.expandableListView,
+											false,null,null).execute();
 								}
 							});
 						}
 					};
 					BackgroundTask.mTimerHandling.schedule(BackgroundTask.mTimerTaskHandling, 0, 3000);
-
 					break;
 				case 200:
 					listItemView.devStatus.setText("指令发送中");
 					listItemView.deviceLayout.setEnabled(true);
 					listItemView.stopButton.setVisibility(View.GONE);
-					// listItemView.stateView.setBackgroundColor(Color
-					// .parseColor("#EE0000"));
+					// listItemView.stateView.setBackgroundColor(Color.parseColor("#EE0000"));
 					listItemView.devIcon.setBackgroundResource(R.drawable.wifiblue);
+					break;
+				case 106:
+					classFlag = true;
+					listItemView.devStatus.setText("正在进行客户端定向阻断");
+					listItemView.deviceLayout.setEnabled(true);
+					listItemView.stopButton.setVisibility(View.VISIBLE);//设置按钮可见
+					listItemView.devIcon.setBackgroundResource(R.drawable.wifiblue);
+					Run = "106";
+
+					try {
+						Detail = PrefSingleton.getInstance().getString("param").substring(2,PrefSingleton.getInstance().getString("param").length()-2);
+						moreView.setText("阻断客户端为:" + Detail);
+					} catch (/*JSON*/Exception e) {
+						e.printStackTrace();
+					}
+
+					devStatusDBUtils = new DevStatusDBUtils(context);
+					devStatusDBUtils.open();
+					devStatusDBUtils.preHandling(device.getDevId());
+					devStatusDBUtils.close();
+
+					List<String> strlists = new ArrayList<>();
+					try {
+						FileInputStream input = MainContext.INSTANCE.getContext().openFileInput("DosFlag.txt"); //打开文件输入流
+						DataInputStream dataInputStream = new DataInputStream(input);
+						String strLine = null;
+						while ((strLine = dataInputStream.readLine())!= null){
+							StringBuilder sb = new StringBuilder();
+							strlists.add(String.valueOf(sb.append(strLine)));
+						}
+						input.close(); //关闭输入流
+
+					}catch (Exception e){
+						e.printStackTrace();
+					}
+
+					if (strlists.size()>0){
+						flag = Boolean.valueOf(strlists.get(0).toString());
+						bssid = strlists.get(1).toString();
+					}
+					Log.d("数据：", String.valueOf(flag));
+					Log.d("数据：", bssid);
+					BackgroundTask.clearAll();
+					BackgroundTask.mTimerHandling = new Timer();
+					BackgroundTask.mTimerTaskHandling = new TimerTask() {
+						@Override
+						public void run() {
+							((Activity) context).runOnUiThread(new Runnable() {
+								@Override
+								public void run() {
+									//new DosUpdater(context, device.getDevId(), null,listItemView.expandableListView,flag,Detail,Run).execute();
+									new DosUpdater(context, device.getDevId(), null,listItemView.expandableListView,false,Detail,Run).execute();
+								}
+							});
+						}
+					};
+					BackgroundTask.mTimerHandling.schedule(BackgroundTask.mTimerTaskHandling, 0, 3000);
 					break;
 				default:
 					break;
@@ -486,10 +612,9 @@ public class DeviceListAdapter extends BaseAdapter {
 
 		}
 
-		// final ImageView okImage = (ImageView)
-		// convertView.findViewById(R.id.ok);
-
 		final TextView moreView = (TextView) view.findViewById(R.id.moreview);
+		moreView.setSelected(true);
+
 		listItemView.deviceLayout.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -509,15 +634,19 @@ public class DeviceListAdapter extends BaseAdapter {
 						intent.setClass(context, DeviceFunctionActivity.class);
 						intent.putExtra("deviceinfo", (Serializable) device);
 						context.startActivity(intent);
-						((Activity) context).overridePendingTransition(
-								R.anim.slide_right_in, R.anim.slide_left_out);
+						((Activity) context).overridePendingTransition(R.anim.slide_right_in, R.anim.slide_left_out);
 						break;
 					case 101:
 						try {
 							String handlingDetail = getHandlingDetail(device.getDevId());
-							moreView.setText("定向阻断热点为:" + handlingDetail);
-									/*+ (new JSONObject(device.getParams()))
-											.getString("essid"));*/
+							MacSsidDBUtils macSsidDBUtils = null;
+							macSsidDBUtils = new MacSsidDBUtils(context);
+							macSsidDBUtils.open();
+							String Ssid = macSsidDBUtils.getSSID(device.getDevId(),handlingDetail);
+							macSsidDBUtils.close();
+							//moreView.setText("定向阻断热点为:" + handlingDetail);
+							moreView.setText("定向阻断热点为:" + Ssid);
+									/*(new JSONObject(device.getParams())).getString("essid"));*/
 						} catch (/*JSON*/Exception e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -531,8 +660,7 @@ public class DeviceListAdapter extends BaseAdapter {
 						try {
 							String handlingDetail = getHandlingDetail(device.getDevId());
 							moreView.setText("定向阻断频段为:" + handlingDetail);
-									/*+ (new JSONObject(device.getParams()))
-											.getString("channeltext"));*/
+									/*+ (new JSONObject(device.getParams())).getString("channeltext"));*/
 						} catch (/*JSON*/Exception e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -561,7 +689,9 @@ public class DeviceListAdapter extends BaseAdapter {
 								macSsidDBUtils.open();
 								String ssidTmp = macSsidDBUtils.getSSID(device.getDevId(), macTmp);
 								macSsidDBUtils.close();
-								moreView.setText("截获握手包AP为:" + handlingDetail.split("-")[1] + "-" + ssidTmp + ".cap");
+								//moreView.setText("截获握手包AP为:" + handlingDetail.split("-")[1] + "-" + ssidTmp + ".cap");
+								//moreView.setText("截获握手包AP为:" + handlingDetail.split("-")[1] + "-" + macTmp);
+								moreView.setText("正在截获握手包");
 							}
 						} catch (/*JSON*/Exception e) {
 							// TODO Auto-generated catch block
@@ -586,11 +716,9 @@ public class DeviceListAdapter extends BaseAdapter {
 								moreView.setVisibility(View.VISIBLE);
 							break;
 					case 110:
-
 						try {
 							moreView.setText("定向阻断频段为:" + getHandlingDetail(device.getDevId()));
-									/*+ (new JSONObject(device.getParams()))
-											.getInt("channeltext"));*/
+									/*+ (new JSONObject(device.getParams())).getInt("channeltext"));*/
 						} catch (/*JSON*/Exception e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -602,9 +730,8 @@ public class DeviceListAdapter extends BaseAdapter {
 						break;
 					case 105:
 						try {
-							moreView.setText("模拟热点ssid为:" + getHandlingDetail(device.getDevId()));
-									/*+ (new JSONObject(device.getParams()))
-											.getString("essid"));*/
+							moreView.setText("模拟4G热点ssid为:" + getHandlingDetail(device.getDevId()));
+									/*+ (new JSONObject(device.getParams())).getString("essid"));*/
 						} catch (/*JSON*/Exception e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -616,21 +743,32 @@ public class DeviceListAdapter extends BaseAdapter {
 						break;
                     case 201:
                         try {
-                            moreView.setText("模拟热点ssid为:" + getHandlingDetail(device.getDevId()));
-                                    /*+ (new JSONObject(device.getParams()))
-                                    .getString("essid"));*/
+                            moreView.setText("模拟WIFI热点ssid为:" + getHandlingDetail(device.getDevId()));
+                                    /*+ (new JSONObject(device.getParams())).getString("essid"));*/
                         } catch (/*JSON*/Exception e) {
                             // TODO Auto-generated catch block
                             e.printStackTrace();
                         }
                         if (moreView.getVisibility() == View.VISIBLE)
-                            moreView.setVisibility(View.GONE);
-                        else
-                            moreView.setVisibility(View.VISIBLE);
+						moreView.setVisibility(View.GONE);
+					else
+						moreView.setVisibility(View.VISIBLE);
                         break;
+					case 106:
+						try {
+							Detail = PrefSingleton.getInstance().getString("param").substring(2,PrefSingleton.getInstance().getString("param").length()-2);
+							moreView.setText("阻断客户端为:" + Detail);
+						} catch (/*JSON*/Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						if (moreView.getVisibility() == View.VISIBLE)
+							moreView.setVisibility(View.GONE);
+						else
+							moreView.setVisibility(View.VISIBLE);
+						break;
 					default:
 						break;
-
 					}
 				}
 			}
@@ -663,66 +801,44 @@ public class DeviceListAdapter extends BaseAdapter {
 						lp.width = (int) (display.getWidth() * 2 / 3);
 						dialogWindow.setAttributes(lp);
 						dialog.show();
-						dialog.getWindow().setBackgroundDrawable(
-								new ColorDrawable(Color.TRANSPARENT));
-						RelativeLayout contextLayout = (RelativeLayout) view
-								.findViewById(R.id.context_menu);
+						dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+						RelativeLayout contextLayout = (RelativeLayout) view.findViewById(R.id.context_menu);
 //						contextLayout.setBackgroundResource(R.drawable.contextbg3);
-						final ListView listView = (ListView) view
-								.findViewById(R.id.listview);
-						ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-								context, R.layout.context_menu_listitem, list);
+						final ListView listView = (ListView) view.findViewById(R.id.listview);
+						ArrayAdapter<String> adapter = new ArrayAdapter<String>(context, R.layout.context_menu_listitem, list);
 						listView.setAdapter(adapter);
 						listView.setOnItemClickListener(new OnItemClickListener() {
 
 							@Override
-							public void onItemClick(AdapterView<?> arg0,
-                                                    View arg1, int arg2, long arg3) {
+							public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 								// TODO Auto-generated method stub
 								switch (arg2) {
 								// TextView ssid = (TextView)
 								// arg1.findViewById(R.id.ssid);
 								// PackageInfo packageInfo = (PackageInfo)
 								// ssid.getTag();
-								case 0:
+								case 0: //设备重命名
                                     dialog.dismiss();
-									View commitView = ((Activity) context)
-											.getLayoutInflater()
-											.inflate(
-													R.layout.context_commit_dialog,
-													null);
-									final Dialog commitDialog = new Dialog(
-											context);
-									commitDialog
-											.requestWindowFeature(Window.FEATURE_NO_TITLE);
+									View commitView = ((Activity) context).getLayoutInflater().inflate(R.layout.context_commit_dialog, null);
+									final Dialog commitDialog = new Dialog(context);
+									commitDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 									commitDialog.setContentView(commitView);
-									Window commitDialogWindow = commitDialog
-											.getWindow();
-									WindowManager commitWm = ((Activity) context)
-											.getWindowManager();
-									Display commitDisplay = commitWm
-											.getDefaultDisplay();
-									WindowManager.LayoutParams commitlp = commitDialogWindow
-											.getAttributes();
+									Window commitDialogWindow = commitDialog.getWindow();
+									WindowManager commitWm = ((Activity) context).getWindowManager();
+									Display commitDisplay = commitWm.getDefaultDisplay();
+									WindowManager.LayoutParams commitlp = commitDialogWindow.getAttributes();
 									commitlp.height = LayoutParams.WRAP_CONTENT;
-									commitlp.width = (int) (commitDisplay
-											.getWidth() * 2 / 3);
+									commitlp.width = (int) (commitDisplay.getWidth() * 2 / 3);
 									commitDialogWindow.setAttributes(commitlp);
 									commitDialog.show();
-									commitDialog.getWindow()
-											.setBackgroundDrawable(
-													new ColorDrawable(Color.TRANSPARENT));
+									commitDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 									RelativeLayout contextLayout = (RelativeLayout) commitView.findViewById(R.id.context_menu);
 //									contextLayout.setBackgroundResource(R.drawable.contextbg1);
-									final EditText commit = (EditText) commitView
-											.findViewById(R.id.commit);
+									final EditText commit = (EditText) commitView.findViewById(R.id.commit_device);
 									commit.setFocusable(true);
-									Button cancelButton = (Button) commitView
-											.findViewById(R.id.cancel);
-									Button okButton = (Button) commitView
-											.findViewById(R.id.ok);
-									cancelButton
-											.setOnClickListener(new OnClickListener() {
+									Button cancelButton = (Button) commitView.findViewById(R.id.cancel);
+									Button okButton = (Button) commitView.findViewById(R.id.ok);
+									cancelButton.setOnClickListener(new OnClickListener() {
 
 												@Override
 												public void onClick(View arg0) {
@@ -737,15 +853,18 @@ public class DeviceListAdapter extends BaseAdapter {
 										public void onClick(View arg0) {
 											// TODO Auto-generated method stub
 											try {
-												DeviceInfo.setCommit(context,
-														device.getDevId(),
-														commit.getText()
-																.toString(),
-														listview, progressBar,
-														refresh, noData,
-														bottomLayout);
-												// listItemView.commit.setText(et.getText().toString());
+												/*String deviceInfo = PrefSingleton.getInstance().getString("deviceInfo");
+												JSONObject jsonObject = new JSONObject(deviceInfo);
+												String data = jsonObject.getString("data");
+												JSONObject dataJson = new JSONObject(data);
+												dataJson.put("device",commit.getText().toString());
+												jsonObject.put("data",dataJson);
+												PrefSingleton.getInstance().putString("device",commit.getText().toString());
+												PrefSingleton.getInstance().putString("deviceInfo",jsonObject.toString());*/
 
+												DeviceInfo.setCommit(context, device.getDevId(), commit.getText().toString(),
+												listview, progressBar, refresh, noData, bottomLayout);
+												// listItemView.commit.setText(et.getText().toString());
 											} catch (JSONException e) {
 												// TODO
 												// Auto-generated
@@ -758,7 +877,22 @@ public class DeviceListAdapter extends BaseAdapter {
 										}
 									});
 									break;
-								case 1:
+								case 1: //重启设备
+									DevStatusDBUtils devStatusDBUtils = new DevStatusDBUtils(context);
+									devStatusDBUtils.open();
+									devStatusDBUtils.handshakeCancel(device.getDevId());//将数据改为原始状态
+									devStatusDBUtils.close();
+									BackgroundTask.clearAll();//取消异步任务
+									String path = "/data/data/com.vrem.wifianalyzer/files/DosFlag.txt";
+									File file = new File(path);
+									if (file.exists()){
+										boolean en = file.delete();
+										Log.e("","DELETE FILE"+ en);
+									}
+									Intent intent = new Intent();
+									intent.setClass(context, MainActivity.class);
+									context.startActivity(intent);
+									((Activity) context).finish();
 									dialog.dismiss();
 									break;
 								default:
@@ -776,43 +910,38 @@ public class DeviceListAdapter extends BaseAdapter {
 			@Override
 			public void onClick(View view) {
 				new AlertDialog.Builder(context)
-						.setTitle("确认")
-						.setMessage("确定停止吗？")
-						.setPositiveButton("是",
+						.setTitle("确认").setMessage("确定停止吗？").setPositiveButton("是",
 								new DialogInterface.OnClickListener() {
 									@Override
-									public void onClick(DialogInterface arg0,
-											int arg1) {
+									public void onClick(DialogInterface arg0, int arg1) {
 										DevStatusDBUtils devStatusDBUtils = new DevStatusDBUtils(context);
 										devStatusDBUtils.open();
-										devStatusDBUtils.handshakeCancel(device.getDevId());//将数据改为原始状态
-										devStatusDBUtils.fakeAPCancel(device.getDevId());
-										devStatusDBUtils.wpscrackStep1Done(device.getDevId());
+										devStatusDBUtils.handshakeCancel(device.getDevId()); //将数据改为原始状态
+										//devStatusDBUtils.fakeAPCancel(device.getDevId());
+										//devStatusDBUtils.wpscrackStep1Done(device.getDevId());
 										devStatusDBUtils.close();
 
 										BackgroundTask.clearAll();//取消异步任务
 
-										String path = "/data/data/com.vrem.wifianalyzer/files/DosFlag.txt";
+										String path = "/data/data/"+ context.getPackageName() + "/files/DosFlag.txt";
 										File file = new File(path);
 										if (file.exists()){
 											boolean en = file.delete();
-											Log.e("","DELETE FILE "+ en);
+											Log.e("","DELETE FILE"+ en);
 										}
-//										if (classFlag){ //说明是fragment （自定义的）否则是activity
+										if (Run != null) {
+											PrefSingleton.getInstance().putString("param", "");
+											((Activity) context).finish();
+										} else {
 											Intent intent = new Intent();
 											intent.setClass(context, MainActivity.class);
 											context.startActivity(intent);
 											((Activity) context).finish();
-//										}else {
-//											((Activity) context).finish();
-//										}
-
-//										((Activity) context).finish();
+										}
 									}
 								})
 						.setNegativeButton("否",
 								new DialogInterface.OnClickListener() {
-
 									@Override
 									public void onClick(DialogInterface arg0,
 											int arg1) {
@@ -831,25 +960,22 @@ public class DeviceListAdapter extends BaseAdapter {
 			public void onClick(View arg0) {
 				// TODO Auto-generated method stub
 
-				for (int i = 0; i < getCount(); i++) {
-					if (((CheckBox) getView(i, null, null).findViewById(
-							R.id.choose)).isChecked()) {
-						if (!(listItems.get(i).getAlive()))
-							isAvaliable = false;
-						if (listItems.get(i).getWorkType() != 100)
-							isAvaliable = false;
-
-						visibleCount++;
-					}
-				}
+//				for (int i = 0; i < getCount(); i++) {
+//					if (((CheckBox) getView(i, null, null).findViewById(
+//							R.id.choose)).isChecked()) {
+//						if (!(listItems.get(i).getAlive()))
+//							isAvaliable = false;
+//						if (listItems.get(i).getWorkType() != 100)
+//							isAvaliable = false;
+//						visibleCount++;
+//					}
+//				}
 				if (visibleCount < 2) {
-					Toast.makeText(context, "请选择大于等于二个设备！", Toast.LENGTH_SHORT)
-							.show();
+					Toast.makeText(context, "请选择大于等于二个设备！", Toast.LENGTH_SHORT).show();
 					visibleCount = 0;
 					isAvaliable = true;
 				} else if (!isAvaliable) {
-					Toast.makeText(context, "请选择空闲在线设备！", Toast.LENGTH_SHORT)
-							.show();
+					Toast.makeText(context, "请选择空闲在线设备！", Toast.LENGTH_SHORT).show();
 					visibleCount = 0;
 					isAvaliable = true;
 				} else {
@@ -942,28 +1068,27 @@ public class DeviceListAdapter extends BaseAdapter {
 						channelText.add("2048");
 
 					}else {
-						Toast.makeText(context, "选择设备过多！", Toast.LENGTH_SHORT)
-								.show();
+						Toast.makeText(context, "选择设备过多！", Toast.LENGTH_SHORT).show();
 						visibleCount = 0;
 					}
 
 					int mCount = 0;
-					for (int i = 0; i < getCount(); i++) {
-						if (((CheckBox) getView(i, null, null).findViewById(
-								R.id.choose)).isChecked()) {
-							mChecked.set(i, true);
-							try {
-								JSONObject jo = new JSONObject();
-								jo.put("channel", channelList.get(mCount));
-								DeviceInfo.sendCommand(context,
-										listItems.get(i), jo, "wifi_dos_all");
-							} catch (JSONException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-							mCount++;
-						}
-					}
+//					for (int i = 0; i < getCount(); i++) {
+//						if (((CheckBox) getView(i, null, null).findViewById(
+//								R.id.choose)).isChecked()) {
+//							mChecked.set(i, true);
+//							try {
+//								JSONObject jo = new JSONObject();
+//								jo.put("channel", channelList.get(mCount));
+//								DeviceInfo.sendCommand(context,
+//										listItems.get(i), jo, "wifi_dos_all");
+//							} catch (JSONException e) {
+//								// TODO Auto-generated catch block
+//								e.printStackTrace();
+//							}
+//							mCount++;
+//						}
+//					}
 					DeviceListActivity.isChoosing = 1;
 					notifyDataSetChanged();
 				}
@@ -971,7 +1096,7 @@ public class DeviceListAdapter extends BaseAdapter {
 		});
 
 		if (DeviceListActivity.isChoosing == 1) {
-			listItemView.choose.setVisibility(View.GONE);
+//			listItemView.choose.setVisibility(View.GONE);
 
 			RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) listItemView.deviceLayout
 					.getLayoutParams();
@@ -986,10 +1111,10 @@ public class DeviceListAdapter extends BaseAdapter {
 		listItemView.devStatus.setTextColor(Color.argb(155, 255, 255, 255));
 		RelativeLayout tmpDevice = (RelativeLayout) view
 				.findViewById(R.id.devicelayout);
-		CheckBox tmpChoose = (CheckBox) view.findViewById(R.id.choose);
+//		CheckBox tmpChoose = (CheckBox) view.findViewById(R.id.choose);
 		ImageButton tmpButton = (ImageButton) view.findViewById(R.id.stop);
 		if (DeviceListActivity.isChoosing == 0) {
-			tmpChoose.setVisibility(View.VISIBLE);
+//			tmpChoose.setVisibility(View.VISIBLE);
 			RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) tmpDevice
 					.getLayoutParams();
 			lp.setMargins(0, 0, 80, 0);

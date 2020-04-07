@@ -23,8 +23,7 @@ import java.util.Map;
 public class BaseUtils {
 	public static ArrayList<Map<String, Object>> setDrawerItems(Context context) {
 		ArrayList<Map<String, Object>> mData = new ArrayList<Map<String, Object>>();
-		String[] mDrawerItems = context.getResources().getStringArray(
-				R.array.drawer_item_array);
+		String[] mDrawerItems = context.getResources().getStringArray(R.array.drawer_item_array);
 		/**
 		 * 设备管理
 		 */

@@ -37,8 +37,8 @@ public class WiFiSignal {
     private final int primaryFrequency;//主频率
     private final int centerFrequency;//中心频率
     private final WiFiWidth wiFiWidth;//wifi宽度 20MHz、40MHz
-    private final WiFiBand wiFiBand;//wifi频道：2.4G 5G
-    private final int level;
+    private final WiFiBand wiFiBand;//wifi频段：2.4 GHZ/5 GHZ
+    private final int level; //信号强度
     private final String channel;//信道
 
     public WiFiSignal(int primaryFrequency, int centerFrequency, @NonNull WiFiWidth wiFiWidth, int level,String channel) {

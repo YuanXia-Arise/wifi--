@@ -35,14 +35,14 @@ import com.vrem.wifianalyzer.wifi.model.WiFiDetail;
 import com.vrem.wifianalyzer.wifi.scanner.UpdateNotifier;
 
 //ExpandableListAdapter数据源
-class AccessPointsAdapter extends BaseExpandableListAdapter implements UpdateNotifier {
+public class AccessPointsAdapter extends BaseExpandableListAdapter implements UpdateNotifier {
     private final Context context;
     private AccessPointsAdapterData accessPointsAdapterData;
     private AccessPointDetail accessPointDetail;
     private AccessPointPopup accessPointPopup;
     private ExpandableListView expandableListView;
 
-    AccessPointsAdapter(@NonNull Context context) {
+    public AccessPointsAdapter(@NonNull Context context) {
         super();
         this.context = context;
         setAccessPointsAdapterData(new AccessPointsAdapterData());
@@ -55,7 +55,7 @@ class AccessPointsAdapter extends BaseExpandableListAdapter implements UpdateNot
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
 
-        WiFiDetail wiFiDetail = (WiFiDetail) getGroup(groupPosition);//获取单条wifi数据详情对象
+        WiFiDetail wiFiDetail = (WiFiDetail) getGroup(groupPosition); //获取单条wifi数据详情对象
         View view = accessPointDetail.makeView(convertView, parent, wiFiDetail, false);//返回AccessPointDetail制作的页面
         attachPopup(view, wiFiDetail);
 
@@ -157,7 +157,7 @@ class AccessPointsAdapter extends BaseExpandableListAdapter implements UpdateNot
         this.accessPointPopup = accessPointPopup;
     }
 
-    void setExpandableListView(ExpandableListView expandableListView) {
+    public void setExpandableListView(ExpandableListView expandableListView) {
         this.expandableListView = expandableListView;
     }
 

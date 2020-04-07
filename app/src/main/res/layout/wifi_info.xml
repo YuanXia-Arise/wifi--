@@ -301,7 +301,13 @@
                 android:layout_toRightOf="@id/companytext"
                 android:singleLine="true"
                 android:textColor="@color/channel_number"
-                android:textSize="18sp" />
+                android:textSize="18sp"
+                android:ellipsize="marquee"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:focusable="false"
+                android:focusableInTouchMode="true"
+                android:scrollHorizontally="true"
+                android:scaleType="centerInside"/>
         </RelativeLayout>
 
     </RelativeLayout>

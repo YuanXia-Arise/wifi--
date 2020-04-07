@@ -19,6 +19,7 @@
 package com.vrem.wifianalyzer.wifi.filter.adapter;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.vrem.wifianalyzer.MainContext;
 import com.vrem.wifianalyzer.navigation.NavigationMenu;
@@ -31,6 +32,8 @@ import org.apache.commons.collections4.Predicate;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
+
+import static android.content.ContentValues.TAG;
 
 public class FilterAdapter {
     private final Settings settings;
@@ -113,5 +116,4 @@ public class FilterAdapter {
             adapter.save(settings);
         }
     }
-
 }

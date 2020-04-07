@@ -18,107 +18,87 @@
   -->
 
 <resources>
-    <string name="app_copyright">Tous droits réservés \u00A9 2015 \u002D 2017</string>
+    <string name="app_copyright">Droits d\'auteur \u00A9 2015 \u002D 2017</string>
 
-    <string name="navigation_drawer_open">Afficher le volet de navigation</string>
-    <string name="navigation_drawer_close">Masquer le volet de navigation</string>
+    <string name="navigation_drawer_open">Ouvrir la navigation</string>
+    <string name="navigation_drawer_close">Fermer la navigation</string>
 
-    <!-- action start -->
-    <string name="action_access_points">Points d\'acccès</string>
-    <string name="action_channel_rating">Qualité de réception</string>
-    <string name="action_channel_graph">Graphique par canal</string>
-    <string name="action_time_graph">Graphique temporel</string>
-    <string name="action_export">Exportation</string>
-    <string name="action_channel_available">Canaux disponibles</string>
-    <string name="action_vendors">Vendeurs</string>
-    <string name="action_settings">Configuration</string>
-    <string name="action_about">À propos</string>
-    <!-- action end -->
+    <string name="action_access_points">point d\'accès</string>
+    <string name="action_channel_rating">évaluation du canal</string>
+    <string name="action_channel_graph">carte de canal</string>
+    <string name="action_time_graph">mappe temporelle</string>
+    <string name="action_export">attaques par blocage</string>
+    <string name="action_channel_available">énumération du client</string>
+    <string name="action_sniffer">Interception de paquets à prise de main</string>
+    <string name="action_vendors">Fissure WPS</string>
+    <string name="action_forgery">falsification de hotspot</string>
+    <string name="action_wifi_hotspot">Point d\'accès sans fil</string>
+    <string name="action_search">Recherche de cible</string>
+    <string name="action_datapack">package</string>
+    <string name="action_settings">Paramètres</string>
+
+    <string-array name="fake_spinner">
+        <item>Simulation 4G</item>
+        <item>Simulation Wifi</item>
+    </string-array>
 
     <string name="button_cancel">Annuler</string>
-    <string name="no_data">Aucune donnée</string>
+    <string name="no_data">pas de données</string>
 
-    <string name="export_not_available">Export non disponible</string>
+    <string name="export_not_available"> l\'exportation n\'est pas disponible</string>
 
-    <string name="channel_rating_best">Meilleurs canaux:</string>
-    <string name="channel_rating_best_none">Aucun</string>
-    <string name="channel_rating_best_alternative">, essayez une fréquence differente</string>
-    <string name="channel_rating_heading_rating">Qualité du canal</string>
-    <string name="channel_rating_heading_number">Canal</string>
-    <string name="channel_rating_heading_count">Nombre de points d\'accès</string>
-    <string name="channel_short_name">CH</string>
+    <string name="channel_rating_best">Meilleur canal:</string>
+    <string name="channel_rating_best_none">no</string>
+    <string name="channel_rating_best_alternative">,essayez d\'autres bandes WiFi</string>
+    <string name="channel_rating_heading_rating">évaluation du canal</string>
+    <string name="channel_rating_heading_number">numéro de canal</string>
+    <string name="channel_rating_heading_count">nombre de points d\'accès</string>
+    <string name="channel_short_name">channel</string>
+    <string name="graph_channel_axis_x">Canal WiFi</string>
+    <string name="graph_time_axis_x">nombre d\'analyses </string>
+    <string name="graph_axis_y">force du signal (dBm)</string>
 
-    <string name="graph_channel_axis_x">Canaux Wi-Fi</string>
-    <string name="graph_time_axis_x">Nombre d\'analyses</string>
-    <string name="graph_axis_y">Intensité du signal (dBm)</string>
-
-    <!-- settings start -->
-    <string name="start_menu_title">Page d\'accueil</string>
+    <string name="start_menu_title">Démarrer</string>
     <string name="country_code_title">Pays</string>
-    <string name="scan_interval_title">Délai d\'analyse</string>
-    <string name="scan_interval_summary">%d secondes entre chaque analyse</string>
-    <string name="sort_by_title">Trier les points d\'accès par :</string>
-    <string name="group_by_title">Grouper les points d\'accès par :</string>
+    <string name="scan_interval_title">intervalle d\'analyse</string>
+    <string name="scan_interval_summary">Chaque intervalle de balayage%dDeuxième</string>
+    <string name="sort_by_title">Tri des points d\'accès</string>
+    <string name="group_by_title">groupement de points d\'accès</string>
     <string name="connection_view_title">Affichage de la connexion</string>
-    <string name="ap_view_title">Affichage des point d\'accès</string>
-    <string name="graph_maximum_y_title">Graphique Puissance maximale du signal</string>
-    <string name="channel_graph_legend_title">Légende pour le graphique des canaux</string>
-    <string name="time_graph_legend_title">Légende pour le graphique temporel</string>
-    <string name="theme_title">Thème</string>
-    <string name="wifi_off_on_exit_title">WiFi à la sortie</string>
-    <string name="language_title">Langue</string>
-    <!-- settings end -->
+    <string name="ap_view_title">affichage du point d\'accès</string>
+    <string name="graph_maximum_y_title">force maximale du signal graphique</string>
+    <string name="channel_graph_legend_title">emplacement d\'affichage de la légende du canal</string>
+    <string name="time_graph_legend_title">emplacement d\'affichage de la légende de l'heure</string>
+    <string name="theme_title">thème</string>
+    <string name="wifi_off_on_exit_title">Désactiver le WiFi lors de la sortie</string>
+    <string name="language_title">langue</string>
 
-    <!-- about start -->
-    <string name="about_license_title">Licence :</string>
-    <string name="about_license_name">Logiciel sous licence GPLv3</string>
-    <string name="about_description_title">Description :</string>
-    <string name="about_description_text">Optimisez vos réseaux Wi-Fi, en vérifiant l\'état du réseau, la force du signal et en identifiant les canaux surchargés grâce à WiFiAnalyzer pour Android.</string>
-    <string name="about_libraries_title">Bibliothèques utilisées :</string>
-    <string name="about_contributor_title">Contributeurs :</string>
-    <string name="about_write_review">Donner votre avis</string>
-    <!-- about end -->
+    <string name="about_license_title">Licence:</string>
+    <string name="about_license_name">Licence GPLv3</string>
+    <string name="about_description_title">Description:</string>
+    <string name="about_description_text">Utilisez cet analyseur WiFi open source Android pour vérifier l’état du réseau Wi-Fi, la force de son signal et identifier les canaux encombrés pour optimiser votre réseau WiFi</string>
+    <string name="about_libraries_title">Bibliothèque utilisée:</string>
+    <string name="about_contributor_title">contributeurs:</string>
+    <string name="about_write_review">Je souhaite évaluer</string>
 
-    <!-- security start -->
-    <string name="security_none">Aucun</string>
-    <!-- security end -->
+    <string name="security_none">no</string>
 
-    <!-- filter start -->
-    <string name="filter_title">Filtre</string>
-    <string name="filter_close">Fermer</string>
-    <string name="filter_reset">Remettre</string>
-    <string name="filter_apply">Appliquer</string>
-    <string name="filter_wifi_band_title">Fréquence Wi-Fi</string>
-    <string name="filter_strength_title">Intensité du signal</string>
-    <string name="filter_security_title">Sécurité</string>
-    <!-- filter end -->
+    <string name="filter_title">filtre</string>
+    <string name="filter_close">off</string>
+    <string name="filter_reset">redémarrer</string>
+    <string name="filter_apply">application</string>
+    <string name="filter_wifi_band_title">Bande WiFi</string>
+    <string name="filter_strength_title">Force du signal</string>
+    <string name="filter_security_title">sécurité</string>
 
-    <!--<string-array name="drawer_item_array">-->
-        <!--<item>Gestión de equipos</item>-->
-        <!--<item>Información del usuario</item>-->
-        <!--<item>设置</item>-->
-        <!--<item>帮助</item>-->
-        <!--<item>退出登录</item>-->
-        <!--<item>关于</item>-->
-    <!--</string-array>-->
+    <string-array name="send_spinner">
+        <item>sauvegarde locale</item>
+        <item>Envoi 3G</item>
+    </string-array>
 
-    <!--<string-array name="send_spinner">-->
-        <!--<item>本地保存</item>-->
-        <!--<item>3G发送</item>-->
-    <!--</string-array>-->
+    <string-array name="method_spinner">
+        <item>mode silencieux</item>
+        <item>mode vitesse</item>
+    </string-array>
 
-    <!--<string-array name="method_spinner">-->
-        <!--<item>静默模式</item>-->
-        <!--<item>极速模式</item>-->
-    <!--</string-array>-->
-
-    <!--<string name="drawer_open">打开抽屉导航</string>-->
-    <!--<string name="drawer_close">关闭抽屉导航</string>-->
-
-    <!--<string name="action_sniffer">握手包截获</string>-->
-    <!--<string name="action_forgery">热点伪造</string>-->
-    <!--<string-array name="fake_spinner">-->
-        <!--<item>3G模拟</item>-->
-        <!--<item>Wifi模拟</item>-->
-    <!--</string-array>-->
 </resources>

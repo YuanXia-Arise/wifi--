@@ -87,6 +87,12 @@
             android:padding="3dp"
             android:textSize="12sp"
             android:singleLine="true"
-            android:textColor="@android:color/white"/>
+            android:textColor="@android:color/white"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:focusable="false"
+            android:focusableInTouchMode="true"
+            android:scrollHorizontally="true"
+            android:scaleType="centerInside"/>
     </RelativeLayout>
 </RelativeLayout>

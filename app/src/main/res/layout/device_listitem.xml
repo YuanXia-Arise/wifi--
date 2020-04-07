@@ -1,7 +1,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    >
+    android:layout_height="match_parent">
 
     <RelativeLayout
         android:id="@+id/devicelayout"
@@ -62,21 +61,25 @@
         </RelativeLayout>
 
     </RelativeLayout>
-    <TextView 
+    <TextView
         android:id="@+id/moreview"
         android:layout_below="@id/devicelayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
         android:textSize="20sp"
         android:singleLine="true"
-
         android:gravity="center"
         android:paddingLeft="8dp"
         android:paddingRight="20dp"
         android:textColor="#ffffff"
-        />
-    <CheckBox
+        android:ellipsize="marquee"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:focusable="false"
+        android:focusableInTouchMode="true"
+        android:scrollHorizontally="true"
+        android:scaleType="centerInside"/>
+    <!--<CheckBox
         android:id="@+id/choose"
         android:layout_width="40dp"
         android:layout_height="match_parent"
@@ -84,17 +87,24 @@
         android:layout_centerVertical="true"
         android:gravity="center"
         android:background="@android:color/transparent"
-        android:visibility="gone"
+        android:visibility="gone">
+    </CheckBox>-->
 
-        >
-    </CheckBox>
-
+    <!--<android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/clientExpandable"
+        android:layout_width="350dp"
+        android:layout_height="400dp"
+        android:layout_marginTop="130dp"
+        android:orientation="vertical"
+        android:childDivider="#B4B3B3">-->
     <ExpandableListView
         android:id="@+id/clientExpandableLV"
         android:layout_width="350dp"
-        android:layout_height="400dp"
-        android:layout_marginTop="130dp">
-
+        android:layout_height="450dp"
+        android:layout_below="@+id/moreview"
+        android:layout_marginTop="5dp"
+        android:scrollbars="none" >
     </ExpandableListView>
-    
- </RelativeLayout>
+    <!--</android.support.v4.widget.SwipeRefreshLayout>-->
+
+</RelativeLayout>
