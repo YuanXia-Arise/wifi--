@@ -18,12 +18,16 @@
 
 package com.vrem.wifianalyzer.wifi.accesspoint;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.annotation.NonNull;
@@ -34,6 +38,8 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -42,48 +48,60 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ExpandableListView;
 import android.widget.ListView;
+import android.widget.Toast;
+
 import com.google.gson.Gson;
+import com.vrem.util.WifiStatus;
+import com.vrem.wifianalyzer.MainActivity;
 import com.vrem.wifianalyzer.MainContext;
 import com.vrem.wifianalyzer.R;
 import com.vrem.wifianalyzer.WifiInfoActivity;
+import com.vrem.wifianalyzer.wifi.common.MacSsidDBUtils;
+import com.vrem.wifianalyzer.wifi.common.PrefSingleton;
 import com.vrem.wifianalyzer.wifi.fragmentDos.DosFragment;
 import com.vrem.wifianalyzer.wifi.fragmentSniffer.SnifferFragment;
 import com.vrem.wifianalyzer.wifi.model.WiFiDetail;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 
 import static android.content.ContentValues.TAG;
+import static android.content.Context.WIFI_SERVICE;
 
 
 public class AccessPointsFragment extends Fragment {
     private SwipeRefreshLayout swipeRefreshLayout;
     private AccessPointsAdapter accessPointsAdapter;
+    private ExpandableListView expandableListView;
 
     private Vibrator vibrator;
-    private FragmentManager manager;//Fragment管理器
+    private FragmentManager manager; //Fragment管理器
 
 
     @Override
     public View onCreateView(@NonNull final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         manager = this.getFragmentManager();
-        View view = inflater.inflate(R.layout.access_points_content, container, false);//绑定页面
+        View view = inflater.inflate(R.layout.access_points_content, container, false); // 绑定页面
 
-        swipeRefreshLayout = view.findViewById(R.id.accessPointsRefresh);//绑定控件
-        swipeRefreshLayout.setOnRefreshListener(new ListViewOnRefreshListener());//设置监听事件
+        swipeRefreshLayout = view.findViewById(R.id.accessPointsRefresh); // 绑定控件
+        swipeRefreshLayout.setOnRefreshListener(new ListViewOnRefreshListener()); // 设置监听事件
 
-        accessPointsAdapter = new AccessPointsAdapter(getActivity()); //获取AccessPointsAdapter的全局数据
-        final ExpandableListView expandableListView = view.findViewById(R.id.accessPointsView); //绑定ExpandableListView控件
-        expandableListView.setAdapter(accessPointsAdapter); //给expandableListView绑定适配器
-        accessPointsAdapter.setExpandableListView(expandableListView); //将数据填充到ExpandableListView
+        accessPointsAdapter = new AccessPointsAdapter(getActivity());  // 获取AccessPointsAdapter的全局数据
+        expandableListView = view.findViewById(R.id.accessPointsView); // 绑定ExpandableListView控件
+        expandableListView.setAdapter(accessPointsAdapter); // 给expandableListView绑定适配器
+        accessPointsAdapter.setExpandableListView(expandableListView); // 将数据填充到ExpandableListView
         expandableListView.setVisibility(View.VISIBLE);
 
         //点击事件
         expandableListView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
             @Override
             public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
-                WiFiDetail detail = (WiFiDetail) accessPointsAdapter.getGroup(groupPosition); //获取某条数据
-                Intent intent = new Intent(getActivity(),WifiInfoActivity.class); //实例化Intent对象，用于页面跳转，数据传递
-                intent.putExtra("wifiDetail",new Gson().toJson(detail)); //将数据添加到Intent，对象类不能直接传递，需要用Gson对它进行转换
-                startActivity(intent); //启动
+                WiFiDetail detail = (WiFiDetail) accessPointsAdapter.getGroup(groupPosition); // 获取某条数据
+                Intent intent = new Intent(getActivity(),WifiInfoActivity.class); // 实例化Intent对象，用于页面跳转，数据传递
+                intent.putExtra("wifiDetail",new Gson().toJson(detail)); // 将数据添加到Intent，对象类不能直接传递，需要用Gson对它进行转换
+                startActivity(intent); // 启动
                 return true;
             }
         });
@@ -145,7 +163,7 @@ public class AccessPointsFragment extends Fragment {
                                     snifferFragment.setArguments(snifBundle);
                                     FragmentTransaction snifferFT;
                                     snifferFT = manager.beginTransaction();
-                                    snifferFT.replace(R.id.main_fragment,snifferFragment);//添加事务这是错的，因为已经有一个事务存在了，要替换才对replace
+                                    snifferFT.replace(R.id.main_fragment,snifferFragment);
                                     snifferFT.commit();//提交事务
                                     dialog.dismiss();
                                     break;
@@ -158,7 +176,7 @@ public class AccessPointsFragment extends Fragment {
                                     wpsBundle.putString("channel",detail.getWiFiSignal().getChannel());
                                     wpsCrackFragment.setArguments(wpsBundle);
                                     wpsFT = manager.beginTransaction();
-                                    wpsFT.replace(R.id.main_fragment,wpsCrackFragment);//添加事务这是错的，因为已经有一个事务存在了，要替s换才对replace
+                                    wpsFT.replace(R.id.main_fragment,wpsCrackFragment);
                                     wpsFT.commit();//提交事务
                                     dialog.dismiss();
                                     break;*/
@@ -189,9 +207,10 @@ public class AccessPointsFragment extends Fragment {
     //下拉刷新
     private void refresh() {
         swipeRefreshLayout.setRefreshing(true);
-        MainContext.INSTANCE.getScannerService().update(); //执行刷新服务
+        MainContext.INSTANCE.getScannerService().update(); // 执行刷新服务
         swipeRefreshLayout.setRefreshing(false);
     }
+
 
     @SuppressLint("LongLogTag")
     @Override
@@ -225,7 +244,27 @@ public class AccessPointsFragment extends Fragment {
     private class ListViewOnRefreshListener implements SwipeRefreshLayout.OnRefreshListener {
         @Override
         public void onRefresh() {
-            refresh();
+            MenuItem menuItem = ((MainActivity) getActivity()).getOptionMenu().getMenu().findItem(R.id.action_scanner);
+            boolean wifi_status = new WifiStatus().Wifi_Status(getContext());
+            if (!wifi_status) {
+                Toast.makeText(getContext(), "设备已断开连接", Toast.LENGTH_SHORT).show();
+                swipeRefreshLayout.setRefreshing(false);
+            } else {
+                if (MainContext.INSTANCE.getScannerService().isRunning() == true) {
+                    MainContext.INSTANCE.getScannerService().pause();
+                    menuItem.setIcon(R.drawable.ic_play_arrow_grey_500_48dp);
+                }
+                swipeRefreshLayout.setRefreshing(true);
+                accessPointsAdapter.clear();
+                accessPointsAdapter.notifyDataSetChanged();
+                if (MainContext.INSTANCE.getScannerService().isRunning() == false) {
+                    MainContext.INSTANCE.getScannerService().resume();
+                    menuItem.setIcon(R.drawable.ic_pause_grey_500_48dp);
+                }
+                accessPointsAdapter.notifyDataSetChanged();
+                swipeRefreshLayout.setRefreshing(false);
+            }
         }
     }
+
 }

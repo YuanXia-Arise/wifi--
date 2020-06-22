@@ -69,14 +69,14 @@ public class WiFiDetail implements Comparable<WiFiDetail> {
     public static final WiFiDetail EMPTY = new WiFiDetail(StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, WiFiSignal.EMPTY, "", "","",0,"");
     private static final String SSID_EMPTY = "***";//用于返回空SSID的wifiSSID信息
 
-    private final List<WiFiDetail> children;//单项wifi信息的集合
-    private final String SSID; //wifiSSID
-    private final String BSSID;//mac地址
-    private final String capabilities;//加密方式
-    private final WiFiSignal wiFiSignal;//wifi信号
-    private final WiFiAdditional wiFiAdditional;//wifi中心频率，主频率，水平，频段、MHz差、信道
+    private final List<WiFiDetail> children; //单项wifi信息的集合
+    private final String SSID;  //wifiSSID
+    private final String BSSID; //mac地址
+    private final String capabilities; //加密方式
+    private final WiFiSignal wiFiSignal; //wifi信号
+    private final WiFiAdditional wiFiAdditional; //wifi中心频率，主频率，水平，频段、MHz差、信道
 
-    private final String client;//客户端mac
+    private final String client; //客户端mac
     private final String cipher; //算法
     private final String wps;
     private final double rate;
@@ -296,8 +296,8 @@ public class WiFiDetail implements Comparable<WiFiDetail> {
 //                                apInfo.setChannel(jsonObjectAp.getInt("channel"));
                                 channel = String.valueOf(jsonObjectAp.getInt("channel"));
 
-                                JSONArray basic_rates = jsonObjectAp.getJSONArray("basic_rates");//获取基础速率组
-                                JSONArray extra_rates = jsonObjectAp.getJSONArray("extra_rates");//获取额外速率组
+                                JSONArray basic_rates = jsonObjectAp.getJSONArray("basic_rates"); //获取基础速率组
+                                JSONArray extra_rates = jsonObjectAp.getJSONArray("extra_rates"); //获取额外速率组
                                 double minRate = -1;
                                 for (int i = 0; i < basic_rates.length(); i++) {
                                     if (basic_rates.getDouble(i) < minRate || minRate < 0) {
@@ -557,7 +557,6 @@ public class WiFiDetail implements Comparable<WiFiDetail> {
                 //{"forty_mhz_support":false,"bssid":"9c:e3:3f:44:15:2d","forty_mhz_2_4_ghz":false,"rate_from":null,"channel":1,"first_time":1634.135051,"rate_to":24,"rx_datas":55,"probes":[],"ap_bssid":"cc:81:da:e4:c1:38","power":-74,"tx_datas":31,"last_time":3596.673311}
 
                 String client_power = jsonObjectStas.getJSONObject(clientBssid).getString("power");
-                Log.d(TAG, "20202020==>" + clientBssid + "==>" + client_power);  //power有空值
 
                 JSONArray probesArr;
                 String probes;

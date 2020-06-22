@@ -267,7 +267,7 @@ public class DosUpdater extends AsyncTask<Object, Object, Void> {
             while(iteratorAps.hasNext()){
                 DosGroupClientModel dosGroupClientModel = new DosGroupClientModel(null, 0,
                         0, 0, null);
-                String apsKey =(String) iteratorAps.next();
+                String apsKey = (String) iteratorAps.next();
                 String apsValues = jsonObjectAps.getString(apsKey);
                 JSONObject apsDosInfo = new JSONObject(apsValues);
                 int cout = apsDosInfo.getInt("count");

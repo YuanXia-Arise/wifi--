@@ -51,6 +51,12 @@ class AccessPointsAdapterData {
         accessPointsAdapterGroup.update(wiFiDetails, expandableListView);
     }
 
+    void clear(){
+        if (wiFiDetails != null){
+            wiFiDetails.clear();
+        }
+    }
+
     //返回一级列表的wifi的个数
     int parentsCount() {
         return wiFiDetails.size();

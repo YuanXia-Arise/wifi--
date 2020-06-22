@@ -151,7 +151,7 @@ public class TargetSearchFragment extends Fragment {
     }
 
     //添加MAC地址
-    private void TargetMac(){ //38-00-25-aa-f2-d0
+    private void TargetMac(){
         LayoutInflater inflater = LayoutInflater.from(context);
         View view = inflater.inflate(R.layout.input_add_mac,null);
         final EditText remarksEt  = view.findViewById(R.id.input_mac);

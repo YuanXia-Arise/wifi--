@@ -114,4 +114,15 @@ public class MacSsidDBUtils {
         return ssid;
     }
 
+
+    /**
+     * 2019.09.05 hc
+     * 清除数据库数据
+     **/
+    public void delete_sql(Context context) {
+        SQLiteDatabase db = mDBHelper.getWritableDatabase();
+        db.execSQL("delete from macssid");
+        db.close();
+    }
+
 }

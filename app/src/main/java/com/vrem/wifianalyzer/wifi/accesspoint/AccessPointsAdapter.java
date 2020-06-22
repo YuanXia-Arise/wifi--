@@ -28,6 +28,7 @@ import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.vrem.wifianalyzer.MainContext;
 import com.vrem.wifianalyzer.R;
 import com.vrem.wifianalyzer.wifi.model.WiFiData;
@@ -59,7 +60,7 @@ public class AccessPointsAdapter extends BaseExpandableListAdapter implements Up
         View view = accessPointDetail.makeView(convertView, parent, wiFiDetail, false);//返回AccessPointDetail制作的页面
         attachPopup(view, wiFiDetail);
 
-        ImageView groupIndicator = view.findViewById(R.id.groupIndicator);//获取图片控件
+        ImageView groupIndicator = view.findViewById(R.id.groupIndicator); //获取图片控件
         int childrenCount = getChildrenCount(groupPosition);
         if (childrenCount > 0) {
             groupIndicator.setVisibility(View.VISIBLE);
@@ -86,6 +87,10 @@ public class AccessPointsAdapter extends BaseExpandableListAdapter implements Up
     public void update(@NonNull WiFiData wiFiData) {
         accessPointsAdapterData.update(wiFiData, expandableListView);
         notifyDataSetChanged();
+    }
+
+    public void clear() {
+        accessPointsAdapterData.clear();
     }
 
     //返回一级列表的wifi的个数
@@ -123,7 +128,7 @@ public class AccessPointsAdapter extends BaseExpandableListAdapter implements Up
         return childPosition;
     }
 
-    ////每个item的id是否是固定？一般为true
+    //每个item的id是否是固定？一般为true
     @Override
     public boolean hasStableIds() {
         return true;

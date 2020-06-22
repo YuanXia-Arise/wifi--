@@ -18,20 +18,15 @@
 
 package com.vrem.wifianalyzer.wifi.filter;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
-import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.View;
 
-import com.vrem.wifianalyzer.MainActivity;
 import com.vrem.wifianalyzer.MainContext;
 import com.vrem.wifianalyzer.R;
 import com.vrem.wifianalyzer.navigation.NavigationMenu;
-import com.vrem.wifianalyzer.wifi.accesspoint.AccessPointsFragment;
 
 import static android.content.ContentValues.TAG;
 
@@ -48,11 +43,11 @@ public class Filter {
         return new Filter(buildAlertDialog());
     }
 
-    private static AlertDialog buildAlertDialog() { //设置过滤器的五个参数
+    private static AlertDialog buildAlertDialog() { // 设置过滤器的五个参数
         if (MainContext.INSTANCE.getMainActivity().isFinishing()) {
             return null;
         }
-        View view = MainContext.INSTANCE.getLayoutInflater().inflate(R.layout.filter_popup, null); //获取页面对象
+        View view = MainContext.INSTANCE.getLayoutInflater().inflate(R.layout.filter_popup, null); // 获取页面对象
         return new AlertDialog
             .Builder(view.getContext())
             .setView(view)

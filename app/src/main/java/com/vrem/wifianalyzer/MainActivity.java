@@ -82,6 +82,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Locale;
 
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.support.design.widget.NavigationView.OnNavigationItemSelectedListener;
 
 public class MainActivity extends AppCompatActivity implements OnSharedPreferenceChangeListener, OnNavigationItemSelectedListener {
@@ -90,6 +91,8 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
     private NavigationMenu startNavigationMenu;
     private OptionMenu optionMenu;
     private String currentCountryCode;
+
+    public static final int REQUEST_CAMERA_PERMISSION = 1003;
 
     private static String TAG = "MainActivity";
 
@@ -155,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
         navigationMenuView = new NavigationMenuView(this, startNavigationMenu);
         onNavigationItemSelected(navigationMenuView.getCurrentMenuItem());
 
-        ConnectionView connectionView = new ConnectionView(this);//获取连接视图对象
+        ConnectionView connectionView = new ConnectionView(this); // 获取连接视图对象
         mainContext.getScannerService().register(connectionView);
 
         ImageButton Imagebutton = findViewById(R.id.add_device);
@@ -167,18 +170,18 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
         });
         copyassets();
         if (Build.VERSION.SDK_INT >= 26) { // Android 8.0
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 200);
-                return;
-            }
+            Permission();
         }
         initWithGetPermission(this);
-        //if (Build.VERSION.SDK_INT >= 26) { // Android 8.0
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 200);
-                return;
-            }
-        //}
+    }
+
+    public void Permission() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_CAMERA_PERMISSION);
+            return;
+        } else {
+            // resume
+        }
     }
 
     //添加设备url
@@ -257,7 +260,7 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
             ComponentName componentName = info.get(0).topActivity;
             String className = componentName.getClassName();
             Log.d("className:" , className);
-            if ("com.vrem.wifianalyzer.SnifferActivity".equals(className)){//判断SnifferActivity是否处于打开状态
+            if ("com.vrem.wifianalyzer.SnifferActivity".equals(className)){ // 判断SnifferActivity是否处于打开状态
                 Log.w("SnifferActivity:","处于打开状态，不执行更新");
             }else if ("com.vrem.wifianalyzer.FakeAPActivity".equals(className)){
                 Log.w("FakeAPActivity:","处于打开状态，不执行更新");
@@ -338,7 +341,7 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
     @Override
     protected void onPause() {
         optionMenu.pause();
-        MainContext.INSTANCE.getScannerService().pause();//暂停扫描
+        MainContext.INSTANCE.getScannerService().pause(); //暂停扫描
         updateActionBar();
         Log.d("MainActivity status","Pause");
         super.onPause();
@@ -481,7 +484,6 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
             }
         }
     }
-
 
 
 }

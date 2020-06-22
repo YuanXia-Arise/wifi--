@@ -101,7 +101,7 @@ public class DosFragment extends Fragment {
         } else {
             Name = name;
         }
-        MainContext.INSTANCE.getScannerService().pause();//暂停扫描，防止命令冲突
+        MainContext.INSTANCE.getScannerService().pause(); //暂停扫描，防止命令冲突
         return view;
     }
 

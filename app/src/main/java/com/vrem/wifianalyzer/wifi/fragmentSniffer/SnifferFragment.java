@@ -211,7 +211,7 @@ public class SnifferFragment extends Fragment {
 
     //选择热点按钮事件
     private void apChooseButtonHanble(){
-        View view = getActivity().getLayoutInflater().inflate(R.layout.scan_dialog_list, null);
+        View view = getActivity().getLayoutInflater().inflate(R.layout.scan_dialog_list,null);
         final Dialog dialog = new Dialog(getContext());
         dialog.setContentView(view);
         dialog.setTitle("热点列表");

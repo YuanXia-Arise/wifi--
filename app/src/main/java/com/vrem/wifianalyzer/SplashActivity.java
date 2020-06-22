@@ -32,7 +32,7 @@ public class SplashActivity extends AppCompatActivity {
             public void run() {
                 enterMainActivity();
             }
-        }, 1000);
+        }, 0);
     }
     private void enterMainActivity() {
 //        Intent intent = new Intent(this, MainActivity.class);

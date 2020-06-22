@@ -11,9 +11,9 @@
          style="?android:attr/progressBarStyleLarge"
          android:layout_width="wrap_content"   
          android:layout_height="wrap_content"  
-         android:layout_centerInParent="true"
-         />  
-         <TextView 
+         android:layout_centerInParent="true" />
+
+    <TextView
         android:id="@+id/clickrefresh"
         android:text="点击刷新"
         android:textSize="40sp"
@@ -21,9 +21,9 @@
         android:layout_height="wrap_content"
         android:textColor="#4e537b"
         android:layout_centerInParent="true"
-        android:visibility="gone"
-        />
-         <TextView 
+        android:visibility="gone" />
+
+    <TextView
         android:id="@+id/nodata"
         android:text="无数据"
         android:textSize="40sp"
@@ -31,14 +31,14 @@
         android:layout_height="wrap_content"
         android:textColor="#4e537b"
         android:layout_centerInParent="true"
-        android:visibility="gone"
-        />
+        android:visibility="gone" />
+
     <ListView 
         android:id="@+id/scanlist"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:dividerHeight="10dp"
         android:layout_marginTop="20dp"
-        android:divider="@android:color/transparent"
-        ></ListView>
+        android:divider="@android:color/transparent">
+    </ListView>
 </RelativeLayout>

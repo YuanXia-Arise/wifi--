@@ -140,7 +140,7 @@ public class FakeApFragment extends Fragment {
             @Override
             public void onClick(View arg0) {
                 // TODO Auto-generated method stub
-                View view = FakeApFragment.this.getLayoutInflater().inflate(R.layout.scan_dialog_list, null);
+                View view = FakeApFragment.this.getLayoutInflater().inflate(R.layout.scan_dialog_list,null);
                 final Dialog dialog = new Dialog(context);
                 dialog.setContentView(view);
                 dialog.setTitle("热点列表");

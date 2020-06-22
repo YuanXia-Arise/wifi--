@@ -135,10 +135,10 @@ public class InfoUpdater extends AsyncTask<Object, Object, JSONObject> {
         try {
             JSONObject response = requestFuture.get(10 - 1, TimeUnit.SECONDS);
             if (null != response ){
-                PrefSingleton.getInstance().putString("deviceInfo",response.toString());//将数据存入数据存储类中
+                PrefSingleton.getInstance().putString("deviceInfo",response.toString()); //将数据存入数据存储类中
             }
 
-            new InteractRecordDBUtils(mContext).easy_insert(obj.toString(), response.toString());//将请求命令、返回结果存入数据库
+            new InteractRecordDBUtils(mContext).easy_insert(obj.toString(), response.toString()); //将请求命令、返回结果存入数据库
 
             Log.w("INFO", "RESPONSE: " + response.toString());
             if (isAp){ //将结果到接口当中，供WIFIHotspotFragment类使用
