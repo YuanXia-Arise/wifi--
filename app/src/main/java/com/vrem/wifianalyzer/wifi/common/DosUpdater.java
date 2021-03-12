@@ -4,16 +4,21 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
+import android.graphics.Paint;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.ExpandableListView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.RequestFuture;
+import com.google.gson.Gson;
 import com.vrem.wifianalyzer.DeviceListActivity;
 import com.vrem.wifianalyzer.MainContext;
 import com.vrem.wifianalyzer.R;
@@ -122,9 +127,11 @@ public class DosUpdater extends AsyncTask<Object, Object, Void> {
             JSONObject response = dosStep2(mContext);
             if (response == null) {
                 return null;
+            } else {
+                jExpandableLVS = response;
             }
-            jExpandableLVS = response;
-            Log.w("DOS_STEP_2", response.toString());
+            //jExpandableLVS = response;
+            Log.w("DOS_STEP_2==2020", response.toString());
         } catch (JSONException e) {
             mExit = true;
             e.printStackTrace();
@@ -140,15 +147,29 @@ public class DosUpdater extends AsyncTask<Object, Object, Void> {
 
     @Override
     protected void onPostExecute(Void param) {
-        Log.d(TAG, "onPostExecute: 888888-1:" + mError + mStep1Run + mExit);
+        Log.d(TAG, "onPostExecute: 阻断攻击:" + mError + mStep1Run + mExit);
         if (jExpandableLVS != null){
+            int list_num = 0;
             try {
+                if (!flag) list_num = 2;
+                if (flag) {
+                    list_num = getDosGroupList(jExpandableLVS).size();
+                    for (int m = 0; m < getDosGroupList(jExpandableLVS).size(); m++) {
+                        list_num += getDosGroupList(jExpandableLVS).get(m).getDosChildClientModelList().size();
+                    }
+                }
+                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) expandableListView.getLayoutParams();
+                params.height = dip2px(mContext.getApplicationContext(), list_num*60);
+                expandableListView.setLayoutParams(params);
+
                 expandableListView.setAdapter(new DosClientExpandableAdapter(getDosGroupList(jExpandableLVS),Run));
-                int groupCount = expandableListView.getExpandableListAdapter().getGroupCount();
-                for (int i = 0; i < groupCount; i++) {
+                int groupCount = expandableListView.getCount();
+                for (int i = 0; i<groupCount; i++) {
                     expandableListView.expandGroup(i);
                 }
             } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (NullPointerException e){
                 e.printStackTrace();
             }
         }
@@ -168,7 +189,7 @@ public class DosUpdater extends AsyncTask<Object, Object, Void> {
         if (mExit == true) {
             DevStatusDBUtils devStatusDBUtils1 = new DevStatusDBUtils(mContext);
             devStatusDBUtils1.open();
-            devStatusDBUtils1.scanStep1Done(mDevId);//扫描结束时的sql语句
+            devStatusDBUtils1.scanStep1Done(mDevId); // 扫描结束时的sql语句
             devStatusDBUtils1.close();
 
             BackgroundTask.clearAll();
@@ -181,6 +202,12 @@ public class DosUpdater extends AsyncTask<Object, Object, Void> {
             ((Activity) mContext).overridePendingTransition(R.anim.slide_left_in,R.anim.slide_right_out);
             ((Activity) mContext).finish();
         }
+    }
+
+    // 控件大小设置
+    private int dip2px(Context context,float dipValue) {
+        Resources r = context.getResources();
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dipValue, r.getDisplayMetrics());
     }
 
     //客户端拼接
@@ -196,7 +223,8 @@ public class DosUpdater extends AsyncTask<Object, Object, Void> {
         if (flag){
             while(iteratorAps.hasNext()){
                 String apsKey = (String) iteratorAps.next(); //宿主bssid
-                if(apsKey.equals(bssid)){
+                //if(apsKey.equals(bssid)){
+                if (bssid.contains(apsKey)){
                     String apsValues = jsonObjectAps.getString(apsKey);
                     JSONObject apsDosInfo = new JSONObject(apsValues); //宿主bssid参数
                     int cout = apsDosInfo.getInt("count"); //攻击次数
@@ -212,8 +240,6 @@ public class DosUpdater extends AsyncTask<Object, Object, Void> {
                     ArrayList<DosChildClientModel> alDosChildClientModels = new ArrayList<>();
                     Iterator iteratorStas = jsonObjectStas.keys();
                     while(iteratorStas.hasNext()){
-
-                        Log.d(TAG, "444==00>" + Run);
                         if (Run != null) {
                             String cus_bssid = PrefSingleton.getInstance().getString("param").
                                     substring(2,PrefSingleton.getInstance().getString("param").length()-2);
@@ -239,16 +265,16 @@ public class DosUpdater extends AsyncTask<Object, Object, Void> {
                                 }
                             }
                         } else {
-                            String stasKey = (String) iteratorStas.next(); //客户端bssid
+                            String stasKey = (String) iteratorStas.next(); // 客户端bssid
                             String stasValeus = jsonObjectStas.getString(stasKey);
-                            JSONObject stasDosInfo = new JSONObject(stasValeus); //客户端bssid参数
-                            String ap_bssid = stasDosInfo.getString("ap_bssid"); //宿主MAC地址
+                            JSONObject stasDosInfo = new JSONObject(stasValeus); // 客户端bssid参数
+                            String ap_bssid = stasDosInfo.getString("ap_bssid"); // 宿主MAC地址
                             if(apsKey.equals(ap_bssid)){
                                 DosChildClientModel dosChildClientModel = new DosChildClientModel(null,
                                         0,0, 0);
-                                int stas_count = stasDosInfo.getInt("count"); //攻击次数
-                                int stas_rx_datas = stasDosInfo.getInt("rx_datas"); //接收数据
-                                int stas_tx_datas = stasDosInfo.getInt("tx_datas"); //发送数据
+                                int stas_count = stasDosInfo.getInt("count"); // 攻击次数
+                                int stas_rx_datas = stasDosInfo.getInt("rx_datas"); // 接收数据
+                                int stas_tx_datas = stasDosInfo.getInt("tx_datas"); // 发送数据
 
                                 dosChildClientModel.setChild_bssid(stasKey);
                                 dosChildClientModel.setChild_count(stas_count);
@@ -263,11 +289,13 @@ public class DosUpdater extends AsyncTask<Object, Object, Void> {
                     dList.add(dosGroupClientModel);
                 }
             }
-        }else {
+        } else {
             while(iteratorAps.hasNext()){
+                String apsKey = (String) iteratorAps.next();
+                if (apsKey.equals(PrefSingleton.getInstance().getString("detail"))) {
                 DosGroupClientModel dosGroupClientModel = new DosGroupClientModel(null, 0,
                         0, 0, null);
-                String apsKey = (String) iteratorAps.next();
+
                 String apsValues = jsonObjectAps.getString(apsKey);
                 JSONObject apsDosInfo = new JSONObject(apsValues);
                 int cout = apsDosInfo.getInt("count");
@@ -282,7 +310,6 @@ public class DosUpdater extends AsyncTask<Object, Object, Void> {
                 ArrayList<DosChildClientModel> alDosChildClientModels = new ArrayList<>();
                 Iterator iteratorStas = jsonObjectStas.keys();
                 while(iteratorStas.hasNext()){
-                    Log.d(TAG, "666==00>" + Run);
                     if (Run != null) {
                         String cus_bssid = PrefSingleton.getInstance().getString("param").
                                 substring(2,PrefSingleton.getInstance().getString("param").length()-2);
@@ -329,9 +356,10 @@ public class DosUpdater extends AsyncTask<Object, Object, Void> {
                         }
                     }
                 }
-                dList.add(dosGroupClientModel);
+                dList.add(dosGroupClientModel);}
             }
         }
+        System.out.println("20219999==>" + new Gson().toJson(dList));
         return dList;
     }
 
@@ -349,6 +377,7 @@ public class DosUpdater extends AsyncTask<Object, Object, Void> {
             PrefSingleton.getInstance().putString("param", param);
             Log.d(TAG, "111000==>" + mJo.getJSONObject("data"));
         }
+        System.out.println("20210305==发送指令：" + obj.toString());
 
         RequestFuture<JSONObject> requestFuture = RequestFuture.newFuture();
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, obj, requestFuture, requestFuture);
@@ -359,8 +388,9 @@ public class DosUpdater extends AsyncTask<Object, Object, Void> {
         try {
             JSONObject response = requestFuture.get(10 - 1, TimeUnit.SECONDS);
 
-            new InteractRecordDBUtils(mContext).easy_insert(obj.toString(), response.toString()); //将请求命令、返回结果存入数据库
+            new InteractRecordDBUtils(mContext).easy_insert(obj.toString(), response.toString()); // 将请求命令、返回结果存入数据库
 
+            System.out.println("20210305==返回结果：" + response.toString());
             int status = response.getInt("status");
             if (status == 0) {
                 Log.w("DOS_STEP_1", "RESPONSE:" + response.toString());
@@ -390,6 +420,7 @@ public class DosUpdater extends AsyncTask<Object, Object, Void> {
         obj.put("param", param);
 
         Log.w("DOS_STEP_2", "REQUEST: " + obj.toString());
+        System.out.println("20210305==发送指令：" + obj.toString());
 
         RequestFuture<JSONObject> requestFuture = RequestFuture.newFuture();
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, obj, requestFuture, requestFuture);
@@ -397,6 +428,7 @@ public class DosUpdater extends AsyncTask<Object, Object, Void> {
 
         try {
             JSONObject response = requestFuture.get(5 - 1, TimeUnit.SECONDS);
+            System.out.println("20210305==返回结果：" + response.toString());
             int status = response.getInt("status");
             if (status == 0) {
                 Log.w("DOS_STEP_2", "RESPONSE:" + response.toString());

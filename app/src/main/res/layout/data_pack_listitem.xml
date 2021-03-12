@@ -19,22 +19,33 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
-            android:layout_marginLeft="53dp"
-            />
+            android:layout_marginLeft="53dp" />
+
         <TextView
             android:id="@+id/pack_mac_tv"
             android:layout_marginLeft="53dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            />
+            android:layout_marginTop="20dp" />
+
         <Button
             android:id="@+id/download_btn"
-            android:layout_width="60dp"
+            android:layout_width="40dp"
             android:layout_height="30dp"
             android:textSize="10dp"
             android:text="下载"
-            android:layout_marginRight="20dp"
+            android:layout_marginRight="50dp"
+            android:layout_marginTop="6dp"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/shape_wihte_frame"/>
+
+        <Button
+            android:id="@+id/delete_btn"
+            android:layout_width="40dp"
+            android:layout_height="30dp"
+            android:textSize="10dp"
+            android:text="删除"
+            android:layout_marginRight="5dp"
             android:layout_marginTop="6dp"
             android:layout_alignParentRight="true"
             android:background="@drawable/shape_wihte_frame"/>

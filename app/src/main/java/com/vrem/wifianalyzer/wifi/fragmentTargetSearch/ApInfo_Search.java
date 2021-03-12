@@ -27,7 +27,7 @@ public class ApInfo_Search {
         List<WiFiDetail> wiFiDetailsTmp = wiFiDetails;
         final List<WiFiDetail> clientData = new ArrayList<>();
         Log.d(TAG, "9999==0>" + new Gson().toJson(wiFiDetailsTmp));
-        for (int i =0; i<wiFiDetailsTmp.size(); i++){
+        for (int i = 0; i<wiFiDetailsTmp.size(); i++){
             WiFiDetail wiFiDetail_o = wiFiDetailsTmp.get(i);
             String target_search = PrefSingleton.getInstance().getString("target_search").toLowerCase();
             String a = wiFiDetail_o.getBSSID().toLowerCase();

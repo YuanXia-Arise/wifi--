@@ -28,12 +28,21 @@ import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.gson.Gson;
 import com.vrem.wifianalyzer.MainContext;
 import com.vrem.wifianalyzer.R;
+import com.vrem.wifianalyzer.wifi.common.PrefSingleton;
+import com.vrem.wifianalyzer.wifi.common.VolleySingleton;
 import com.vrem.wifianalyzer.wifi.model.WiFiData;
 import com.vrem.wifianalyzer.wifi.model.WiFiDetail;
 import com.vrem.wifianalyzer.wifi.scanner.UpdateNotifier;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 //ExpandableListAdapter数据源
 public class AccessPointsAdapter extends BaseExpandableListAdapter implements UpdateNotifier {
@@ -84,7 +93,7 @@ public class AccessPointsAdapter extends BaseExpandableListAdapter implements Up
     }
 
     @Override
-    public void update(@NonNull WiFiData wiFiData) {
+    public void update(@NonNull final WiFiData wiFiData) {
         accessPointsAdapterData.update(wiFiData, expandableListView);
         notifyDataSetChanged();
     }

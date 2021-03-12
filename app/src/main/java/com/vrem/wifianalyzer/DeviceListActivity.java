@@ -163,7 +163,6 @@ public class DeviceListActivity extends Activity {
 			bottomLayout.setVisibility(View.GONE);
 			return true;
 
-
 		default:
 			return super.onOptionsItemSelected(item);
 		}
@@ -181,7 +180,6 @@ public class DeviceListActivity extends Activity {
 	private void selectItem(int position) {
 		switch (position) {
 		case 0:
-
 			break;
 		case 1:
 //			BaseUtils.userDialog(DeviceListActivity.this);

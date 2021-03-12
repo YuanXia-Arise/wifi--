@@ -59,13 +59,13 @@ public class DosFragment extends Fragment {
 
     private String ssid;
     private String bssid;
-    private int channel;
+    private String channel;
     private Button apDosButton;
     private Button startButton;
     private  Button channelDosButton;
     private Button mChannelDosButton;
-    private String channelSelected = ""; //多频段
-    private int channelId = 1;//单频段
+    private String channelSelected = ""; //多信道
+    private int channelId = 1;//单信道
 
 //    private String intentId="";
     private List<WiFiDetail> wiFiDetails;
@@ -75,6 +75,7 @@ public class DosFragment extends Fragment {
     private Bundle bundle;
     private String Name = "";
     //private int device_frequency = 1;
+    private String Mac = "";
 
     //onCreateView为fragment的初始化页面方法
     @Nullable
@@ -82,9 +83,9 @@ public class DosFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         view  = inflater.inflate(R.layout.fragment_dos, container, false);
         startButton = view.findViewById(R.id.startButton);//开始dos攻击按钮
-//        cancelButton = view.findViewById(R.id.cancelButton);//取消攻击按钮
-        channelDosButton = view.findViewById(R.id.channeldos);//单频段按钮
-        mChannelDosButton = view.findViewById(R.id.mchanneldos);//多频段按钮
+        //cancelButton = view.findViewById(R.id.cancelButton);//取消攻击按钮
+        channelDosButton = view.findViewById(R.id.channeldos);//单信道按钮
+        mChannelDosButton = view.findViewById(R.id.mchanneldos);//多信道按钮
         apDosButton = view.findViewById(R.id.apdos);//选择热点按钮
 
         //device_frequency = Integer.parseInt(PrefSingleton.getInstance().getString("device_frequency"));
@@ -92,7 +93,9 @@ public class DosFragment extends Fragment {
         if (bundle.getString("ssid") != null){
             bssid = bundle.getString("bssid");
             ssid = bundle.getString("ssid");
-            channel = Integer.parseInt(bundle.getString("channel"));
+            //channel = Integer.parseInt(bundle.getString("channel"));
+            channel = bundle.getString("channel");
+            Mac = bundle.getString("mac");
             apDosButton.setText(ssid);
         }
         String name = bundle.getString("Fragment");
@@ -157,7 +160,7 @@ public class DosFragment extends Fragment {
                 }
         });
 
-        //单频段按钮事件
+        //单信道按钮事件
         channelDosButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
@@ -166,7 +169,7 @@ public class DosFragment extends Fragment {
             }
         });
 
-        //多频段按钮事件
+        //多信道按钮事件
         mChannelDosButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
@@ -192,34 +195,66 @@ public class DosFragment extends Fragment {
                     JSONArray blist = new JSONArray();
                     param.put("action", "mdk"); // 2-1
 
-                    if (channelDosButton.getText().toString().equals("选择目标频段") == false) {
+                    if (channelDosButton.getText().toString().equals("选择目标信道") == false) {
                         jo.put("type", "single");
                         jo.put("detail", new Integer(channelId).toString());
                         channels.put(channelId);
-                    } else if (mChannelDosButton.getText().toString().equals("选择多目标频段") == false) {
+                    } else if (mChannelDosButton.getText().toString().equals("选择多目标信道") == false) {
                         jo.put("type", "multi");
                         jo.put("detail", channelSelected);
                         String[] channelIDArr = channelSelected.split(",");
                         for (int i = 0; i < channelIDArr.length; i++) {
                             channels.put(Integer.parseInt(channelIDArr[i]));
                         }
-                    } else if (apDosButton.getText().toString().equals("选择目标热点") == false) {
-                        jo.put("type", "ap");
-                        jo.put("detail", bssid);
-                        blist.put(bssid);
-                        channels.put(channel);
-                        flag = true;
-                        writeFile("DosFlag.txt",String.valueOf(flag),bssid);
-                    }
-                    else {
-                        Toast.makeText(getContext(), "请选择目标热点或频段！", Toast.LENGTH_SHORT).show();
+                    } else if (apDosButton.getText().toString().equals("选择目标SSID") == false) {
+                        try {
+                            String Bssid = "";
+                            if (bssid.contains(",")) {
+                                String[] tokens = Mac.split(",");
+                                for (String token : tokens) {
+                                    token = token.length() > 17 ? token.substring(0, 17) : token;
+                                    Bssid = Bssid.equals("") ? token : Bssid + "," + token;
+                                }
+                                bssid = Bssid;
+                            }
+                            //bssid = bssid.length()>17 ? bssid.substring(0,17) : bssid;
+                            jo.put("type", "ap");
+                            jo.put("detail", bssid);
+
+                            //blist.put(bssid);
+                            if (Mac.contains(",")) {
+                                String[] tokens = Mac.split(",");
+                                for (String token : tokens) {
+                                    token = token.length() > 17 ? token.substring(0, 17) : token;
+                                    blist.put(token);
+                                }
+                            } else {
+                                Mac = Mac.length() > 17 ? Mac.substring(0, 17) : Mac;
+                                blist.put(Mac);
+                            }
+
+                            //channels.put(channel);
+                            if (channel.contains(",")) {
+                                String[] tokens = channel.split(",");
+                                for (String token : tokens) {
+                                    channels.put(Integer.valueOf(token));
+                                }
+                            } else {
+                                channels.put(Integer.valueOf(channel));
+                            }
+
+                            flag = true;
+                            writeFile("DosFlag.txt", String.valueOf(flag), bssid);
+                        } catch (NullPointerException e){}
+                    } else {
+                        Toast.makeText(getContext(), "请选择目标热点或信道！", Toast.LENGTH_SHORT).show();
                         return;
                     }
 
                     wlist.put(PrefSingleton.getInstance().getString("device_mac"));
-                    param.put("channels", channels); // 2-3
-                    param.put("wlist", wlist); // 2-4
-                    param.put("blist", blist); // 2-5
+                    param.put("channels", channels);
+                    param.put("wlist", wlist);
+                    param.put("blist", blist);
                     param.put("interval", 1.5);
                     obj.put("param", param);
                     jo.put("data", obj);
@@ -240,15 +275,14 @@ public class DosFragment extends Fragment {
                                 return;
                             }
                             try {
-                                Log.d(TAG, "run: 12345==01>" + jof);
+                                Log.d(TAG, "run: 12345==01>" + jof.toString());
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
-                            getActivity().runOnUiThread(new Runnable() {  /*在fragment中，不能直接用runOnUiThread，需要加getActivity，因为它是activity中的方法*/
+                            getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    new DosUpdater(getContext(), devId, jof,null,false,
-                                            null,null).execute(); //开始阻断
+                                    new DosUpdater(getContext(), devId, jof,null,false,null,null).execute(); //开始阻断
                                 }
                             });
                         }
@@ -268,7 +302,7 @@ public class DosFragment extends Fragment {
         try {
             FileOutputStream fileOutputStream = getActivity().openFileOutput(fileName,MODE_PRIVATE);/*在fragment中没有openFileOutput，因为它是activity中的方法*/
             fileOutputStream.write(flag.getBytes());
-            fileOutputStream.write("\n".getBytes());//写入换行
+            fileOutputStream.write("\n".getBytes()); //写入换行
             fileOutputStream.write(bssid.getBytes());
             fileOutputStream.close();
         } catch (FileNotFoundException e) {
@@ -292,7 +326,8 @@ public class DosFragment extends Fragment {
                         // TODO Auto-generated method stub
                         dosSsid = wiFiDetails.get(arg1).getSSID();
                         bssid = wiFiDetails.get(arg1).getBSSID();
-                        channel = Integer.parseInt(wiFiDetails.get(arg1).getWiFiSignal().getChannel());
+                        //channel = Integer.parseInt(wiFiDetails.get(arg1).getWiFiSignal().getChannel());
+                        channel = wiFiDetails.get(arg1).getWiFiSignal().getChannel();
                     }
                 })
                 .setPositiveButton("确定", new DialogInterface.OnClickListener() {
@@ -305,8 +340,10 @@ public class DosFragment extends Fragment {
                         DeviceInfo deviceInfo = new DeviceInfo();
                         deviceInfo.setWorkType(101);
                         apDosButton.setText(dosSsid);
+                        channelDosButton.setText("选择目标信道");
+                        mChannelDosButton.setText("选择多目标信道");
                         if (dosSsid == null) {
-                            apDosButton.setText("选择目标热点");
+                            apDosButton.setText("选择目标SSID");
                         }
                     }
                 })
@@ -319,20 +356,20 @@ public class DosFragment extends Fragment {
                 }).show();
     }
 
-    //单频段事件
+    //单信道事件
     private void channelButtonHandle(final Button tmpButton) {
-        final String[] channelString = { "频道1","频道2","频道3","频道4","频道5","频道6","频道7","频道8","频道9","频道10",
-                "频道11","频道12","频道13","频道14", "频道36","频道38","频道40","频道42","频道44","频道46","频道48","频道52",
-                "频道56","频道60","频道64","频道149","频道153","频道157","频道161","频道165"};
+        final String[] channelString = { "信道1","信道2","信道3","信道4","信道5","信道6","信道7","信道8","信道9","信道10",
+                "信道11","信道12","信道13","信道14", "信道36","信道38","信道40","信道42","信道44","信道46","信道48","信道52",
+                "信道56","信道60","信道64","信道149","信道153","信道157","信道161","信道165"};
         new AlertDialog.Builder(getContext())
-                .setTitle("选择频道")
+                .setTitle("选择信道")
                 .setSingleChoiceItems(channelString, 0,
                         new DialogInterface.OnClickListener() {
 
                             public void onClick(DialogInterface arg0, int arg1) {
                                 // TODO Auto-generated method stub
                                 if (arg1 >= 0) {
-                                    channelId = Integer.parseInt(channelString[arg1].replace("频道", ""));//arg1 + 1;
+                                    channelId = Integer.parseInt(channelString[arg1].replace("信道", ""));//arg1 + 1;
                                 }
                             }
                         })
@@ -343,10 +380,10 @@ public class DosFragment extends Fragment {
                         dialog.dismiss();
                         DeviceInfo deviceInfo = new DeviceInfo();
                         deviceInfo.setWorkType(102);
-                        tmpButton.setText("所选频段为：" + channelId);
+                        tmpButton.setText("所选信道为：" + channelId);
 
                         /*if (channelId == device_frequency) {
-                            new AlertDialog.Builder(getContext()).setTitle("提示").setMessage("你选择的频段为设备频段")
+                            new AlertDialog.Builder(getContext()).setTitle("提示").setMessage("你选择的信道为设备信道")
                                     .setPositiveButton("确定",
                                     new DialogInterface.OnClickListener() {
                                         @Override
@@ -356,7 +393,8 @@ public class DosFragment extends Fragment {
                                     }).show();
                         }*/
 
-                        mChannelDosButton.setText("选择多目标频段");
+                        mChannelDosButton.setText("选择多目标信道");
+                        apDosButton.setText("选择目标SSID");
                     }
                 })
                 .setNegativeButton("取消", new DialogInterface.OnClickListener() {
@@ -367,26 +405,26 @@ public class DosFragment extends Fragment {
                     }
                 }).show();
     }
-    //多频段事件
+    //多信道事件
     private void mChannelButtonHandle(final Button button) {
-        final String[] channelString = { "频道1","频道2","频道3","频道4","频道5","频道6","频道7","频道8","频道9","频道10",
-                "频道11","频道12","频道13","频道14", "频道36","频道38","频道40","频道42","频道44","频道46","频道48","频道52",
-                "频道56","频道60","频道64","频道149","频道153","频道157","频道161","频道165"};
+        final String[] channelString = { "信道1","信道2","信道3","信道4","信道5","信道6","信道7","信道8","信道9","信道10",
+                "信道11","信道12","信道13","信道14", "信道36","信道38","信道40","信道42","信道44","信道46","信道48","信道52",
+                "信道56","信道60","信道64","信道149","信道153","信道157","信道161","信道165"};
         final List<Integer> listInteger = new ArrayList();
         new AlertDialog.Builder(getContext())
-                .setTitle("选择多频道")
+                .setTitle("选择多信道")
                 .setMultiChoiceItems(channelString, null,
                         new DialogInterface.OnMultiChoiceClickListener() {
                             @Override
                             public void onClick(DialogInterface arg0, int arg1, boolean arg2) {
                                 // TODO Auto-generated method stub
                                 if (arg2) {
-                                    //listInteger.add(Integer.parseInt(channelString[arg1].replace("频道","")));
+                                    //listInteger.add(Integer.parseInt(channelString[arg1].replace("信道","")));
                                     int counts = listInteger.size();
                                     if (counts < 4) {
-                                        listInteger.add(Integer.parseInt(channelString[arg1].replace("频道","")));
+                                        listInteger.add(Integer.parseInt(channelString[arg1].replace("信道","")));
                                     } else {
-                                        Toast.makeText(getContext(), "请选择少于等于四个频段！", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(getContext(), "请选择少于等于四个信道！", Toast.LENGTH_SHORT).show();
                                         return;
                                     }
 
@@ -394,7 +432,7 @@ public class DosFragment extends Fragment {
                                     Iterator<Integer> ii = listInteger.iterator();
                                     while(ii.hasNext()){
                                         Integer e = ii.next();
-                                        if(e.equals(Integer.parseInt(channelString[arg1].replace("频道","")))){
+                                        if(e.equals(Integer.parseInt(channelString[arg1].replace("信道","")))){
                                             ii.remove();
                                         }
                                     }
@@ -416,19 +454,19 @@ public class DosFragment extends Fragment {
                         }
                         if (count == 0) {
                             dialog.dismiss();
-                            button.setText("选择多目标频段");
+                            button.setText("选择多目标信道");
                             apDosButton.setEnabled(true);
                             channelDosButton.setEnabled(true);
-                            Toast.makeText(getContext(), "未选择频段！", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "未选择信道！", Toast.LENGTH_SHORT).show();
                         } else if(count <= 4){
                             dialog.dismiss();
                             DeviceInfo deviceInfo = new DeviceInfo();
                             deviceInfo.setWorkType(110);
-                            button.setText("所选频段为：" + channelSelected);
+                            button.setText("所选信道为：" + channelSelected);
 
                             /*if (channelSelected.indexOf(String.valueOf(device_frequency)) != -1) {
-                                new AlertDialog.Builder(getContext()).setTitle("提示").setMessage("你选择的频段包含设备频段"
-                                        + "\n" + "设备频段为:" + device_frequency)
+                                new AlertDialog.Builder(getContext()).setTitle("提示").setMessage("你选择的信道包含设备信道"
+                                        + "\n" + "设备信道为:" + device_frequency)
                                         .setPositiveButton("确定",
                                                 new DialogInterface.OnClickListener() {
                                                     @Override
@@ -438,9 +476,10 @@ public class DosFragment extends Fragment {
                                                 }).show();
                             }*/
 
-                            channelDosButton.setText("选择目标频段");
+                            channelDosButton.setText("选择目标信道");
+                            apDosButton.setText("选择目标SSID");
                         } else {
-                            Toast.makeText(getContext(), "请选择少于等于四个频段！", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "请选择少于等于四个信道！", Toast.LENGTH_SHORT).show();
                             return;
                         }
                     }

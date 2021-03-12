@@ -88,7 +88,7 @@
     <!-- about end -->
 
     <!-- security start -->
-    <string name="security_none">沒有</string>
+    <string name="security_none">OPEN</string>
     <!-- security end -->
 
     <!-- filter start -->

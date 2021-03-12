@@ -46,6 +46,8 @@ public enum NavigationMenu {
     SNIFFER(R.drawable.ic_location_on_sniffer_500_48dp,R.string.action_sniffer,NavigationItemFactory.SNIFFER),
     WIFI_HOTSPOT(R.drawable.wifi_hotspot,R.string.action_wifi_hotspot,NavigationItemFactory.WIFI_HOTSPOT),
     TARGET_SEARCH(R.drawable.ic_target_search_500_48dp, R.string.action_search, NavigationItemFactory.TARGET_SEARCH),
+    CHANNEL(R.drawable.ic_target_search_500_48dp, R.string.action_channel, NavigationItemFactory.CHANNEL),
+    CHANNEL_RATE(R.drawable.ic_target_search_500_48dp, R.string.action_channel_rate, NavigationItemFactory.CHANNEL_RATE),
     DATA_PACK(R.drawable.data_pack_icon,R.string.action_datapack,NavigationItemFactory.DATA_PACK),
     SETTINGS(R.drawable.ic_settings_grey_500_48dp, R.string.action_settings, NavigationItemFactory.SETTINGS);
     //ABOUT(R.drawable.ic_info_outline_grey_500_48dp, R.string.action_about, NavigationItemFactory.ABOUT);

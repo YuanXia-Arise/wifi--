@@ -108,7 +108,7 @@ public class CommonUpdater extends AsyncTask<Object, Object, List<WiFiDetail>> {
             if (response == null) {
                 return null;
             }
-            List<WiFiDetail> apData = WiFiDetail.response2ApData(response, mTag, mSort);
+            List<WiFiDetail> apData = WiFiDetail.response2ApData(response, mTag, mSort, mContext);
             if (apData == null) {
                 mError = true;
             }
@@ -138,7 +138,7 @@ public class CommonUpdater extends AsyncTask<Object, Object, List<WiFiDetail>> {
         macSsidDBUtils.open();
         for (WiFiDetail apInfo : param) {
             try {
-                macSsidDBUtils.insertOrUpdate(mDevId, apInfo.getBSSID(), apInfo.getSSID());
+                macSsidDBUtils.insertOrUpdate(mDevId, apInfo.getBSSID(), apInfo.getSSID(), apInfo.getLast_time(), apInfo.getCount(),String.valueOf(System.currentTimeMillis()));
             } catch (Exception e) {}
         }
         macSsidDBUtils.close();

@@ -22,6 +22,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.app.Fragment;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -36,7 +37,6 @@ import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
@@ -58,6 +58,8 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.squareup.leakcanary.LeakCanary;
 import com.vrem.util.ConfigurationUtils;
 import com.vrem.util.EnumUtils;
 import com.vrem.wifianalyzer.menu.OptionMenu;
@@ -72,8 +74,14 @@ import com.vrem.wifianalyzer.wifi.band.WiFiBand;
 import com.vrem.wifianalyzer.wifi.band.WiFiChannel;
 import com.vrem.wifianalyzer.wifi.common.FrequencyTransformTools;
 import com.vrem.wifianalyzer.wifi.common.InfoUpdater;
+import com.vrem.wifianalyzer.wifi.common.MacSsidDBUtils;
 import com.vrem.wifianalyzer.wifi.common.PrefSingleton;
 import com.vrem.wifianalyzer.wifi.deviceList.Deviece;
+import com.vrem.wifianalyzer.wifi.model.WiFiDetail;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -123,6 +131,11 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
+        //20210309
+        if (LeakCanary.isInAnalyzerProcess(this)) {
+            return;
+        }
+        LeakCanary.install(getApplication()); // 内存泄漏检测
 
         PrefSingleton.getInstance().Initialize(getApplicationContext());//初始化参数
         if (!PrefSingleton.getInstance().getString("target_search").equals("")) {
@@ -142,7 +155,7 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
 
         settings.registerOnSharedPreferenceChangeListener(this);
 
-        setOptionMenu(new OptionMenu()); //设置菜单
+        setOptionMenu(new OptionMenu()); //设置菜单 cc 81 da e4 c1 38
 
         Toolbar toolbar = findViewById(R.id.toolbar); //获取工具栏控件
         toolbar.setOnClickListener(new WiFiBandToggle()); //设置点击事件：切换WiFi频道
@@ -161,18 +174,13 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
         ConnectionView connectionView = new ConnectionView(this); // 获取连接视图对象
         mainContext.getScannerService().register(connectionView);
 
-        ImageButton Imagebutton = findViewById(R.id.add_device);
-        Imagebutton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Addevice();
-            }
-        });
         copyassets();
         if (Build.VERSION.SDK_INT >= 26) { // Android 8.0
             Permission();
         }
         initWithGetPermission(this);
+        Permission_write();
+
     }
 
     public void Permission() {
@@ -182,45 +190,6 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
         } else {
             // resume
         }
-    }
-
-    //添加设备url
-    private void Addevice(){
-        LayoutInflater inflater = LayoutInflater.from(this);
-        View view = inflater.inflate(R.layout.input_add_devices,null);
-        final EditText remarksEt  = view.findViewById(R.id.input_et);
-        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("添加设备");
-        builder.setView(view);
-        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if (!TextUtils.isEmpty(remarksEt.getText().toString())){
-                    String remarksStr = remarksEt.getText().toString();
-//                    PrefSingleton.getInstance().putString("url", remarksStr);
-                    PrefSingleton.getInstance().Initialize(getApplicationContext());//初始化参数
-                    boolean isWIFI = MainContext.INSTANCE.getScannerService().isWifiStatus();
-                    if (isWIFI) {
-                        PrefSingleton.getInstance().putString("url", remarksStr);
-                        if (PrefSingleton.getInstance().getInt("id") < 0) {
-                            PrefSingleton.getInstance().putInt("id", 0);
-                        }
-                        new InfoUpdater(MainContext.INSTANCE.getContext(),true).execute(); //获取前置信息
-                    }
-                }
-            }
-        });
-        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if (!TextUtils.isEmpty(remarksEt.getText().toString())){
-                    remarksEt.setText("");
-                }
-                dialog.dismiss();
-            }
-        });
-        AlertDialog dialog = builder.create();//获取dialog
-        dialog.show();//显示对话框
     }
 
     //设置WiFi信道组
@@ -262,7 +231,7 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
             Log.d("className:" , className);
             if ("com.vrem.wifianalyzer.SnifferActivity".equals(className)){ // 判断SnifferActivity是否处于打开状态
                 Log.w("SnifferActivity:","处于打开状态，不执行更新");
-            }else if ("com.vrem.wifianalyzer.FakeAPActivity".equals(className)){
+            } else if ("com.vrem.wifianalyzer.FakeAPActivity".equals(className)){
                 Log.w("FakeAPActivity:","处于打开状态，不执行更新");
             } else if ("com.vrem.wifianalyzer.MainActivity".equals(className)){
                 MainContext.INSTANCE.getScannerService().update();
@@ -307,7 +276,7 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
 
     //导航条动作选择
     @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+    public boolean onNavigationItemSelected(MenuItem menuItem) {
         try {
             closeDrawer();//关闭正在打开的页面，为新动作做准备
             NavigationMenu navigationMenu = EnumUtils.find(NavigationMenu.class, menuItem.getItemId(), NavigationMenu.ACCESS_POINTS);
@@ -351,6 +320,7 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
     protected void onResume() {
         Log.d("MainActivity status","Resume");
         super.onResume();
+        MainContext.INSTANCE.getScannerService().update();
         optionMenu.resume();
         updateActionBar();
     }
@@ -391,7 +361,7 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
         return optionMenu;
     }
 
-    void setOptionMenu(@NonNull OptionMenu optionMenu) {
+    void setOptionMenu(OptionMenu optionMenu) {
         this.optionMenu = optionMenu;
     }
 
@@ -447,7 +417,7 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
             InputStream inputStream = activity.getAssets().open(fileName);
             File file = new File(activity.getFilesDir().getAbsolutePath() + File.separator + fileName);
             if(!file.exists() || file.length() == 0) {
-                FileOutputStream fos = new FileOutputStream(file);//如果文件不存在，FileOutputStream会自动创建文件
+                FileOutputStream fos = new FileOutputStream(file); // 如果文件不存在，FileOutputStream会自动创建文件
                 int len = -1;
                 byte[] buffer = new byte[1024];
                 while ((len = inputStream.read(buffer)) != -1){
@@ -461,9 +431,9 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
         }
     }
 
-/*
-* 修改系统设置权限,开启热点需要"WRITE_SETTINGS"权限
-*/
+    /**
+    * 修改系统设置权限,开启热点需要"WRITE_SETTINGS"权限
+    */
     private static final int REQUEST_CODE_WRITE_SETTINGS = 2;
     public void initWithGetPermission(Activity context) {
         boolean permission;
@@ -477,11 +447,22 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
         } else {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
                 Intent intent = new Intent(android.provider.Settings.ACTION_MANAGE_WRITE_SETTINGS);
-                intent.setData(Uri.parse("package:" + context.getPackageName()));
-                context.startActivityForResult(intent, REQUEST_CODE_WRITE_SETTINGS);
+                intent.setData(Uri.parse("package:" + getPackageName()));
+                startActivityForResult(intent, REQUEST_CODE_WRITE_SETTINGS);
             } else {
                 ActivityCompat.requestPermissions(context, new String[]{Manifest.permission.WRITE_SETTINGS}, REQUEST_CODE_WRITE_SETTINGS);
             }
+        }
+    }
+
+    // 动态权限申请
+    public void Permission_write() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    REQUEST_CAMERA_PERMISSION);
+            return;
+        } else {
+            // resume
         }
     }
 

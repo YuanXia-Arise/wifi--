@@ -37,7 +37,8 @@ public class WifiStatus {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        System.out.println("888888:" + device + " " + getWifi_SSID(context));
+        System.out.println("20210305==98>" + getWifi_SSID(context));
+        System.out.println("20210305==99>" + device);
         if (device != null && getWifi_SSID(context).contains(device)) {
             return true;
         } else {

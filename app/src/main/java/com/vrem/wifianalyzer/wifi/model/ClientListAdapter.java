@@ -65,6 +65,7 @@ public class ClientListAdapter extends BaseAdapter{
             listItemView.mac = convertView.findViewById(R.id.mac);
             listItemView.probe = convertView.findViewById(R.id.probe);
             listItemView.company = convertView.findViewById(R.id.company);
+            listItemView.company.setSelected(true);
             convertView.setTag(listItemView);
         }else{
             listItemView = (ListItemView) convertView.getTag();

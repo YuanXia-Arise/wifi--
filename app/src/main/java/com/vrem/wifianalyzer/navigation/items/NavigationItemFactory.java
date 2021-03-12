@@ -23,6 +23,8 @@ import com.vrem.wifianalyzer.settings.SettingActivity;
 import com.vrem.wifianalyzer.wifi.accesspoint.AccessPointsFragment;
 import com.vrem.wifianalyzer.wifi.channelgraph.ChannelGraphFragment;
 import com.vrem.wifianalyzer.wifi.channelrating.ChannelRatingFragment;
+import com.vrem.wifianalyzer.wifi.fragmentChannel.ChannelFragment;
+import com.vrem.wifianalyzer.wifi.fragmentChannelRate.ChannelRateFragment;
 import com.vrem.wifianalyzer.wifi.fragmentClientEnum.ClientEnumFragment;
 import com.vrem.wifianalyzer.wifi.fragmentDataPack.DataPackageFragment;
 import com.vrem.wifianalyzer.wifi.fragmentDos.DosFragment;
@@ -47,6 +49,8 @@ public class NavigationItemFactory {
     public static final NavigationItem FORGERY = new FragmentItem(new FakeApFragment(),true); //fakeAp
     public static final NavigationItem WIFI_HOTSPOT = new FragmentItem(new WIFIHotspotFragment(),true); //wifi_hostpot
     public static final NavigationItem TARGET_SEARCH = new FragmentItem(new TargetSearchFragment(),true);  //target_search
+    public static final NavigationItem CHANNEL = new FragmentItem(new ChannelFragment(),true);  //channel_data
+    public static final NavigationItem CHANNEL_RATE = new FragmentItem(new ChannelRateFragment(),true);  //channel_rate
     public static final NavigationItem DATA_PACK = new FragmentItem(new DataPackageFragment(),true); //data_pack
     //public static final NavigationItem CLIENT = new FragmentItem(new ClientFragment(),true);  //client
 

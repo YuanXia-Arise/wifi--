@@ -74,7 +74,8 @@ public class PackageInfo extends Base {
 	}
 
 	public static void setPackageInfo(final Context context, String deviceId,
-                                      final ListView listview, final ProgressBar progressBar, final TextView refresh, final TextView noData) throws JSONException {
+                                      final ListView listview, final ProgressBar progressBar,
+									  final TextView refresh, final TextView noData) throws JSONException {
 		progressBar.setVisibility(View.VISIBLE);
 
 		final List<PackageInfo> packageData = new ArrayList<PackageInfo>();
@@ -91,7 +92,8 @@ public class PackageInfo extends Base {
 			packageInfo.setDownloadUrl(PrefSingleton.getInstance().getString("url").replace("http://", "") + "/" + snifferFile.file);
 
 			packageInfo.setId(i.toString());
-			packageInfo.setMac(snifferFile.file.split("-")[1]);//snifferFile.file.split("-")[1] + "-" + snifferFile.file.split("-")[2] + ".cap");//snifferFile.file.split("-")[1].split("\\.")[0]);
+			//packageInfo.setMac(snifferFile.file.split("-")[1]);
+			packageInfo.setMac(snifferFile.file);
 
 			packageInfo.setSsid(snifferFile.essid);
 
@@ -102,7 +104,7 @@ public class PackageInfo extends Base {
 		if(packageData.size() == 0){
 			noData.setVisibility(View.VISIBLE);
 			refresh.setVisibility(View.GONE);
-		}else{
+		} else {
 			noData.setVisibility(View.GONE);
 			refresh.setVisibility(View.GONE);
 			packageDownloadAdapter = new PackageDownloadAdapter(context,
@@ -112,7 +114,8 @@ public class PackageInfo extends Base {
 	}
 	
 	public static void setPackageInfo_bak(final Context context, DeviceInfo deviceInfo,
-                                          final ListView listview, final ProgressBar progressBar, final TextView refresh, final TextView noData) throws JSONException {
+                                          final ListView listview, final ProgressBar progressBar,
+										  final TextView refresh, final TextView noData) throws JSONException {
 		progressBar.setVisibility(View.VISIBLE);
 		SharedPreferences userInfo = context.getSharedPreferences("user_info", 0);
 		String token = userInfo.getString("token", "");

@@ -81,7 +81,7 @@
     <string name = "about_contributor_title">contributors:</string>
     <string name = "about_write_review">Voglio valutare</string>
 
-    <string name = "security_none">no</string>
+    <string name = "security_none">OPEN</string>
 
     <string name = "filter_title">filter</string>
     <string name = "filter_close">off</string>

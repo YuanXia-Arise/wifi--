@@ -36,11 +36,11 @@ public class BackgroundTask {
     }
 
     public static void clearHandling() {
-        if (mTimerTaskHandling != null) { //不为空
+        if (mTimerTaskHandling != null) { // 不为空
             mTimerTaskHandling.cancel();
             mTimerTaskHandling = null;
         }
-        if (mTimerHandling != null) { //不为空
+        if (mTimerHandling != null) { // 不为空
             mTimerHandling.cancel();
             mTimerHandling = null;
         }

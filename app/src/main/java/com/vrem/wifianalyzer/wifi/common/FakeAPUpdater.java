@@ -11,6 +11,7 @@ import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.RequestFuture;
+import com.google.gson.Gson;
 import com.vrem.wifianalyzer.DeviceListActivity;
 import com.vrem.wifianalyzer.MainActivity;
 import com.vrem.wifianalyzer.MainContext;
@@ -39,7 +40,9 @@ public class FakeAPUpdater extends AsyncTask<Object, Object, Void> {
     boolean mExit;
     boolean mStep1Run;
 
+
     public FakeAPUpdater(Context context, String devID, JSONObject jo) {
+        System.out.println("20200715-0:" + "devID=" + devID + " jo=" + new Gson().toJson(jo));
         mContext = context;
         mDevId = devID;
         mJo = jo;
@@ -85,11 +88,9 @@ public class FakeAPUpdater extends AsyncTask<Object, Object, Void> {
                 return null;
             }
 
-//            JSONObject jo = response.getJSONObject("data");
-//            Log.d(TAG, "doInBackground: 999999-3:" + jo);
-//            JSONArray clients = jo.getJSONArray("mac");
-//            Log.d(TAG, "doInBackground: 999999-4:" + clients);
-//            Log.w("FAKE_STEP_2", "CLIENTS " + clients.toString());
+            //JSONObject jo = response.getJSONObject("data");
+            //JSONArray clients = jo.getJSONArray("mac");
+            //Log.w("FAKE_STEP_2", "CLIENTS " + clients.toString());
             //return apData;
         } catch (JSONException e) {
             //mError = true;
@@ -116,7 +117,7 @@ public class FakeAPUpdater extends AsyncTask<Object, Object, Void> {
             Intent intent = new Intent();
             intent.setClass(mContext,DeviceListActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            mContext.startActivity(intent);  //跳转到功能运行界面
+            mContext.startActivity(intent);  // 跳转到功能运行界面
             ((Activity) mContext).overridePendingTransition(R.anim.slide_left_in, R.anim.slide_right_out);
             ((Activity) mContext).finish();
             return;
@@ -144,8 +145,8 @@ public class FakeAPUpdater extends AsyncTask<Object, Object, Void> {
         param.put("action", "fakeap"); // 2-1
         param.put("essid", jo.getString("essid")); //2-2
         param.put("channel", jo.getInt("channel")); // 2-3
-        JSONObject sec_param = new JSONObject(); // 2-4 //加密
-        JSONObject out_param = new JSONObject(); // 2-5 //目标热点SSID,PSW,CHANNEL
+        JSONObject sec_param = new JSONObject(); // 2-4 // 加密
+        JSONObject out_param = new JSONObject(); // 2-5 // 目标热点SSID,PSW,CHANNEL
         JSONObject sec_param_data = new JSONObject(); // 2-4-x
         JSONObject out_param_data = new JSONObject(); // 2-5-x
 
@@ -198,6 +199,7 @@ public class FakeAPUpdater extends AsyncTask<Object, Object, Void> {
         obj.put("param", param);
 
         Log.w("FAKE_STEP_1_REQUEST", obj.toString());
+        System.out.println("20210305==发送指令：" + obj.toString());
 
         RequestFuture<JSONObject> requestFuture = RequestFuture.newFuture();
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, obj, requestFuture, requestFuture);
@@ -210,15 +212,16 @@ public class FakeAPUpdater extends AsyncTask<Object, Object, Void> {
 
             new InteractRecordDBUtils(mContext).easy_insert(obj.toString(), response.toString());//将请求命令、返回结果存入数据库
 
+            System.out.println("20210305==返回结果：" + response.toString());
             int status = response.getInt("status");
             if (status == 0) {
-                Log.w("FAKE_STEP_1", "RESPONSE:" + response.toString());
-//                return 0;
-                return -2;
+                Log.w("FAKE_STEP_1", "RESPONSE:" + response.toString()); // 20200911测试，返回status=1,0<==>2
+                return 0;
+                //return -2;
             } else {
                 Log.w("FAKE_STEP_1", "UNEXPECTED RESPONSE: " + response.toString());
-//                return -2;
-                return 0;
+                return -2;
+                //return 0;
             }
         } catch (TimeoutException e) {
             Log.w("FAKE_STEP_1", "TIMEOUT");
@@ -239,6 +242,7 @@ public class FakeAPUpdater extends AsyncTask<Object, Object, Void> {
         obj.put("param", param);
 
         Log.w("FAKE_STEP_2", "REQUEST: " + obj.toString());
+        System.out.println("20210305==发送指令：" + obj.toString());
 
         RequestFuture<JSONObject> requestFuture = RequestFuture.newFuture();
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, obj, requestFuture, requestFuture);
@@ -246,6 +250,7 @@ public class FakeAPUpdater extends AsyncTask<Object, Object, Void> {
 
         try {
             JSONObject response = requestFuture.get(5 - 1, TimeUnit.SECONDS);
+            System.out.println("20210305==返回结果：" + response.toString());
             int status = response.getInt("status");
             if (status == 0) {
                 Log.w("FAKE_STEP_2", "RESPONSE:" + response.toString());

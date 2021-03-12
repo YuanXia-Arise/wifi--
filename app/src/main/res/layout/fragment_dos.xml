@@ -20,7 +20,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/title"
-            android:text="使用前置设备对选定的目标无线热点或者频段发动拒绝服务攻击，使目标无线热点或者相应频段下的客户端无法正常连接。"
+            android:text="使用前置设备对选定的目标无线热点或者信道发动拒绝服务攻击，使目标无线热点或者相应信道下的客户端无法正常连接。"
             android:textColor="@android:color/white" />
         </LinearLayout>
     <LinearLayout
@@ -34,7 +34,7 @@
             android:layout_below="@id/desc"
             android:textAllCaps="false"
             android:gravity="center"
-            android:text="选择目标热点"
+            android:text="选择目标SSID"
             android:textColor="@android:color/white"
             android:textSize="28sp" 
             android:singleLine="true"/>
@@ -50,7 +50,7 @@
             android:layout_height="55dp"
             android:layout_below="@id/apdos"
             android:gravity="center"
-            android:text="选择目标频段"
+            android:text="选择目标信道"
             android:textColor="@android:color/white"
             android:textSize="28sp"
             android:singleLine="true" />
@@ -65,7 +65,7 @@
             android:layout_height="55dp"
             android:layout_below="@id/channeldos"
             android:gravity="center"
-            android:text="选择多目标频段"
+            android:text="选择多目标信道"
             android:textColor="@android:color/white"
             android:textSize="28sp"
             android:singleLine="true" />

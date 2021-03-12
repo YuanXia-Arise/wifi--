@@ -18,12 +18,15 @@
 
 package com.vrem.wifianalyzer.wifi.accesspoint;
 
+import android.app.Fragment;
 import android.net.wifi.WifiInfo;
 import android.support.annotation.NonNull;
+import android.support.v4.app.FragmentManager;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.vrem.wifianalyzer.MainActivity;
 import com.vrem.wifianalyzer.MainContext;
 import com.vrem.wifianalyzer.R;
@@ -74,7 +77,10 @@ public class ConnectionView implements UpdateNotifier {
     private void setConnectionVisibility(@NonNull WiFiData wiFiData, @NonNull ConnectionViewType connectionViewType) {
         WiFiDetail connection = wiFiData.getConnection();
         View connectionView = mainActivity.findViewById(R.id.connection);
+
         WiFiConnection wiFiConnection = connection.getWiFiAdditional().getWiFiConnection();
+
+        //String str = mainActivity.getNavigationMenuView().getCurrentNavigationMenu().name(); // 当前Fragment
         if (connectionViewType.isHide() || !wiFiConnection.isConnected()) {
             connectionView.setVisibility(View.GONE);
         } else {
@@ -84,7 +90,7 @@ public class ConnectionView implements UpdateNotifier {
             if (parent.getChildCount() == 0) {
                 parent.addView(view);
             }
-            setViewConnection(connectionView, wiFiConnection);
+            setViewConnection(connectionView, wiFiConnection); //65Mbps 192.168.100.98
             attachPopup(view, connection);
         }
     }
@@ -101,6 +107,8 @@ public class ConnectionView implements UpdateNotifier {
             textLinkSpeed.setVisibility(View.VISIBLE);
             textLinkSpeed.setText(String.format(Locale.ENGLISH, "%d%s", linkSpeed, WifiInfo.LINK_SPEED_UNITS));
         }
+        connectionView.findViewById(R.id.ipAddress).setVisibility(View.GONE);
+        connectionView.findViewById(R.id.linkSpeed).setVisibility(View.GONE);
     }
 
     private void attachPopup(@NonNull View view, @NonNull WiFiDetail wiFiDetail) {

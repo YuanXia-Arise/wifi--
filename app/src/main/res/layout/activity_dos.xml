@@ -92,7 +92,7 @@
             android:layout_below="@id/apdos"
             android:layout_marginLeft="10dp"
             android:gravity="center"
-            android:text="选择目标频段"
+            android:text="选择目标信道"
             android:textColor="@android:color/white"
             android:textSize="28sp"
             android:singleLine="true" />
@@ -110,7 +110,7 @@
             android:layout_below="@id/channeldos"
             android:layout_marginLeft="10dp"
             android:gravity="center"
-            android:text="选择多目标频段"
+            android:text="选择多目标信道"
             android:textColor="@android:color/white"
             android:textSize="28sp"
             android:singleLine="true" />

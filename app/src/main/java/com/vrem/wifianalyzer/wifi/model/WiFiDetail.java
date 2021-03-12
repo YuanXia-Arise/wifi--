@@ -30,11 +30,15 @@ import android.widget.Toast;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
+import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.RequestFuture;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
+import com.vrem.AppUtil;
 import com.vrem.wifianalyzer.MainContext;
 import com.vrem.wifianalyzer.R;
 import com.vrem.wifianalyzer.settings.Settings;
@@ -42,6 +46,7 @@ import com.vrem.wifianalyzer.wifi.adapter.APDialogListAdapter;
 import com.vrem.wifianalyzer.wifi.band.WiFiWidth;
 import com.vrem.wifianalyzer.wifi.common.BaseUtils;
 import com.vrem.wifianalyzer.wifi.common.FrequencyTransformTools;
+import com.vrem.wifianalyzer.wifi.common.MacSsidDBUtils;
 import com.vrem.wifianalyzer.wifi.common.PrefSingleton;
 import com.vrem.wifianalyzer.wifi.common.VolleySingleton;
 
@@ -55,9 +60,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -66,7 +72,9 @@ import static android.content.ContentValues.TAG;
 
 //单条wifi详细信息
 public class WiFiDetail implements Comparable<WiFiDetail> {
-    public static final WiFiDetail EMPTY = new WiFiDetail(StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, WiFiSignal.EMPTY, "", "","",0,"");
+    public static final WiFiDetail EMPTY = new WiFiDetail(StringUtils.EMPTY,
+            StringUtils.EMPTY, StringUtils.EMPTY, WiFiSignal.EMPTY, "",
+            "","",0,"","","");
     private static final String SSID_EMPTY = "***";//用于返回空SSID的wifiSSID信息
 
     private final List<WiFiDetail> children; //单项wifi信息的集合
@@ -74,19 +82,21 @@ public class WiFiDetail implements Comparable<WiFiDetail> {
     private final String BSSID; //mac地址
     private final String capabilities; //加密方式
     private final WiFiSignal wiFiSignal; //wifi信号
-    private final WiFiAdditional wiFiAdditional; //wifi中心频率，主频率，水平，频段、MHz差、信道
+    private final WiFiAdditional wiFiAdditional; //wifi中心频率，主频率，水平，信道、MHz差、信道
 
     private final String client; //客户端mac
     private final String cipher; //算法
     private final String wps;
     private final double rate;
     private final String beacons; //信号强度
+    private final String last_time; // 最后扫描时间
+    private final String count; // last_time对比叠加次数
 
     private static APDialogListAdapter apDialogListAdapter;
 
     public WiFiDetail(@NonNull String SSID, @NonNull String BSSID, @NonNull String capabilities,
                       @NonNull WiFiSignal wiFiSignal, @NonNull WiFiAdditional wiFiAdditional,
-                      String client,String cipher,String wps,double rate,String beacons) {
+                      String client,String cipher,String wps,double rate,String beacons,String last_time,String count) {
         if (SSID.equals("")){
             this.SSID = "隐藏SSID";
         }else {
@@ -103,18 +113,21 @@ public class WiFiDetail implements Comparable<WiFiDetail> {
         this.wps = wps;
         this.rate = rate;
         this.beacons = beacons;
+        this.last_time = last_time;
+        this.count = count;
     }
 
     //接收下面WiFiDetail构造方法回传的数据
     public WiFiDetail(@NonNull String SSID, @NonNull String BSSID, @NonNull String capabilities, @NonNull WiFiSignal wiFiSignal,
-                      String client, String cipher,String wps,double rate,String beacons) {
-        this(SSID, BSSID, capabilities, wiFiSignal, WiFiAdditional.EMPTY,client,cipher,wps,rate,beacons);
+                      String client, String cipher,String wps,double rate,String beacons,String last_time,String count) {
+        this(SSID, BSSID, capabilities, wiFiSignal, WiFiAdditional.EMPTY,client,cipher,wps,rate,beacons,last_time,count);
     }
 
     //定义构造方法，回传给上面的WiFiDetail构造方法
     public WiFiDetail(@NonNull WiFiDetail wiFiDetail, @NonNull WiFiAdditional wiFiAdditional,String client,
-                      String cipher,String wps,double rate,String beacons) {
-        this(wiFiDetail.SSID, wiFiDetail.BSSID, wiFiDetail.getCapabilities(), wiFiDetail.getWiFiSignal(), wiFiAdditional,client,cipher,wps,rate,beacons);
+                      String cipher,String wps,double rate,String beacons,String last_time,String count) {
+        this(wiFiDetail.SSID, wiFiDetail.BSSID, wiFiDetail.getCapabilities(), wiFiDetail.getWiFiSignal(),
+                wiFiAdditional,client,cipher,wps,rate,beacons,last_time,count);
     }
 
     public double getRate() {
@@ -126,11 +139,15 @@ public class WiFiDetail implements Comparable<WiFiDetail> {
     }
 
     public String getSSID() {
-        return isHidden() ? SSID_EMPTY : SSID;//为true则返回SSID_EMPTY 反之
+        return isHidden() ? SSID_EMPTY : SSID; //为true则返回SSID_EMPTY 反之
     }
 
+    public String getLast_time() { return last_time; }
+
+    public String getCount() { return count; }
+
     boolean isHidden() {
-        return StringUtils.isBlank(SSID);//判断SSID是否为空，为空返回true 反之
+        return StringUtils.isBlank(SSID); //判断SSID是否为空，为空返回true 反之
     }
 
     public String getWps(){
@@ -257,6 +274,7 @@ public class WiFiDetail implements Comparable<WiFiDetail> {
                             JSONObject jsonObjectAps = jo.getJSONObject("aps");
                             Iterator<?> keys = jsonObjectAps.keys();
                             String essid = null,enc = null,wps = null, bssid = null,channel = null,client = null,beacons = null;
+                            String last_time = null;
                             double cRate = 0;
                             int power = 0;
                             while (keys.hasNext()) {
@@ -272,21 +290,20 @@ public class WiFiDetail implements Comparable<WiFiDetail> {
                                 bssid = key;
                                 String cipher = "";
                                 beacons = String.valueOf(jsonObjectAp.getInt("beacons"));
+                                last_time = String.valueOf(jsonObjectAp.getLong("last_time"));
                                 JSONArray wpa_cipher = jsonObjectAp.getJSONArray("wpa_cipher");
                                 JSONArray wpa2_cipher = jsonObjectAp.getJSONArray("wpa2_cipher");
                                 for (int i = 0; i < wpa_cipher.length(); i++) {
                                     if (cipher.equals("")) {
                                         cipher = cipher + wpa_cipher.getString(i);
-                                    }
-                                    else {
+                                    } else {
                                         cipher = cipher + " " + wpa_cipher.getString(i);
                                     }
                                 }
                                 for (int i = 0; i < wpa2_cipher.length(); i++) {
                                     if (cipher.equals("")) {
                                         cipher = cipher + wpa2_cipher.getString(i);
-                                    }
-                                    else {
+                                    } else {
                                         cipher = cipher + " " + wpa2_cipher.getString(i);
                                     }
                                 }
@@ -315,7 +332,7 @@ public class WiFiDetail implements Comparable<WiFiDetail> {
 
                                 WiFiWidth wiFiWidth =WiFiWidth.MHZ_40;//模拟wifi宽度
                                 WiFiSignal addWiFiSignal = new WiFiSignal(1,2,wiFiWidth,power,channel);//模拟wifi信号 13：power dbm,
-                                WiFiDetail addWiFiDetail = new WiFiDetail(essid,bssid,enc,addWiFiSignal,client,cipher,wps,cRate,beacons);//模拟单条wifi的基本信息 1111:essid  fds:bssid  fdss:enc
+                                WiFiDetail addWiFiDetail = new WiFiDetail(essid,bssid,enc,addWiFiSignal,client,cipher,wps,cRate,beacons,last_time,"");//模拟单条wifi的基本信息 1111:essid  fds:bssid  fdss:enc
                                 apData.add(addWiFiDetail);
                             }
 //                            switch (sort) {
@@ -402,16 +419,18 @@ public class WiFiDetail implements Comparable<WiFiDetail> {
         obj.put("param", param); // 3
 
         Log.w("SCAN_STEP_1", "REQUEST: " + obj.toString());
+        System.out.println("20210305==发送指令：" + obj.toString());
 
         RequestFuture<JSONObject> requestFuture = RequestFuture.newFuture();
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url,  obj, requestFuture, requestFuture);
         jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(10000,
                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        VolleySingleton.getInstance(context).getRequestQueue().add(jsonObjectRequest);
+        VolleySingleton.getInstance(context.getApplicationContext()).getRequestQueue().add(jsonObjectRequest);
 
         try {
             JSONObject response = requestFuture.get(5 - 1, TimeUnit.SECONDS);
+            System.out.println("20210305==返回结果：" + response.toString());
             int status = response.getInt("status");
             if (status == 0) {
                 Log.w("成功", "RESPONSE:" + response.toString());
@@ -422,6 +441,7 @@ public class WiFiDetail implements Comparable<WiFiDetail> {
             }
         } catch (TimeoutException e) {
             Log.w("超时", "TIMEOUT");
+            PrefSingleton.getInstance().putString("deviceInfo",null);
             return -1;
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -435,22 +455,25 @@ public class WiFiDetail implements Comparable<WiFiDetail> {
         Log.d(TAG, "scanStep1: 123--1");
         String url = PrefSingleton.getInstance().getString("url");
 
-        JSONObject obj = new JSONObject();
+        final JSONObject obj = new JSONObject();
         JSONObject param = new JSONObject();
         param.put("action", "action");
         obj.put("param", param);
 
         Log.w("SCAN_STEP_2", "REQUEST: " + obj.toString());
+        System.out.println("20210305==发送指令：" + obj.toString());
 
-        RequestFuture<JSONObject> requestFuture = RequestFuture.newFuture(); //声明同步的网络请求对象
+        RequestFuture < JSONObject > requestFuture = RequestFuture.newFuture(); //声明同步的网络请求对象
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url,  obj, requestFuture, requestFuture); //声明接收对象
         jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(10000,
                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)); //设置超时和重试请求,第一个代表超时时间,第三个参数代表最大重试次数,这里设置为1.0f代表如果超时，则不重试
-        VolleySingleton.getInstance(context).getRequestQueue().add(jsonObjectRequest); //把请求加入队列,此时已产生数据
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        //设置超时和重试请求,第一个代表超时时间,第三个参数代表最大重试次数,这里设置为1.0f代表如果超时，则不重试
+        VolleySingleton.getInstance(context.getApplicationContext()).getRequestQueue().add(jsonObjectRequest); //把请求加入队列,此时已产生数据
 
         try {
             JSONObject response = requestFuture.get(10 - 1, TimeUnit.SECONDS); //获取请求结果,包含扫描的wifi数据
+            System.out.println("20210305==返回结果：" + response.toString());
 
             int status = response.getInt("status");
             if (status == 0) {
@@ -471,7 +494,7 @@ public class WiFiDetail implements Comparable<WiFiDetail> {
         return null;
     }
 
-    public static List<WiFiDetail> response2ApData(JSONObject response, int tag, int sort) throws JSONException {
+    public static List<WiFiDetail> response2ApData(JSONObject response, int tag, int sort, Context context) throws JSONException {
         Log.d(TAG, "scanStep1: 123--2");
 
         List<WiFiDetail> apData = new ArrayList<WiFiDetail>();
@@ -483,6 +506,7 @@ public class WiFiDetail implements Comparable<WiFiDetail> {
         JSONObject jsonObjectStas = jo.getJSONObject("stas");
         Iterator<?> keys = jsonObjectAps.keys();
         String chanel = null, bssid = null, enc = null, essid = null, cipher = "", clientTmp = null, wps = null, beacons = null;
+        String last_time = null;
         int power = 0;
         double cRate = 0;
         while (keys.hasNext()) { //遍历所有扫描到的数据
@@ -491,6 +515,8 @@ public class WiFiDetail implements Comparable<WiFiDetail> {
             JSONObject jsonObjectAp = jsonObjectAps.getJSONObject(key); //获取单条wifi数据的所有信息
 
             beacons = String.valueOf(jsonObjectAp.getInt("beacons")); //信号强度
+            last_time = String.valueOf(jsonObjectAp.getLong("last_time")); // System.currentTimeMillis();
+
 
             if (tag == 1 && jsonObjectAp.get("wps") == null) continue;
             if (jsonObjectAp.get("essid") instanceof String) {
@@ -500,6 +526,8 @@ public class WiFiDetail implements Comparable<WiFiDetail> {
 //                apInfo.setSsid("");
                 essid = "";
             }
+            essid = essid.replace("\u0000", ""); // 旧版隐藏SSID
+            essid = essid.replace("\\x00", ""); // 新版隐藏SSID
             int tmp = 0;
             try {
                 tmp = jsonObjectAp.getInt("power"); //获取功率
@@ -523,9 +551,9 @@ public class WiFiDetail implements Comparable<WiFiDetail> {
             //wps = (jsonObjectAp.get("wps") == null) ? "false" : "true";
             if (jsonObjectAp.get("wps") == null){
                 wps = "false";
-            }else if(jsonObjectAp.get("wps").equals("configured")) {
+            } else if(jsonObjectAp.get("wps").equals("configured")) {
                 wps = "true";
-            }else{
+            } else{
                 wps = "false";
             }
 //            apInfo.setMac(key); //设置mac地址
@@ -539,6 +567,7 @@ public class WiFiDetail implements Comparable<WiFiDetail> {
                     cipher = cipher + " " + wpa_cipher.getString(i); //拼接暗号
                 }
             }
+
             for (int i = 0; i < wpa2_cipher.length(); i++) { //遍历暗号
                 if (cipher.equals("")) {
                     cipher = cipher + wpa2_cipher.getString(i); //拼接暗号
@@ -553,9 +582,6 @@ public class WiFiDetail implements Comparable<WiFiDetail> {
             JSONArray clients = new JSONArray();
             for (int i = 0; i < clientBssids.length(); i++) {//遍历客户端wifi的mac地址
                 String clientBssid = clientBssids.getString(i);
-                //Log.d(TAG, "1234==001>" + jsonObjectStas.getJSONObject(clientBssid));
-                //{"forty_mhz_support":false,"bssid":"9c:e3:3f:44:15:2d","forty_mhz_2_4_ghz":false,"rate_from":null,"channel":1,"first_time":1634.135051,"rate_to":24,"rx_datas":55,"probes":[],"ap_bssid":"cc:81:da:e4:c1:38","power":-74,"tx_datas":31,"last_time":3596.673311}
-
                 String client_power = jsonObjectStas.getJSONObject(clientBssid).getString("power");
 
                 JSONArray probesArr;
@@ -574,6 +600,8 @@ public class WiFiDetail implements Comparable<WiFiDetail> {
                 client.put("mac", clientBssid);
                 client.put("probe", probes);
                 client.put("power", client_power);
+                client.put("rx_datas",jsonObjectStas.getJSONObject(clientBssid).getString("rx_datas"));
+                client.put("tx_datas",jsonObjectStas.getJSONObject(clientBssid).getString("tx_datas"));
                 clients.put(client);
             }
             clientTmp = clients.toString();
@@ -603,8 +631,8 @@ public class WiFiDetail implements Comparable<WiFiDetail> {
             cRate = minRate;
             WiFiWidth wiFiWidth = WiFiWidth.MHZ_40;//模拟wifi宽度
 
-/*
-**拿到滤波器设置的信息，对获取的数据进行处理(SSID/WiFi频段/信号强度/安全)
+/**
+* 拿到滤波器设置的信息，对获取的数据进行处理(SSID/WiFi信道/信号强度/安全)
 * addWiFiSignal.getWiFiBand()/addWiFiSignal.getStrength()
 * addWiFiDetail.SSID/addWiFiDetail.capabilities
 **/
@@ -614,44 +642,97 @@ public class WiFiDetail implements Comparable<WiFiDetail> {
             String data = jsonObject.getString("data");
             JSONObject dataJson = new JSONObject(data);
             String device_name = dataJson.getString("device");
+            //String device_name = "device";
 
-            //essid(隐藏SSID(null))，bssid(00:00:00:00:00:00),信号(0),距离(0m);不添加至列表
-            if (!essid.equals("")) {
-            //if (!bssid.equals("00:00:00:00:00:00")) {
-            if (essid.indexOf(device_name) != -1) { //设备信息保存在界面
-                WiFiSignal addWiFiSignal = new WiFiSignal(frequency,frequency,wiFiWidth,power,chanel); //wifi信号
-                WiFiDetail addWiFiDetail = new WiFiDetail(essid,bssid,enc,addWiFiSignal,clientTmp,cipher,wps,cRate,beacons); //单条wifi的基本信息
-                PrefSingleton.getInstance().putString("device_mac", addWiFiDetail.getBSSID());
-                Log.d(TAG, "123==0>" + addWiFiDetail.getBSSID());
-                apData.add(addWiFiDetail);
-                Log.d(TAG, "123==1>" + addWiFiSignal);
-                Log.d(TAG, "123==2>" + addWiFiDetail);
-            } else {
-                WiFiSignal addWiFiSignal = new WiFiSignal(frequency,frequency,wiFiWidth,power,chanel); //wifi信号
-                String WifiBands = String.valueOf(addWiFiSignal.getWiFiBand()); //WIFI频段(2.4GHZ/5GHZ)
-                String EwifiBands = String.valueOf(settings.getWiFiBands());
-                String a = String.valueOf(EwifiBands).substring(1, String.valueOf(EwifiBands).length() - 1);
-                String Strengths = String.valueOf(addWiFiSignal.getStrength()); //信号强度(Zero/One/Two/Three/Four)
-                String Estrengths = String.valueOf(settings.getStrengths());
-                String d = String.valueOf(Estrengths).substring(1, String.valueOf(Estrengths).length() - 1);
-                if ((a.indexOf(WifiBands) != -1) && (d.indexOf(Strengths) != -1)) {
-                    WiFiDetail addWiFiDetail = new WiFiDetail(essid,bssid,enc,addWiFiSignal,clientTmp,cipher,wps,cRate,beacons); //单条wifi的基本信息
-                    String SSIDs = addWiFiDetail.SSID; //SSID
-                    String Essid = String.valueOf(settings.getSSIDs());
-                    String b = String.valueOf(Essid).substring(1, String.valueOf(Essid).length() - 1);
-                    String SSIDs_low = SSIDs.toLowerCase();
-                    String b_low = b.toLowerCase(); //忽略大小写
-                    String Securities = addWiFiDetail.capabilities; //安全(NONE/WPS/WEP/WPA/WPA2)
-                    if (Securities.equals("")) {
-                        Securities = "NONE";
-                    }
-                    String Esecurities = String.valueOf(settings.getSecurities());
-                    String c = String.valueOf(Esecurities).substring(1, String.valueOf(Esecurities).length() - 1);
-                    if ((c.indexOf(Securities) != -1) && (SSIDs_low.indexOf(b_low) != -1)) {
-                        apData.add(addWiFiDetail);
+            // last_time对比，叠加count，回传数据显示处理
+            MacSsidDBUtils macSsidDBUtils = new MacSsidDBUtils(context);
+            macSsidDBUtils.open();
+            String Last_time = macSsidDBUtils.getLastTime(bssid);
+            String count = macSsidDBUtils.getCount(bssid);
+            count = count.equals("") ? String.valueOf(0) : count;
+            if (!essid.equals(device_name) && !essid.equals("")){
+                if (last_time.equals(Last_time)){
+                    macSsidDBUtils.updataCount(bssid, String.valueOf(Integer.valueOf(count) + 1));
+                    macSsidDBUtils.updataLast_time(bssid,last_time);
+                } else {
+                    macSsidDBUtils.updataCount(bssid, String.valueOf(0));
+                    macSsidDBUtils.updataLast_time(bssid,last_time);
+                    macSsidDBUtils.updataTime(bssid,String.valueOf(System.currentTimeMillis()));
+                }
+            }
+            macSsidDBUtils.close();
+
+            //essid(隐藏SSID(null))，bssid(00:00:00:00:00:00),信号(0),距离(0m);不添加至列表显示
+            //if (!essid.equals("") && Integer.valueOf(count) < (10/scan_count + 1)) {
+            if (!essid.equals("") && Integer.valueOf(count) < 6) {
+                if (essid.indexOf(device_name) != -1) { //设备信息保存在界面
+                    WiFiSignal addWiFiSignal = new WiFiSignal(frequency, frequency, wiFiWidth, power, chanel); //WIFI信号
+                    WiFiDetail addWiFiDetail = new WiFiDetail(essid, bssid, enc, addWiFiSignal, clientTmp, cipher, wps, cRate, beacons, last_time, count); //单条WIFI的基本信息
+                    PrefSingleton.getInstance().putString("device_mac", addWiFiDetail.getBSSID());
+                    apData.add(addWiFiDetail);
+                } else {
+                    WiFiSignal addWiFiSignal = new WiFiSignal(frequency, frequency, wiFiWidth, power, chanel); //WIFI信号
+                    String WifiBands = String.valueOf(addWiFiSignal.getWiFiBand()); //WIFI信道(2.4GHZ/5GHZ)
+                    String EwifiBands = String.valueOf(settings.getWiFiBands());
+                    String a = String.valueOf(EwifiBands).substring(1, String.valueOf(EwifiBands).length() - 1);
+                    String Strengths = String.valueOf(addWiFiSignal.getStrength()); //信号强度(Zero/One/Two/Three/Four)
+                    String Estrengths = String.valueOf(settings.getStrengths());
+                    String d = String.valueOf(Estrengths).substring(1, String.valueOf(Estrengths).length() - 1);
+                    if ((a.indexOf(WifiBands) != -1) && (d.indexOf(Strengths) != -1)) {
+                        WiFiDetail addWiFiDetail = new WiFiDetail(essid, bssid, enc, addWiFiSignal, clientTmp, cipher, wps, cRate, beacons, last_time, count); //单条WIFI的基本信息
+                        String SSIDs = addWiFiDetail.SSID; //SSID 名称
+                        //String SSIDs = addWiFiDetail.BSSID; //BSSID
+                        String Essid = String.valueOf(settings.getSSIDs());
+                        String b = String.valueOf(Essid).substring(1, String.valueOf(Essid).length() - 1);
+                        String SSIDs_low = SSIDs.toLowerCase();
+                        String b_low = b.toLowerCase(); //忽略大小写
+                        String Securities = addWiFiDetail.capabilities; //安全(OPEN/WPS/WEP/WPA/WPA2)
+                        if (Securities.equals("") || Securities.equals("OPEN")) {
+                            Securities = "NONE";
+                        }
+                        String Esecurities = String.valueOf(settings.getSecurities());
+                        String c = String.valueOf(Esecurities).substring(1, String.valueOf(Esecurities).length() - 1);
+                        if ((c.indexOf(Securities) != -1) && (SSIDs_low.indexOf(b_low) != -1)) {
+                            apData.add(addWiFiDetail);
+                        }
                     }
                 }
-            }}
+            } else if (!essid.equals("") && Integer.valueOf(count) >= 6){
+                String Bssid = bssid + count;
+                if (essid.indexOf(device_name) != -1) { //设备信息保存在界面
+                    WiFiSignal addWiFiSignal = new WiFiSignal(frequency, frequency, wiFiWidth, power, chanel); //WIFI信号
+                    WiFiDetail addWiFiDetail = new WiFiDetail(essid, Bssid, enc, addWiFiSignal, clientTmp, cipher, wps, cRate, beacons, last_time, count); //单条WIFI的基本信息
+                    PrefSingleton.getInstance().putString("device_mac", addWiFiDetail.getBSSID());
+                    apData.add(addWiFiDetail);
+                } else {
+                    WiFiSignal addWiFiSignal = new WiFiSignal(frequency, frequency, wiFiWidth, power, chanel); //WIFI信号
+                    String WifiBands = String.valueOf(addWiFiSignal.getWiFiBand()); //WIFI信道(2.4GHZ/5GHZ)
+                    String EwifiBands = String.valueOf(settings.getWiFiBands());
+                    String a = String.valueOf(EwifiBands).substring(1, String.valueOf(EwifiBands).length() - 1);
+                    String Strengths = String.valueOf(addWiFiSignal.getStrength()); //信号强度(Zero/One/Two/Three/Four)
+                    String Estrengths = String.valueOf(settings.getStrengths());
+                    String d = String.valueOf(Estrengths).substring(1, String.valueOf(Estrengths).length() - 1);
+                    if ((a.indexOf(WifiBands) != -1) && (d.indexOf(Strengths) != -1)) {
+                        WiFiDetail addWiFiDetail = new WiFiDetail(essid, Bssid, enc, addWiFiSignal, clientTmp, cipher, wps, cRate, beacons, last_time, count); //单条WIFI的基本信息
+                        String SSIDs = addWiFiDetail.SSID; //SSID 名称
+                        //String SSIDs = addWiFiDetail.BSSID; //BSSID
+                        String Essid = String.valueOf(settings.getSSIDs());
+                        String b = String.valueOf(Essid).substring(1, String.valueOf(Essid).length() - 1);
+                        String SSIDs_low = SSIDs.toLowerCase();
+                        String b_low = b.toLowerCase(); //忽略大小写
+                        String Securities = addWiFiDetail.capabilities; //安全(OPEN/WPS/WEP/WPA/WPA2)
+                        if (Securities.equals("") || Securities.equals("OPEN")) {
+                            Securities = "NONE";
+                        }
+                        String Esecurities = String.valueOf(settings.getSecurities());
+                        String c = String.valueOf(Esecurities).substring(1, String.valueOf(Esecurities).length() - 1);
+                        if ((c.indexOf(Securities) != -1) && (SSIDs_low.indexOf(b_low) != -1)) {
+                            apData.add(addWiFiDetail);
+                        }
+                    }
+                }
+            }
+
             /*WiFiSignal addWiFiSignal = new WiFiSignal(frequency,frequency,wiFiWidth,power,chanel);//模拟wifi信号 13：power dbm,
             WiFiDetail addWiFiDetail = new WiFiDetail(essid,bssid,enc,addWiFiSignal,clientTmp,cipher,wps,cRate);//模拟单条wifi的基本信息 1111:essid  fds:bssid  fdss:enc
             apData.add(addWiFiDetail);//将单个wifi对象添加到wifi对象组list*/
@@ -698,11 +779,13 @@ public class WiFiDetail implements Comparable<WiFiDetail> {
         String chanel=null,bssid=null,enc=null,essid=null,cipher="",clientTmp=null,wps=null,beacons=null;
         int power=0;
         double cRate=0;
+        String last_time = null;
         while (keys.hasNext()) {//遍历所有扫描到的数据
             String key = (String)keys.next();
             if (key.equals("")) continue;
             JSONObject jsonObjectAp = jsonObjectAps.getJSONObject(key);//获取单条wifi数据的所有信息
             beacons = String.valueOf(jsonObjectAp.getInt("beacons"));
+            last_time = String.valueOf(jsonObjectAp.getLong("last_time"));
 
             if (tag == 1 && jsonObjectAp.get("wps") == null) continue;
             if (jsonObjectAp.get("essid") instanceof String) {
@@ -796,7 +879,7 @@ public class WiFiDetail implements Comparable<WiFiDetail> {
             if (wps.equals("true")){
                 WiFiWidth wiFiWidth =WiFiWidth.MHZ_40;//模拟wifi宽度
                 WiFiSignal addWiFiSignal = new WiFiSignal(1,2,wiFiWidth,power,chanel);//模拟wifi信号 13：power dbm,
-                WiFiDetail addWiFiDetail = new WiFiDetail(essid,bssid,enc,addWiFiSignal,clientTmp,cipher,wps,cRate,beacons);//模拟单条wifi的基本信息 1111:essid  fds:bssid  fdss:enc
+                WiFiDetail addWiFiDetail = new WiFiDetail(essid,bssid,enc,addWiFiSignal,clientTmp,cipher,wps,cRate,beacons,last_time,"");//模拟单条wifi的基本信息 1111:essid  fds:bssid  fdss:enc
                 apData.add(addWiFiDetail);//将单个wifi对象添加到wifi对象组list
             }
         }

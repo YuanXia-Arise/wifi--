@@ -193,7 +193,12 @@ public class WifiInfoActivity extends Activity {
             method.setText("无");
         }
         String strMac = wiFiDetail.getBSSID();
-        mac.setText(strMac);
+        if (strMac.length() > 17) {
+            mac.setText(strMac.substring(0,17));
+        } else {
+            mac.setText(strMac);
+        }
+        //mac.setText(strMac);
 
         company.setSelected(true);
         GetCompany getCompany = new GetCompany();

@@ -25,6 +25,7 @@ import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.vrem.util.WifiStatus;
 import com.vrem.wifianalyzer.MainContext;
 import com.vrem.wifianalyzer.R;
 import com.vrem.wifianalyzer.wifi.common.BackgroundTask;
@@ -34,14 +35,11 @@ import com.vrem.wifianalyzer.wifi.common.FakeAPUpdater;
 import com.vrem.wifianalyzer.wifi.common.PrefSingleton;
 import com.vrem.wifianalyzer.wifi.model.WiFiDetail;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Timer;
 import java.util.TimerTask;
-
-import static android.content.ContentValues.TAG;
 
 /**
  * Created by ZhenShiJie on 2018/4/24.
@@ -378,8 +376,7 @@ public class FakeApFragment extends Fragment {
                                                         int which) {
                                         // TODO Auto-generated method stub
                                         dialog.dismiss();
-                                        encryEdit
-                                                .setText(encryString[encryId - 1]);
+                                        encryEdit.setText(encryString[encryId - 1]);
 
                                     }
 
@@ -528,6 +525,7 @@ public class FakeApFragment extends Fragment {
     }
 
     private  void sendCommand(String command){
+        PrefSingleton.getInstance().remove_fake();
         final Context context1 = getView().getContext();
         JSONObject jo = new JSONObject();
 
@@ -539,6 +537,10 @@ public class FakeApFragment extends Fragment {
                     jo.put("out", "4g" );
                     jo.put("essid", openSsidEdit.getText().toString());
                     jo.put("channel", openChannelId);
+                    PrefSingleton.getInstance().putString("fake_net","open");
+                    PrefSingleton.getInstance().putString("fake_out","4g");
+                    PrefSingleton.getInstance().putString("fake_essid",openSsidEdit.getText().toString());
+                    PrefSingleton.getInstance().putInt("fake_channel",openChannelId);
                 } catch (JSONException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -549,6 +551,10 @@ public class FakeApFragment extends Fragment {
                         jo.put("ssid", apSsid); // essid是fakeap的，ssid是out ap的
                         jo.put("ticket", wifipassedit.getText().toString()); // out ap password
                         jo.put("ap_channel", apChannel);
+                        PrefSingleton.getInstance().putString("fake_out","wifi");
+                        PrefSingleton.getInstance().putString("fake_ssid",apSsid);
+                        PrefSingleton.getInstance().putString("fake_ticket",wifipassedit.getText().toString());
+                        PrefSingleton.getInstance().putInt("fake_ap_channel",apChannel);
                     } catch (JSONException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
@@ -584,17 +590,28 @@ public class FakeApFragment extends Fragment {
                 jo.put("security", encryEdit.getText().toString()); //wap,wap2,wap2-wap
                 jo.put("password", password); //jo.put("password", passEdit.getText().toString());
                 jo.put("encryption", encryMethodEdit.getText().toString()); // TKIP,CCMP,TCIP-CCMP
+                PrefSingleton.getInstance().putString("fake_net","enc");
+                PrefSingleton.getInstance().putString("fake_out","4g");
+                PrefSingleton.getInstance().putString("fake_essid",ssid);
+                PrefSingleton.getInstance().putInt("fake_channel",channelId);
+                PrefSingleton.getInstance().putString("fake_security",encryEdit.getText().toString());
+                PrefSingleton.getInstance().putString("fake_password",password);
+                PrefSingleton.getInstance().putString("fake_encryption",encryMethodEdit.getText().toString());
             } catch (JSONException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
 
-            if(command.equals("connect_wifi_and_fake")){ // wifi 特有
+            if(command.equals("connect_wifi_and_fake")){ // wifi特有
                 try {
                     jo.put("out", "wifi");
                     jo.put("ssid", apSsid);
                     jo.put("ticket", wifipassedit.getText().toString());
                     jo.put("ap_channel", apChannel);
+                    PrefSingleton.getInstance().putString("fake_out","wifi");
+                    PrefSingleton.getInstance().putString("fake_ssid",apSsid);
+                    PrefSingleton.getInstance().putString("fake_ticket",wifipassedit.getText().toString());
+                    PrefSingleton.getInstance().putInt("fake_ap_channel",apChannel);
                 } catch (JSONException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -606,6 +623,7 @@ public class FakeApFragment extends Fragment {
         }
 
         final JSONObject jof = jo;
+        System.out.println("20200911热点伪造<==>" + jo);
 
         //DeviceInfo.sendCommand(FakeAPActivity.this, deviceInfo, jo, command);
         DevStatusDBUtils devStatusDBUtils = new DevStatusDBUtils(context1);
@@ -629,6 +647,6 @@ public class FakeApFragment extends Fragment {
                 });
             }
         };
-        BackgroundTask.mTimerHandling.schedule(BackgroundTask.mTimerTaskHandling, 0, 30000); //延迟时间0ms,执行的间隔30000ms
+        BackgroundTask.mTimerHandling.schedule(BackgroundTask.mTimerTaskHandling, 0, 30000);
     }
 }

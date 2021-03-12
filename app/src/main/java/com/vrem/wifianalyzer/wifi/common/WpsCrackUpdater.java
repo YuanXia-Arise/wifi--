@@ -78,10 +78,7 @@ public class WpsCrackUpdater extends AsyncTask<Object, Object, Void> {
                 return null;
             }
 
-            Log.d(TAG, "doInBackground: 333--5");
             JSONObject response = dosStep2(mContext);
-            Log.d(TAG, "doInBackground: 333--6");
-            Log.d(TAG, "doInBackground: 333--7:" + response);
             if (response == null) {
                 return null;
             }
@@ -184,6 +181,7 @@ public class WpsCrackUpdater extends AsyncTask<Object, Object, Void> {
         obj.put("param", param);
 
         Log.w("CRACK_STEP_2", "REQUEST: " + obj.toString());
+        System.out.println("20210305==发送指令：" + obj.toString());
 
         RequestFuture<JSONObject> requestFuture = RequestFuture.newFuture();
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url,  obj, requestFuture, requestFuture);
@@ -191,6 +189,7 @@ public class WpsCrackUpdater extends AsyncTask<Object, Object, Void> {
 
         try {
             JSONObject response = requestFuture.get(5 - 1, TimeUnit.SECONDS);
+            System.out.println("20210305==返回结果：" + response.toString());
             int status = response.getInt("status");
             if (status == 0) {
                 Log.w("CRACK_STEP_2", "RESPONSE:" + response.toString());

@@ -13,8 +13,11 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.vrem.wifianalyzer.R;
+import com.vrem.wifianalyzer.wifi.common.SnifferFile;
+import com.vrem.wifianalyzer.wifi.common.SnifferFilesDBUtils;
 
 import java.util.List;
+import java.util.Map;
 
 public class PackageDownloadAdapter extends BaseAdapter {
 
@@ -28,6 +31,7 @@ public class PackageDownloadAdapter extends BaseAdapter {
         public TextView ssid;
         public Button download;
         public ImageView imageView;
+        public Button delete;
     }
 
     public PackageDownloadAdapter(Context context, List<PackageInfo> data, int resource, ProgressBar progressBar){
@@ -54,7 +58,7 @@ public class PackageDownloadAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
         ListItemView listItemView = null;
         if(convertView == null){
             convertView = listContainer.inflate(this.itemViewResource, null);
@@ -63,6 +67,7 @@ public class PackageDownloadAdapter extends BaseAdapter {
             listItemView.mac        = convertView.findViewById(R.id.pack_mac_tv);
             listItemView.download   = convertView.findViewById(R.id.download_btn);
             listItemView.imageView  = convertView.findViewById(R.id.pack_image);
+            listItemView.delete     = convertView.findViewById(R.id.delete_btn);
             convertView.setTag(listItemView);
         }else{
             listItemView = (ListItemView) convertView.getTag();
@@ -80,6 +85,7 @@ public class PackageDownloadAdapter extends BaseAdapter {
         else
             listItemView.mac.setText(packageInfo.getMac());
             listItemView.imageView.setBackgroundResource(R.drawable.ic_location_on_sniffer_500_48dp);
+
         listItemView.download.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
@@ -92,6 +98,20 @@ public class PackageDownloadAdapter extends BaseAdapter {
 
             }
         });
+
+        listItemView.delete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                listItems.remove(position);
+                SnifferFilesDBUtils snifferFilesDBUtils = new SnifferFilesDBUtils(context);
+                snifferFilesDBUtils.open();
+                snifferFilesDBUtils.delSniffer(packageInfo.getId());
+                snifferFilesDBUtils.close();
+                notifyDataSetChanged();
+            }
+        });
+
         return convertView;
     }
+
 }

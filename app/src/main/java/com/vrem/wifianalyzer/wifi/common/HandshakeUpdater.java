@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
@@ -103,7 +104,7 @@ public class HandshakeUpdater extends AsyncTask<Object, Object, Void> {
                 param.put("action", "mdk"); //2-1
                 jo.put("type", "ap");
                 jo.put("detail", mBssid);
-                blist.put(mBssid);
+                blist.put(mBssid);//001384
                 channels.put(mChannelID);
 
                 param.put("channels", channels); //2-3
@@ -116,6 +117,7 @@ public class HandshakeUpdater extends AsyncTask<Object, Object, Void> {
 
                 jo = jo.getJSONObject("data");
                 Log.w("DOS_STEP_1_REQUEST", jo.toString());
+                System.out.println("20210305==发送指令：" + jo.toString());
 
                 RequestFuture<JSONObject> requestFuture = RequestFuture.newFuture();
                 JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url,  jo, requestFuture, requestFuture);
@@ -128,18 +130,23 @@ public class HandshakeUpdater extends AsyncTask<Object, Object, Void> {
                     new InteractRecordDBUtils(mContext).easy_insert(obj.toString(), response.toString()); //将请求命令、返回结果存入数据库
                     int status = response.getInt("status");
                     if (status == 0) {
+                        String Rate = new Double(mRate).toString();
+                        if (Rate.contains("-")) Rate = Rate.replace("-", "");
                         Log.w("HDSK_DOS_STEP", "RESPONSE:" + response.toString());
                         DevStatusDBUtils devStatusDBUtils = new DevStatusDBUtils(mContext);
                         devStatusDBUtils.open();
-                        devStatusDBUtils.handshakeStep1Done(mDevId, new Integer(mChannelID).toString() + "-" + new Integer(gId + 1).toString() + "-" + mBssid + ".cap" + "-" + new Double(mRate).toString());
+                        devStatusDBUtils.handshakeStep1Done(mDevId, new Integer(mChannelID).toString() + "-"
+                                + new Integer(gId + 1).toString() + "-" + mBssid + ".cap" + "-" + Rate);
                         devStatusDBUtils.close();
                         mStep1Run = true;
                         return null;
                     } else {
+                        System.out.println("20210305==返回结果：" + response.toString());
                         Log.w("HDSK_DOS_STEP", "UNEXPECTED RESPONSE: " + response.toString());
                     }
                 } catch (TimeoutException e) {
                     Log.w("HDSK_DOS_STEP", "TIMEOUT");
+                    Toast.makeText(mContext, "超时出错啦",Toast.LENGTH_SHORT).show();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 } catch (ExecutionException e) {
@@ -282,6 +289,7 @@ public class HandshakeUpdater extends AsyncTask<Object, Object, Void> {
         obj.put("param", param);
 
         Log.w("HDSK_STEP_1_REQUEST", obj.toString());
+        System.out.println("20210305==发送指令：" + obj.toString());
 
         RequestFuture<JSONObject> requestFuture = RequestFuture.newFuture();
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url,  obj, requestFuture, requestFuture);
@@ -290,8 +298,9 @@ public class HandshakeUpdater extends AsyncTask<Object, Object, Void> {
         try {
             JSONObject response = requestFuture.get(5 - 1, TimeUnit.SECONDS);
 
-            new InteractRecordDBUtils(mContext).easy_insert(obj.toString(), response.toString()); //将请求命令、返回结果存入数据库
+            new InteractRecordDBUtils(mContext).easy_insert(obj.toString(), response.toString()); // 将请求命令、返回结果存入数据库
 
+            System.out.println("20210305==返回结果：" + response.toString());
             int status = response.getInt("status");
             if (status == 0) {
                 Log.w("HDSK_STEP_1", "RESPONSE:" + response.toString());
@@ -320,6 +329,7 @@ public class HandshakeUpdater extends AsyncTask<Object, Object, Void> {
         obj.put("param", param);
 
         Log.w("HDSK_STEP_2", "REQUEST: " + obj.toString());
+        System.out.println("20210305==发送指令：" + obj.toString());
 
         RequestFuture<JSONObject> requestFuture = RequestFuture.newFuture();
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url,  obj, requestFuture, requestFuture);
@@ -327,6 +337,7 @@ public class HandshakeUpdater extends AsyncTask<Object, Object, Void> {
 
         try {
             JSONObject response = requestFuture.get(5 - 1, TimeUnit.SECONDS);
+            System.out.println("20210305==返回结果：" + response.toString());
             int status = response.getInt("status");
             if (status == 0) {
                 Log.w("HDSK_STEP_2", "RESPONSE:" + response.toString());

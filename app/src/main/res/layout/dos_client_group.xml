@@ -5,61 +5,61 @@
     android:layout_height="match_parent">
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="30dp">
+        android:layout_height="20dp">
         <TextView
             android:layout_width="wrap_content"
-            android:layout_height="30dp"
+            android:layout_height="20dp"
             android:text="Mac地址:"
             android:gravity="center"
             android:layout_marginLeft="30dp"/>
         <TextView
             android:id="@+id/tv_group"
             android:layout_width="wrap_content"
-            android:layout_height="30dp"
+            android:layout_height="20dp"
             android:gravity="center"
             android:layout_marginLeft="5dp"
             android:text="xx:xx:xx:xx:xx"/>
 
         <TextView
             android:layout_width="wrap_content"
-            android:layout_height="30dp"
+            android:layout_height="20dp"
             android:layout_marginLeft="8dp"
             android:gravity="center"
             android:text="攻击次数:"/>
         <TextView
             android:id="@+id/count_data"
             android:layout_width="wrap_content"
-            android:layout_height="30dp"
+            android:layout_height="20dp"
             android:gravity="center"
             android:layout_marginLeft="5dp"/>
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="30dp">
+        android:layout_height="20dp">
         <TextView
             android:layout_width="wrap_content"
-            android:layout_height="30dp"
+            android:layout_height="20dp"
             android:text="发送数据包:"
             android:gravity="center"
             android:layout_marginLeft="30dp" />
         <TextView
             android:id="@+id/rx_data"
             android:layout_width="wrap_content"
-            android:layout_height="30dp"
+            android:layout_height="20dp"
             android:gravity="center"
             android:layout_marginLeft="5dp"/>
 
         <TextView
             android:layout_width="wrap_content"
-            android:layout_height="30dp"
+            android:layout_height="20dp"
             android:layout_marginLeft="30dp"
             android:gravity="center"
             android:text="接收数据包:" />
         <TextView
             android:id="@+id/tx_data"
             android:layout_width="wrap_content"
-            android:layout_height="30dp"
+            android:layout_height="20dp"
             android:gravity="center"
             android:layout_marginLeft="5dp"/>
     </LinearLayout>

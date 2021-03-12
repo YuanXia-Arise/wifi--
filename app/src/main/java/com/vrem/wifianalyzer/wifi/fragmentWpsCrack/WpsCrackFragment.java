@@ -108,7 +108,7 @@ public class WpsCrackFragment extends Fragment {
                         final JSONObject obj    = new JSONObject();
                         final JSONObject jo     = new JSONObject();
                         PrefSingleton.getInstance().Initialize(getContext());
-                        int gId                 = PrefSingleton.getInstance().getInt("id");
+                        int gId = PrefSingleton.getInstance().getInt("id");
                         PrefSingleton.getInstance().putInt("id", gId + 1);
                         obj.put("id", gId); // 1-1
                         JSONObject param        = new JSONObject(); // 2

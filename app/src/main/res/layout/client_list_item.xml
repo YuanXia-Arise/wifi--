@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="70dp"
     android:gravity="center_vertical"
-    android:padding="15dp">
+    android:padding="5dp">
 
     <RelativeLayout
         android:id="@+id/maclayout"
@@ -17,7 +17,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:padding="3dp"
-            android:text="MAC："
+            android:text="MAC:"
             android:textSize="20sp"
             android:singleLine="true"
             android:textColor="@android:color/white"/>
@@ -47,7 +47,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:padding="3dp"
-            android:text="首选ap："
+            android:text="首选ap:"
             android:textSize="16sp"
             android:textColor="@android:color/white"/>
 

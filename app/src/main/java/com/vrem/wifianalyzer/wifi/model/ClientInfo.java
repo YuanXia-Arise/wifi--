@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.vrem.wifianalyzer.GetCompany;
 import com.vrem.wifianalyzer.R;
 
@@ -101,9 +102,11 @@ public class ClientInfo {
                     || !"".equals(wiFiDetailsTmp.get(i).getClient())
                     || !wiFiDetailsTmp.get(i).getClient().equals("[]")){
                 JSONArray client = new JSONArray(wiFiDetailsTmp.get(i).getClient());
-                ClientInfo clientInfo = new ClientInfo();
-                if (client.length()>0){
-                    for (int j =0; j<client.length();j++){
+                //ClientInfo clientInfo = new ClientInfo();
+                if (client.length() > 0){
+                    for (int j = 0; j < client.length(); j++){
+                        ClientInfo clientInfo = new ClientInfo();
+
                         clientInfo.setMac(client.getJSONObject(j).getString("mac"));
                         clientInfo.setProbe(client.getJSONObject(j).getString("probe"));
 //                        String company_info = "无厂商信息";

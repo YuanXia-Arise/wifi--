@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import org.json.JSONObject;
+
 import java.util.Map;
 
 //数据存储类
@@ -53,5 +55,22 @@ public class PrefSingleton {
         SharedPreferences.Editor editor = mSharedPreferences.edit();
         editor.remove(key);
         editor.commit();
+    }
+
+    public void remove_fake(){
+        try {
+            SharedPreferences.Editor editor = mSharedPreferences.edit();
+            editor.remove("fake_net");
+            editor.remove("fake_out");
+            editor.remove("fake_essid");
+            editor.remove("fake_channel");
+            editor.remove("fake_security");
+            editor.remove("fake_password");
+            editor.remove("fake_encryption");
+            editor.remove("fake_ssid");
+            editor.remove("fake_ticket");
+            editor.remove("fake_ap_channel");
+            editor.commit();
+        } catch (NullPointerException e){}
     }
 }

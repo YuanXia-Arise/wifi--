@@ -1,6 +1,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <RelativeLayout
         android:id="@+id/devicelayout"
@@ -79,32 +81,26 @@
         android:focusableInTouchMode="true"
         android:scrollHorizontally="true"
         android:scaleType="centerInside"/>
-    <!--<CheckBox
-        android:id="@+id/choose"
-        android:layout_width="40dp"
-        android:layout_height="match_parent"
-        android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
-        android:gravity="center"
-        android:background="@android:color/transparent"
-        android:visibility="gone">
-    </CheckBox>-->
 
-    <!--<android.support.v4.widget.SwipeRefreshLayout
-        android:id="@+id/clientExpandable"
-        android:layout_width="350dp"
-        android:layout_height="400dp"
-        android:layout_marginTop="130dp"
-        android:orientation="vertical"
-        android:childDivider="#B4B3B3">-->
+    <!--<RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="1200dp"
+        android:layout_marginTop="130dp">
+
+        <ExpandableListView
+            android:id="@+id/clientExpandableLV"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        </ExpandableListView>
+    </RelativeLayout>-->
+
     <ExpandableListView
         android:id="@+id/clientExpandableLV"
-        android:layout_width="350dp"
-        android:layout_height="450dp"
-        android:layout_below="@+id/moreview"
-        android:layout_marginTop="5dp"
-        android:scrollbars="none" >
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="130dp">
     </ExpandableListView>
-    <!--</android.support.v4.widget.SwipeRefreshLayout>-->
+
+
 
 </RelativeLayout>

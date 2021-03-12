@@ -35,6 +35,7 @@ public class ClientInfo_Search {
     private String company;
     private String SSID;
     private String power;
+    private String channel;
 
     public String getMac() {
         return mac;
@@ -76,6 +77,13 @@ public class ClientInfo_Search {
         this.power = power;
     }
 
+    public String getChannel() {
+        return channel;
+    }
+
+    public void setChannel(String channel) {
+        this.channel = channel;
+    }
 
     //搜索热点客户端
     public static void setAllClientInfo(Context context,List<WiFiDetail> wiFiDetails, ListView listView) throws JSONException {
@@ -103,6 +111,7 @@ public class ClientInfo_Search {
                         clientInfo.setCompany(company_info);
                         clientInfo.setPower(client.getJSONObject(j).getString("power"));
                         clientData.add(clientInfo);
+                        System.out.println("20200921==99>" + wiFiDetailsTmp.get(i).getWiFiSignal().getChannel());
                         Log.d(TAG, "2020==27>" + new Gson().toJson(clientData));
                     }
                 }

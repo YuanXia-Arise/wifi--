@@ -18,8 +18,8 @@ public class SnifferFilesDBUtils {
     public static final String TABLE_SNIFFERFILES_TABLE ="snifferfiles";
     public static final String KEY_ROWID = "_id"; // integer 自增长，主key
     public static final String DEVID = "devid"; // 设备ID
-    public static final String FILE = "file"; //握手包
-    public static final String ESSID = "essid";  //热点SSID
+    public static final String FILE = "file"; // 握手包
+    public static final String ESSID = "essid";  // 热点ESSID
 
     final Context mContext;
 
@@ -70,7 +70,9 @@ public class SnifferFilesDBUtils {
 
     public void insertNewFile(String devID, String file, String essid) {
         StringBuilder sql = new StringBuilder();
-        sql.append("insert into ").append(TABLE_SNIFFERFILES_TABLE).append(" (")
+        sql.append("insert into ")
+                .append(TABLE_SNIFFERFILES_TABLE)
+                .append(" (")
                 .append(DEVID).append(", ")
                 .append(FILE).append(", ")
                 .append(ESSID).append(" ")
@@ -96,6 +98,13 @@ public class SnifferFilesDBUtils {
         }
         cursor.close();
         return snifferFileMap;
+    }
+
+
+    // 删除数据库sniffer数据
+    public void delSniffer(String id){
+        String sql = "delete from snifferfiles where _id='"+id+"'";
+        mDb.execSQL(sql);
     }
 
 }

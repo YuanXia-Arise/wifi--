@@ -23,10 +23,10 @@ public class DeviceAdapter extends BaseAdapter {
     private String deviceName[];
 //    private int image[];
     private String deviceStatus[];
-    private int deviceBtty[];
-    private int workType;
+    private String[] deviceBtty;
+    private int workType[];
 
-    public DeviceAdapter(Context context, /*int[] image_Objects, */String[] deviceName, String[] deviceStatus, int[] deviceBtty,int workType){
+    public DeviceAdapter(Context context, /*int[] image_Objects, */String[] deviceName, String[] deviceStatus, String[] deviceBtty,int[] workType){
         this.layoutInflater = LayoutInflater.from(context);
         this.deviceName     = deviceName;
         this.deviceStatus   = deviceStatus;
@@ -58,38 +58,36 @@ public class DeviceAdapter extends BaseAdapter {
         myClass.moodView  = convertView.findViewById(R.id.mood);
         myClass.battyView = convertView.findViewById(R.id.batty);
 
-//        myClass.imageView.setBackgroundResource(image[position]);
         myClass.nameView.setText(deviceName[position]);
         myClass.moodView.setText(deviceStatus[position]);
-        int Battery = deviceBtty[position];
+        int Battery = Integer.valueOf(deviceBtty[position]);
         if (Battery > 99) {
             Battery = 100;
-            myClass.battyView.setText(Integer.toString(Battery));
+            myClass.battyView.setText(Integer.toString(Battery) + "%");
         } else if (Battery == 0) {
-            myClass.battyView.setText(Battery);
+            myClass.battyView.setText(Integer.toString(Battery)  + "%");
         } else if (Battery == -1) {
             myClass.battyView.setText("未连接电池");
         } else {
-            myClass.battyView.setText(Integer.toString(deviceBtty[position]));
+            myClass.battyView.setText(Integer.toString(Battery)  + "%");
         }
-        //myClass.battyView.setText(Integer.toString(deviceBtty[position]));
         myClass.nameView.setTextColor(Color.WHITE);
-        myClass.moodView.setTextColor(Color.RED);
 
-        if (deviceBtty[position] < 70 && deviceBtty[position] > 40){
-            myClass.battyView.setTextColor(Color.GRAY);
-        }else if (deviceBtty[position] <= 40 && deviceBtty[position] > 0){
+        if (Battery < 70 && Battery > 40){
+            myClass.battyView.setTextColor(Color.WHITE);
+        } else if (Battery <= 40 && Battery >= 0){
             myClass.battyView.setTextColor(Color.RED);
-        }else {
+        } else if (Battery == -1){
+            myClass.battyView.setTextColor(Color.RED);
+        } else {
             myClass.battyView.setTextColor(Color.GREEN);
         }
         String deviceStatusFlag = deviceStatus[position];
-//        Log.v("deviceStatusFlag:",deviceStatusFlag);
 
-        if (workType == 100){
+        if (workType[position] == 100){
             myClass.moodView.setTextColor(Color.GREEN);
             myClass.imageView.setBackgroundResource(R.drawable.wifigreen);
-        }else{
+        } else {
             myClass.moodView.setTextColor(Color.RED);
             myClass.imageView.setBackgroundResource(R.drawable.wifiblue);
         }

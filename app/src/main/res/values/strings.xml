@@ -16,7 +16,7 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>
   -->
 
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- application start -->
     <string name="app_name" translatable="false">FireTech</string>
     <string name="app_company_name" translatable="false">VREM Software Development</string>
@@ -46,7 +46,9 @@
     <string name="action_resume" translatable="false">Resume</string>
     <string name="action_filter" translatable="false">Filter</string>
     <string name="action_device" translatable="false">Device</string>
-    <string name = "action_search">Target search</string>
+    <string name="action_search">Target search</string>
+    <string name="action_channel" tools:ignore="MissingTranslation">Channel information</string>
+    <string name="action_channel_rate" tools:ignore="MissingTranslation">Channel rate</string>
     <!-- action end -->
 
     <string-array name="fake_spinner">

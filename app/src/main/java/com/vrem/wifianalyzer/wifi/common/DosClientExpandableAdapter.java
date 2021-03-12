@@ -8,10 +8,14 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.vrem.wifianalyzer.GetCompany;
 import com.vrem.wifianalyzer.MainContext;
 import com.vrem.wifianalyzer.R;
+import com.vrem.wifianalyzer.wifi.dosClientModel.DosChildClientModel;
 import com.vrem.wifianalyzer.wifi.dosClientModel.DosGroupClientModel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static android.content.ContentValues.TAG;
@@ -25,7 +29,6 @@ public class DosClientExpandableAdapter extends BaseExpandableListAdapter {
 
     private List<DosGroupClientModel> dosGroupClientModels;
     private String str;
-
 
     public DosClientExpandableAdapter(List<DosGroupClientModel> dosGroupClientModels,String str){
         this.dosGroupClientModels = dosGroupClientModels;
@@ -44,10 +47,9 @@ public class DosClientExpandableAdapter extends BaseExpandableListAdapter {
 
     @Override
     public int getChildrenCount(int groupPosition) {
-        if (!(dosGroupClientModels.get(groupPosition).getDosChildClientModelList() ==null)){ //避免子项为空时报NULL异常
+        if (!(dosGroupClientModels.get(groupPosition).getDosChildClientModelList() == null)){ //避免子项为空时报NULL异常
             return dosGroupClientModels.get(groupPosition).getDosChildClientModelList().size();
         }else{
-            //Toast.makeText(MainContext.INSTANCE.getContext(), "沒有客戶端！", Toast.LENGTH_SHORT).show();
             return 0;
         }
     }
@@ -82,9 +84,9 @@ public class DosClientExpandableAdapter extends BaseExpandableListAdapter {
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
         ViewHolderGroup group;
         if (convertView == null) {
-            //convertView = View.inflate(MainContext.INSTANCE.getContext(), R.layout.dos_client_group, null);
-            convertView = LayoutInflater.from(MainContext.INSTANCE.getContext()).inflate(R.layout.dos_client_group, parent,false);
-//        }
+            convertView = View.inflate(MainContext.INSTANCE.getContext(), R.layout.dos_client_group, null);
+            //convertView = LayoutInflater.from(MainContext.INSTANCE.getContext()).inflate(R.layout.dos_client_group, parent,false);
+            //convertView = LayoutInflater.from(MainContext.INSTANCE.getContext()).inflate(R.layout.dos_client_group, null);
             group = new ViewHolderGroup();
             group.tv_group = convertView.findViewById(R.id.tv_group);
             group.tv_count = convertView.findViewById(R.id.count_data);
@@ -99,7 +101,7 @@ public class DosClientExpandableAdapter extends BaseExpandableListAdapter {
         group.tv_count.setText(String.valueOf(dosGroupClientModels.get(groupPosition).getGroup_count()));
         group.tv_rx.setText(String.valueOf(dosGroupClientModels.get(groupPosition).getGroup_tx_datas()));
         group.tv_tx.setText(String.valueOf(dosGroupClientModels.get(groupPosition).getGroup_rx_datas()));
-        notifyDataSetChanged();
+        //notifyDataSetChanged();
         return convertView;
     }
     private static class ViewHolderGroup{
@@ -113,14 +115,16 @@ public class DosClientExpandableAdapter extends BaseExpandableListAdapter {
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
         ViewHolderItem item;
         if (convertView == null) {
-            //convertView = View.inflate(MainContext.INSTANCE.getContext(), R.layout.dos_client_child, null);
-            convertView = LayoutInflater.from(MainContext.INSTANCE.getContext()).inflate(R.layout.dos_client_child, parent,false);
-//        }
+            convertView = View.inflate(MainContext.INSTANCE.getContext(), R.layout.dos_client_child, null);
+            //convertView = LayoutInflater.from(MainContext.INSTANCE.getContext()).inflate(R.layout.dos_client_child, parent,false);
+            //convertView = LayoutInflater.from(MainContext.INSTANCE.getContext()).inflate(R.layout.dos_client_child, null);
             item = new ViewHolderItem();
             item.tv_group = convertView.findViewById(R.id.tv_child_group);
             item.tv_count = convertView.findViewById(R.id.child_count_data);
             item.tv_rx = convertView.findViewById(R.id.rx_child_data);
             item.tv_tx = convertView.findViewById(R.id.tx_child_data);
+            item.tv_company = convertView.findViewById(R.id.child_company);
+            item.tv_company.setSelected(true);
             convertView.setTag(item);
         } else {
             item = (ViewHolderItem) convertView.getTag();
@@ -130,14 +134,19 @@ public class DosClientExpandableAdapter extends BaseExpandableListAdapter {
         item.tv_count.setText(String.valueOf(dosGroupClientModels.get(groupPosition).getDosChildClientModelList().get(childPosition).getChild_count()));
         item.tv_rx.setText(String.valueOf(dosGroupClientModels.get(groupPosition).getDosChildClientModelList().get(childPosition).getChild_rx_datas()));//没毛病
         item.tv_tx.setText(String.valueOf(dosGroupClientModels.get(groupPosition).getDosChildClientModelList().get(childPosition).getChild_tx_datas()));
-        notifyDataSetChanged();
+        String mac = dosGroupClientModels.get(groupPosition).getDosChildClientModelList().get(childPosition).getChild_bssid();
+        String company = new GetCompany().read_csv(mac.substring(0,8).replace(":","").toUpperCase());
+        item.tv_company.setText(company);
+        //notifyDataSetChanged();
         return convertView;
     }
+
     private class ViewHolderItem {
         TextView tv_group;
         TextView tv_count;
         TextView tv_rx;
         TextView tv_tx;
+        TextView tv_company;
     }
 
     @Override

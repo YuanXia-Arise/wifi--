@@ -49,8 +49,8 @@ public class DosActivity extends Activity {
 	private Button cancelButton;
 	private  Button channelDosButton;
 	private Button mChannelDosButton;
-	private String channelSelected = ""; //多频段
-	private int channelId = 1;//单频段
+	private String channelSelected = ""; //多信道
+	private int channelId = 1;//单信道
 
 	private String intentId="";
 
@@ -66,8 +66,8 @@ public class DosActivity extends Activity {
 
 		startButton = findViewById(R.id.startButton);//开始dos攻击按钮
 		cancelButton = findViewById(R.id.cancelButton);//取消攻击按钮
-		channelDosButton = findViewById(R.id.channeldos);//单频段按钮
-		mChannelDosButton = findViewById(R.id.mchanneldos);//多频段按钮
+		channelDosButton = findViewById(R.id.channeldos);//单信道按钮
+		mChannelDosButton = findViewById(R.id.mchanneldos);//多信道按钮
 
 		final Context context = this;
 
@@ -88,7 +88,7 @@ public class DosActivity extends Activity {
 					apDosButtonHandle(apDosButton,wiFiDetails);
 				}
 			});
-		}else { //不需要选择热点
+		} else { //不需要选择热点
 			ssid = intent.getStringExtra("ssid");
 			bssid = intent.getStringExtra("bssid");
 			channel	= Integer.parseInt(intent.getStringExtra("channel"));
@@ -111,15 +111,16 @@ public class DosActivity extends Activity {
 					PrefSingleton.getInstance().Initialize(getApplicationContext());
 					int gId = PrefSingleton.getInstance().getInt("id");
 					PrefSingleton.getInstance().putInt("id", gId + 1);
-					obj.put("id", gId); // 1-1
-					JSONObject param = new JSONObject(); // 2
+					obj.put("id", gId);
+					JSONObject param = new JSONObject();
 					JSONArray channels = new JSONArray();
 					JSONArray wlist	= new JSONArray();
 					JSONArray blist = new JSONArray();
-					param.put("action", "mdk"); // 2-1
+					param.put("action", "mdk");
 
 					jo.put("type", "cus");
 					jo.put("detail", bssid);
+					PrefSingleton.getInstance().putString("detail",bssid);
 					channels.put(channel);
 
 					flag = true;
@@ -150,7 +151,7 @@ public class DosActivity extends Activity {
 								@Override
 								public void run() {
 									new DosUpdater(DosActivity.this, devId, jof,null,false,
-											null,"106").execute(); //开始阻断
+											null,"106").execute(); // 开始阻断
 								}
 							});
 						}
@@ -168,8 +169,7 @@ public class DosActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				finish();
-				overridePendingTransition(R.anim.slide_left_in,
-						R.anim.slide_right_out);
+				overridePendingTransition(R.anim.slide_left_in, R.anim.slide_right_out);
 			}
 		});
 	}
@@ -197,7 +197,7 @@ public class DosActivity extends Activity {
 		}
 		new AlertDialog.Builder(DosActivity.this)
 				.setTitle("选择热点")
-				.setSingleChoiceItems(strings, -1,new DialogInterface.OnClickListener() {
+				.setSingleChoiceItems(strings, -1, new DialogInterface.OnClickListener() {
 
 							public void onClick(DialogInterface arg0, int arg1) {
 								// TODO Auto-generated method stub

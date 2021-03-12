@@ -29,10 +29,12 @@ import android.widget.Toast;
 import com.vrem.wifianalyzer.MainContext;
 import com.vrem.wifianalyzer.R;
 import com.vrem.wifianalyzer.wifi.common.InfoUpdater;
+import com.vrem.wifianalyzer.wifi.common.MacSsidDBUtils;
 import com.vrem.wifianalyzer.wifi.common.PrefSingleton;
 import com.vrem.wifianalyzer.wifi.deviceList.Deviece;
 import com.vrem.wifianalyzer.wifi.filter.Filter;
 
+import org.json.JSONException;
 
 
 public class OptionMenu {
@@ -48,6 +50,13 @@ public class OptionMenu {
     //菜单动作
     public void select(@NonNull MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.action_DbToCsv:
+                MacSsidDBUtils macSsidDBUtils = new MacSsidDBUtils(activity);
+                macSsidDBUtils.open();
+                macSsidDBUtils.ExportToCSV("Wifi_Analyzer.csv");
+                macSsidDBUtils.close();
+                Toast.makeText(activity, "已导出数据库至本地", Toast.LENGTH_SHORT).show();
+                break;
             case R.id.action_scanner:
                 MenuItem menuItem = menu.findItem(R.id.action_scanner);
                 if (MainContext.INSTANCE.getScannerService().isRunning()) {
@@ -71,7 +80,7 @@ public class OptionMenu {
                     MenuInflater inflater = MainContext.INSTANCE.getOptionMenu();
                     inflater.inflate(R.menu.optionmenu,menu);
                     menu.findItem(R.id.action_device).setVisible(false);
-                }else {
+                } else {
                     menu.findItem(R.id.action_device).setVisible(true);
                     Deviece.build().show(); //显示设备列表
                 }

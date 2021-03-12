@@ -1,5 +1,6 @@
 package com.vrem.wifianalyzer.wifi.common;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -15,7 +16,6 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import static android.content.ContentValues.TAG;
 
@@ -24,21 +24,21 @@ import static android.content.ContentValues.TAG;
  */
 
 public class APInfoUpdater extends AsyncTask<Object, Object, List<WiFiDetail>>{
-    Context mContext;
-    ListView mListView;
-    String mDevId;
-    ProgressBar mProgressBar;
-    int mTag;
-    int mMainPage;
-    int mSort;
-    boolean mStep1Needed;
+    private Context mContext;
+    public ListView mListView;
+    private String mDevId;
+    public ProgressBar mProgressBar;
+    private int mTag;
+    public int mMainPage;
+    private int mSort;
+    private boolean mStep1Needed;
 
-    TextView mRefresh;
-    TextView mNoData;
-    boolean mIsDialog;
+    public TextView mRefresh;
+    public TextView mNoData;
+    public boolean mIsDialog;
 
-    boolean mError;
-    List<WiFiDetail> wiFiDetails = new ArrayList<>();
+    public boolean mError;
+    public List<WiFiDetail> wiFiDetails = new ArrayList<>();
     public AsyncResponse asyncResponse;
 
     public APInfoUpdater(Context context, String devId, int tag, int mainPage, int sort) {
@@ -50,7 +50,9 @@ public class APInfoUpdater extends AsyncTask<Object, Object, List<WiFiDetail>>{
 
         this.mError = false;
     }
-    public APInfoUpdater (Context context, ListView listView, String devId, int tag, ProgressBar progressBar, int mainPage, int sort, TextView refresh, TextView noData, boolean isDialog) {
+
+    public APInfoUpdater (Context context, ListView listView, String devId, int tag, ProgressBar progressBar,
+                          int mainPage, int sort, TextView refresh, TextView noData, boolean isDialog) {
         mContext = context;
         mListView = listView;
         mDevId = devId;
@@ -65,8 +67,7 @@ public class APInfoUpdater extends AsyncTask<Object, Object, List<WiFiDetail>>{
         mError = false;
     }
 
-    public void setOnAsyncResponse(AsyncResponse asyncResponse)
-    {
+    public void setOnAsyncResponse(AsyncResponse asyncResponse) {
         this.asyncResponse = asyncResponse;
     }
 
@@ -74,19 +75,21 @@ public class APInfoUpdater extends AsyncTask<Object, Object, List<WiFiDetail>>{
     protected void onPreExecute() {
         DevStatusDBUtils devStatusDBUtils = new DevStatusDBUtils(mContext);
         devStatusDBUtils.open();
-        int scanStep1Done = devStatusDBUtils.getScanstep1done(mDevId);//查询数据库中是否有设备ID
+        int scanStep1Done = devStatusDBUtils.getScanstep1done(mDevId); // 查询数据库中是否有设备ID
         devStatusDBUtils.close();
 
         if (scanStep1Done == 0){ //数据库中没有设备ID
             DevStatusDBUtils insetrtID = new DevStatusDBUtils(mContext);
             insetrtID.open();
             insetrtID.tryInsertNewDev(mDevId);
-            scanStep1Done = insetrtID.getScanstep1done(mDevId);//插入设备ID
+            scanStep1Done = insetrtID.getScanstep1done(mDevId); //插入设备ID
             insetrtID.close();
             if (scanStep1Done == 0){
                 mStep1Needed = true;
-            }else{mStep1Needed = false;}
-        }else{
+            } else {
+                mStep1Needed = false;
+            }
+        } else {
             mStep1Needed = false;
         }
     }
@@ -100,7 +103,7 @@ public class APInfoUpdater extends AsyncTask<Object, Object, List<WiFiDetail>>{
 
         DevStatusDBUtils devStatusDBUtils = new DevStatusDBUtils(context);
         devStatusDBUtils.open();
-        devStatusDBUtils.scanStep1Done(devID); //扫描结束时的sql语句 更新1
+        devStatusDBUtils.scanStep1Done(devID); // 扫描结束时的sql语句 更新1
         devStatusDBUtils.close();
 
         return true;
@@ -115,19 +118,25 @@ public class APInfoUpdater extends AsyncTask<Object, Object, List<WiFiDetail>>{
                 return null;
             }
 
-            JSONObject response = WiFiDetail.scanStep2(mContext);//获得周围wifi数据
+            JSONObject response = WiFiDetail.scanStep2(mContext); // 获得周围wifi数据
             if (response == null) {
                 return null;
             }
-            List<WiFiDetail> apData = WiFiDetail.response2ApData(response, mTag, mSort);
-            Log.d(TAG, "doInBackground: 123--7" + new Gson().toJson(apData));
+            List<WiFiDetail> apData = WiFiDetail.response2ApData(response, mTag, mSort,mContext);
+
+            //测试显示信息
+            /*try{
+                for (int i = 0; i < apData.size(); i++){
+                    System.out.println("20200911==热点列表>" + i + "<===>" + new Gson().toJson(apData.get(i)));
+                }
+            }catch (NullPointerException e){}*/
 
             if (apData == null) {
                 mError = true;
             }
             wiFiDetails = apData;
             if (wiFiDetails != null && asyncResponse != null){
-                asyncResponse.onDataReceivedSuccess(wiFiDetails); //将扫描结果存入asyncResponse接口当中，供其它类使用数据
+                asyncResponse.onDataReceivedSuccess(wiFiDetails); // 将扫描结果存入asyncResponse接口当中，供其它类使用数据
         }
             return wiFiDetails;
         } catch (JSONException e) {
@@ -143,7 +152,7 @@ public class APInfoUpdater extends AsyncTask<Object, Object, List<WiFiDetail>>{
                 Log.w("SCAN_ERROR", "STEP2 INVALID RESPONSE");
                 DevStatusDBUtils devStatusDBUtils = new DevStatusDBUtils(mContext);
                 devStatusDBUtils.open();
-                devStatusDBUtils.scanStep2Error(mDevId);//更新2
+                devStatusDBUtils.scanStep2Error(mDevId); // 更新2
                 devStatusDBUtils.close();
             }
             return;
@@ -152,7 +161,7 @@ public class APInfoUpdater extends AsyncTask<Object, Object, List<WiFiDetail>>{
         macSsidDBUtils.open();
         for (WiFiDetail apInfo : param) {
             try {
-                macSsidDBUtils.insertOrUpdate(mDevId, apInfo.getBSSID(), apInfo.getSSID());
+                macSsidDBUtils.insertOrUpdate(mDevId, apInfo.getBSSID(), apInfo.getSSID(), apInfo.getLast_time(), apInfo.getCount(), String.valueOf(System.currentTimeMillis()));
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -31,6 +31,7 @@
         android:resizeableActivity="true"
         android:supportsRtl="true"
         android:theme="@style/ThemeAppCompatDark">
+        <activity android:name=".wifi.fragmentTargetSearch.SearchChart"></activity>
 
         <meta-data
             android:name="android.max_aspect"
@@ -46,7 +47,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity android:name=".DeviceListActivity" />
         <activity
             android:name=".MainActivity"
@@ -75,7 +75,6 @@
         <activity android:name=".WifiInfoActivity" />
         <activity android:name=".DosActivity" />
         <activity android:name=".DeviceFunctionActivity" />
-
     </application>
 
 </manifest>

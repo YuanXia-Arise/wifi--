@@ -18,7 +18,10 @@
 
 package com.vrem.wifianalyzer.wifi.accesspoint;
 
+import android.app.PendingIntent;
+import android.app.VoiceInteractor;
 import android.content.Context;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -28,8 +31,11 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.vrem.wifianalyzer.MainContext;
 import com.vrem.wifianalyzer.R;
+import com.vrem.wifianalyzer.wifi.common.MacSsidDBUtils;
+import com.vrem.wifianalyzer.wifi.common.PrefSingleton;
 import com.vrem.wifianalyzer.wifi.model.Security;
 import com.vrem.wifianalyzer.wifi.model.Strength;
 import com.vrem.wifianalyzer.wifi.model.WiFiAdditional;
@@ -38,6 +44,8 @@ import com.vrem.wifianalyzer.wifi.model.WiFiSignal;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
 
 import static android.content.ContentValues.TAG;
@@ -82,7 +90,19 @@ public class AccessPointDetail {
     //设置压缩视图 view传入的页面 WiFiDetail 传入的单条wifi记录 isChild 判断是否是子项
     private void setViewCompact(@NonNull View view, @NonNull WiFiDetail wiFiDetail, boolean isChild) {
         Context context = view.getContext();
-        ((TextView) view.findViewById(R.id.ssid)).setText(wiFiDetail.getTitle());//设置SSID and BSSID
+
+        String Title = wiFiDetail.getTitle();
+        String Bssid = Title.substring(Title.indexOf("(")+1, Title.lastIndexOf(")"));
+        String Essid = Title.substring(0,Title.lastIndexOf("("));
+        if (Bssid.length() > 17) {
+            String bssid = Bssid.substring(0, 17);
+            ((TextView) view.findViewById(R.id.ssid)).setText(Essid + "(" + bssid + ")");//设置SSID and BSSID
+            ((TextView) view.findViewById(R.id.ssid)).setTextColor(Color.RED);
+        } else {
+            ((TextView) view.findViewById(R.id.ssid)).setText(wiFiDetail.getTitle());//设置SSID and BSSID
+            ((TextView) view.findViewById(R.id.ssid)).setTextColor(Color.WHITE);
+        }
+        //((TextView) view.findViewById(R.id.ssid)).setText(wiFiDetail.getTitle());//设置SSID and BSSID
         WiFiSignal wiFiSignal = wiFiDetail.getWiFiSignal();//获取这条wifi信号对象
         Strength strength = wiFiSignal.getStrength();//获取这条wifi的信号强度等级 Strength：枚举类，枚举信号强度等级
         Security security = wiFiDetail.getSecurity();//获取这条wifi的信号安全等级 Security：枚举类，枚举信号安全等级
@@ -90,18 +110,36 @@ public class AccessPointDetail {
         securityImage.setImageResource(security.getImageResource());//设置安全等级图片
         securityImage.setColorFilter(ContextCompat.getColor(context, R.color.icons_color));//设置安全等级图片颜色
 
+
+        TextView Levels = view.findViewById(R.id.levels);//绑定dBm值控件
+        view.findViewById(R.id.levels).setVisibility(View.GONE);
+        Levels.setText(String.format(Locale.ENGLISH, "%ddBm", wiFiSignal.getLevel()));//设置dBm值
+        Levels.setTextColor(ContextCompat.getColor(context, strength.colorResource()));//设置dBm值颜色
+
         TextView textLevel = view.findViewById(R.id.level);//绑定dBm值控件
         textLevel.setText(String.format(Locale.ENGLISH, "%ddBm", wiFiSignal.getLevel()));//设置dBm值
         textLevel.setTextColor(ContextCompat.getColor(context, strength.colorResource()));//设置dBm值颜色
-        ((TextView) view.findViewById(R.id.channel)).setText(wiFiSignal.getChannelDisplay());//设置信道
+        //((TextView) view.findViewById(R.id.channel)).setText(wiFiSignal.getChannelDisplay());//设置信道
+        ((TextView) view.findViewById(R.id.channel)).setText(wiFiSignal.getChannel());//设置信道
         ((TextView) view.findViewById(R.id.primaryFrequency))
-            .setText(String.format(Locale.ENGLISH, "%d%s", wiFiSignal.getPrimaryFrequency(), WiFiSignal.FREQUENCY_UNITS));//设置主频率
+                .setText(String.format(Locale.ENGLISH, "%d%s", wiFiSignal.getPrimaryFrequency(), WiFiSignal.FREQUENCY_UNITS));//设置主频率
         ((TextView) view.findViewById(R.id.distance))
-            .setText(String.format(Locale.ENGLISH, "%5.1fm", wiFiSignal.getDistance()));/*设置距离*/
+                .setText(String.format(Locale.ENGLISH, "%5.1fm", wiFiSignal.getDistance())); //设置距离
         if (isChild) {
             view.findViewById(R.id.tab).setVisibility(View.VISIBLE);//如果是子项，则设置可见
         } else {
             view.findViewById(R.id.tab).setVisibility(View.GONE);//否则隐藏
+        }
+        //20201104
+        WiFiAdditional wiFiAdditional = wiFiDetail.getWiFiAdditional();//获取到网络的额外信息
+        if (wiFiAdditional.isConfiguredNetwork()){
+            view.findViewById(R.id.levels).setVisibility(View.VISIBLE);
+            view.findViewById(R.id.securityImage).setVisibility(View.GONE);
+            view.findViewById(R.id.level).setVisibility(View.GONE);
+            view.findViewById(R.id.channel).setVisibility(View.GONE);
+            view.findViewById(R.id.primaryFrequency).setVisibility(View.GONE);
+            view.findViewById(R.id.distance).setVisibility(View.GONE);
+            view.findViewById(R.id.channel_name).setVisibility(View.GONE);
         }
     }
 
@@ -111,25 +149,45 @@ public class AccessPointDetail {
 
         ImageView configuredImage = view.findViewById(R.id.configuredImage);//笑脸图片
         WiFiAdditional wiFiAdditional = wiFiDetail.getWiFiAdditional();//获取到网络的额外信息
-        if (wiFiAdditional.isConfiguredNetwork()) {//网络配置为true
+        if (wiFiAdditional.isConfiguredNetwork()) { //网络配置为true
             configuredImage.setVisibility(View.VISIBLE);//笑脸设为可见
             configuredImage.setColorFilter(ContextCompat.getColor(context, R.color.connected));//设置笑脸颜色
+            //20201104
+            view.findViewById(R.id.levelImage).setVisibility(View.GONE);
+            view.findViewById(R.id.channel_frequency_range).setVisibility(View.GONE);
+            view.findViewById(R.id.width).setVisibility(View.GONE);
+            view.findViewById(R.id.capabilities).setVisibility(View.GONE);
+            view.findViewById(R.id.time).setVisibility(View.GONE);
         } else {
             configuredImage.setVisibility(View.GONE);//隐藏笑脸
         }
 
-        WiFiSignal wiFiSignal = wiFiDetail.getWiFiSignal();//获取到wifi信号
-        Strength strength = wiFiSignal.getStrength();//获取到wifi信号强度
-        ImageView imageView = view.findViewById(R.id.levelImage);//绑定图片控件
-        imageView.setImageResource(strength.imageResource());//设置wifi信号强度
-        imageView.setColorFilter(ContextCompat.getColor(context, strength.colorResource()));//设置wifi信号强度颜色
+        WiFiSignal wiFiSignal = wiFiDetail.getWiFiSignal(); //获取到wifi信号
+        Strength strength = wiFiSignal.getStrength(); //获取到wifi信号强度
+        ImageView imageView = view.findViewById(R.id.levelImage); //绑定图片控件
+        imageView.setImageResource(strength.imageResource()); //设置wifi信号强度
+        imageView.setColorFilter(ContextCompat.getColor(context, strength.colorResource())); //设置wifi信号强度颜色
 
         ((TextView) view.findViewById(R.id.channel_frequency_range))
             .setText(Integer.toString(wiFiSignal.getFrequencyStart()) + " - " + Integer.toString(wiFiSignal.getFrequencyEnd()));//设置wifi频率：xxxx-xxxx
         ((TextView) view.findViewById(R.id.width))
             .setText("(" + Integer.toString(wiFiSignal.getWiFiWidth().getFrequencyWidth()) + WiFiSignal.FREQUENCY_UNITS + ")");//设置wifi宽度
         ((TextView) view.findViewById(R.id.capabilities))
-            .setText(wiFiDetail.getCapabilities());//设置wifi加密方式
+            .setText(wiFiDetail.getCapabilities()); //设置wifi加密方式
+
+        String Title = wiFiDetail.getTitle();
+        String Bssid = Title.substring(Title.indexOf("(")+1, Title.lastIndexOf(")"));
+        if (Bssid.length() > 17) {
+            MacSsidDBUtils macSsidDBUtils = new MacSsidDBUtils(context);
+            macSsidDBUtils.open();
+            String bssid = Bssid.substring(0, 17);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String sd = sdf.format(new Date(Long.parseLong(macSsidDBUtils.getTime(bssid))));
+            macSsidDBUtils.close();
+            ((TextView) view.findViewById(R.id.time)).setText("最后更新于:" + sd);
+        } else {
+            ((TextView) view.findViewById(R.id.time)).setText("");
+        }
     }
 
     //设置供应商

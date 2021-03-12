@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.vrem.wifianalyzer.MainContext;
 import com.vrem.wifianalyzer.R;
 import com.vrem.wifianalyzer.wifi.common.DevStatusDBUtils;
@@ -27,10 +28,11 @@ import static com.vrem.wifianalyzer.wifi.model.DeviceInfo.handlingToWorkType;
 
 public class Deviece {
     private final AlertDialog alertDialog; //声明对话框对象
-    private static String[] deviceName;//设备名
+    //private static String[] deviceName;//设备名
 //    private static int[] image = {R.drawable.wifigreen,R.drawable.wifigreen,R.drawable.wifigreen};
-    private static String[] deviceStatus;//设备状态
-    private static int[] deviceBtty;//电量
+    //private static String[] deviceStatus;//设备状态
+    //private static int[] deviceBtty;//电量
+    //private static int[] workTypes;//类型
 
 
     public Deviece(@NonNull AlertDialog alertDialog) {
@@ -42,17 +44,21 @@ public class Deviece {
     }
 
     private static AlertDialog buildAlertDialog() { //设置过滤器的五个参数
-        View view = MainContext.INSTANCE.getLayoutInflater().inflate(R.layout.device_list, null); //获取页面对象
-        String deviceInfo = PrefSingleton.getInstance().getString("deviceInfo");//获取存储的数据
-        PrefSingleton.getInstance().remove("deviceInfo");//及时移除数据，避免二次获取的时候数据冲突
+        View view = MainContext.INSTANCE.getLayoutInflater().inflate(R.layout.device_list, null); // 获取页面对象
+        String deviceInfo = PrefSingleton.getInstance().getString("deviceInfo");// 获取存储的数据
+        PrefSingleton.getInstance().remove("deviceInfo"); // 及时移除数据，避免二次获取的时候数据冲突
+        String[] deviceStatus = new String[0];
+        String[] deviceName = new String[0];
+        String[] deviceBtty = new String[0];
+        int[] workTypes = new int[0];
+
         int workType = 100;
         try {
             JSONObject jsonObject = new JSONObject(deviceInfo);
             String data = jsonObject.getString("data");
             JSONObject dataJson = new JSONObject(data);
             int battery = dataJson.getInt("battery");
-            deviceBtty = new int[]{battery};
-
+            deviceBtty = new String[]{String.valueOf(battery)};
             String device = dataJson.getString("device");
             deviceName = new String[]{device};
 
@@ -64,11 +70,14 @@ public class Deviece {
             workType = handlingToWorkType(handling);
             String status = reDeviceStatus(workType);
             deviceStatus = new String[]{status};
+            workTypes = new int[]{workType};
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        if (deviceBtty != null && deviceName != null && deviceStatus != null){
-            final DeviceAdapter myAdapter = new DeviceAdapter(MainContext.INSTANCE.getContext(),/*image,*/deviceName,deviceStatus,deviceBtty,workType);
+
+        //if (deviceBtty != null && deviceName != null && deviceStatus != null){
+        if (!deviceInfo.equals("")){
+            final DeviceAdapter myAdapter = new DeviceAdapter(MainContext.INSTANCE.getContext(),/*image,*/deviceName,deviceStatus,deviceBtty,workTypes);
             return new AlertDialog
                     .Builder(view.getContext())
                     .setTitle("设备列表")
@@ -88,6 +97,7 @@ public class Deviece {
                 .setIcon(R.drawable.ic_location_on_forgery_500_48dp)
                 .setMessage("请稍等！")
                 .create();
+
     }
 
     public void show() {
@@ -100,21 +110,21 @@ public class Deviece {
         if (workType > 0){
             if (workType == 100){
                 return "空闲";
-            }else if (workType == 103){
+            } else if (workType == 103){
                 return "正在抓包";
-            }else if (workType == 104){
+            } else if (workType == 104){
                 return "正在破解WPS";
-            }else if (workType == 105){
+            } else if (workType == 105){
                 return "正在伪造热点 4G";
-            }else if (workType == 101){
+            } else if (workType == 101){
                 return "正在攻击热点";
             }else if (workType == 201){
                 return "正在伪造热点 WIFI";
-            }else if (workType == 102){
+            } else if (workType == 102){
                 return "正在攻击热点信道";
             }else if (workType == 110){
                 return "正在攻击多热点";
-            }else if (workType == 106){
+            } else if (workType == 106){
                 return "正在攻击客户端";
             }
         }

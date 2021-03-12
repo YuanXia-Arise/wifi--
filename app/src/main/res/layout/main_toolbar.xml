@@ -36,13 +36,13 @@
             android:background="?attr/colorPrimary"
             app:popupTheme="@style/AppTheme.PopupOverlay">
 
-        <ImageButton
-            android:id="@+id/add_device"
-            android:layout_width="wrap_content"
+        <!--<Button
+            android:id="@+id/DbToCsv"
+            android:layout_width="40dp"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="40dp"
-            android:background="@drawable/ic_add"
-            android:visibility="invisible"/>
+            android:layout_marginLeft="35dp"
+            android:text="导出"
+            android:visibility="visible"/>-->
 
         </android.support.v7.widget.Toolbar>
 

@@ -88,8 +88,7 @@ public class InfoUpdater extends AsyncTask<Object, Object, JSONObject> {
                     devID = "HEHE2017";
                 }
                 PrefSingleton.getInstance().putString("device", devID);
-            }
-            else if (status == 1) {
+            } else if (status == 1) {
                 String devID = "HEHE2017";
 //                Intent it = new Intent();
 //                it.setClass(mContext, DeviceListActivity.class);
@@ -97,12 +96,11 @@ public class InfoUpdater extends AsyncTask<Object, Object, JSONObject> {
 //                mContext.startActivity(it);
 //                ((Activity)mContext).overridePendingTransition(R.anim.slide_right_in,
 //                        R.anim.slide_left_out);
-            }
-            else {
+            } else {
                 Toast.makeText(mContext, "出错啦", Toast.LENGTH_SHORT).show();
                 return;
             }
-            status = param.getInt("status");
+            //status = param.getInt("status");
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -124,6 +122,7 @@ public class InfoUpdater extends AsyncTask<Object, Object, JSONObject> {
         obj.put("param", param);
 
         Log.w("INFO", "REQUEST: " + obj.toString());
+        System.out.println("20210305==发送指令：" + obj.toString());
 
         RequestFuture<JSONObject> requestFuture = RequestFuture.newFuture();
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url,  obj, requestFuture, requestFuture);
@@ -132,16 +131,17 @@ public class InfoUpdater extends AsyncTask<Object, Object, JSONObject> {
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         VolleySingleton.getInstance(context).getRequestQueue().add(jsonObjectRequest);
 
-        try {
+        try { // {"action":"info","data":{"battery":-1,"signal":"","version":"0.0.0","device":"FT21098"},"status":0}
             JSONObject response = requestFuture.get(10 - 1, TimeUnit.SECONDS);
+            System.out.println("20210305==返回结果：" + response.toString());
             if (null != response ){
-                PrefSingleton.getInstance().putString("deviceInfo",response.toString()); //将数据存入数据存储类中
+                PrefSingleton.getInstance().putString("deviceInfo",response.toString()); // 将数据存入数据存储类中
             }
 
-            new InteractRecordDBUtils(mContext).easy_insert(obj.toString(), response.toString()); //将请求命令、返回结果存入数据库
+            new InteractRecordDBUtils(mContext).easy_insert(obj.toString(), response.toString()); // 将请求命令、返回结果存入数据库
 
             Log.w("INFO", "RESPONSE: " + response.toString());
-            if (isAp){ //将结果到接口当中，供WIFIHotspotFragment类使用
+            if (isAp){ // 将结果到接口当中，供WIFIHotspotFragment类使用
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
@@ -154,7 +154,6 @@ public class InfoUpdater extends AsyncTask<Object, Object, JSONObject> {
                         } else {
                             wifiHotspotFragment.createWifiHotspot(hotspotName,hotspotPsw);
                         }
-//                        wifiHotspotFragment.createWifiHotspot(hotspotName,hotspotPsw);
                     }
                 });
 //                wifiHotspotFragment.createWifiHotspot8(MainContext.INSTANCE.getContext(),true);

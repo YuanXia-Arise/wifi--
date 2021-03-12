@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Picture;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -28,7 +29,10 @@ import com.vrem.wifianalyzer.wifi.common.VolleySingleton;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 
@@ -151,24 +155,12 @@ public class DeviceInfo extends Base {
 		for (int i = 0; i < length; i++) {
 			DeviceInfo deviceInfo = new DeviceInfo();
 			deviceInfo.setDevId(((JSONObject) response.getJSONArray("devices").get(i)).getString("devid"));
-			deviceInfo.setCommit(((JSONObject) response
-					.getJSONArray("devices").get(i))
-					.getString("commit"));
-			deviceInfo.setDevType(((JSONObject) response
-					.getJSONArray("devices").get(i))
-					.getInt("dev_type"));
-			deviceInfo.setWorkType(((JSONObject) response
-					.getJSONArray("devices").get(i))
-					.getInt("work_type"));
-			deviceInfo.setStLasttime(((JSONObject) response
-					.getJSONArray("devices").get(i))
-					.getString("st_lasttime"));
-			deviceInfo.setAlive(((JSONObject) response
-					.getJSONArray("devices").get(i))
-					.getBoolean("is_alive"));
-			deviceInfo.setParams(((JSONObject) response
-					.getJSONArray("devices").get(i))
-					.getJSONObject("cmd_param").toString());
+			deviceInfo.setCommit(((JSONObject) response.getJSONArray("devices").get(i)).getString("commit"));
+			deviceInfo.setDevType(((JSONObject) response.getJSONArray("devices").get(i)).getInt("dev_type"));
+			deviceInfo.setWorkType(((JSONObject) response.getJSONArray("devices").get(i)).getInt("work_type"));
+			deviceInfo.setStLasttime(((JSONObject) response.getJSONArray("devices").get(i)).getString("st_lasttime"));
+			deviceInfo.setAlive(((JSONObject) response.getJSONArray("devices").get(i)).getBoolean("is_alive"));
+			deviceInfo.setParams(((JSONObject) response.getJSONArray("devices").get(i)).getJSONObject("cmd_param").toString());
 			deviceData.add(deviceInfo);
 		}
 
@@ -176,10 +168,10 @@ public class DeviceInfo extends Base {
 		mainContainer.setVisibility(View.VISIBLE);
 		DeviceListActivity.flag = 1;
 		((Activity) context).invalidateOptionsMenu();
-		if(deviceData.size() == 0){
+		if (deviceData.size() == 0) {
 			noData.setVisibility(View.VISIBLE);
 			refresh.setVisibility(View.GONE);
-		}else{
+		} else {
 			noData.setVisibility(View.GONE);
 			refresh.setVisibility(View.GONE);
 			deviceListAdapter = new DeviceListAdapter(context,deviceData, R.layout.device_listitem, mainContainer, progressBar, refresh, noData, bottomLayout);
@@ -188,7 +180,11 @@ public class DeviceInfo extends Base {
 	}
 
 	public static void setDeviceInfo_bak(final Context context,
-                                         final ListView mainContainer, final ProgressBar progressBar, final TextView refresh, final TextView noData, final RelativeLayout bottomLayout) throws JSONException {
+										 final ListView mainContainer,
+										 final ProgressBar progressBar,
+										 final TextView refresh,
+										 final TextView noData,
+										 final RelativeLayout bottomLayout) throws JSONException {
 		progressBar.setVisibility(View.VISIBLE);
 		DeviceListActivity.flag = 0;
 		((Activity) context).invalidateOptionsMenu();
@@ -208,8 +204,7 @@ public class DeviceInfo extends Base {
 					public void onResponse(JSONObject response) {
 						// display response
 						try {
-							int length = response.getJSONArray("devices")
-									.length();
+							int length = response.getJSONArray("devices").length();
 							for (int i = 0; i < length; i++) {
 								DeviceInfo deviceInfo = new DeviceInfo();
 								deviceInfo.setDevId(((JSONObject) response
@@ -243,14 +238,13 @@ public class DeviceInfo extends Base {
 							if(deviceData.size() == 0){
 								noData.setVisibility(View.VISIBLE);
 								refresh.setVisibility(View.GONE);
-							}else{
+							} else {
 								noData.setVisibility(View.GONE);
 								refresh.setVisibility(View.GONE);
 							deviceListAdapter = new DeviceListAdapter(context,
 									deviceData, R.layout.device_listitem, mainContainer, progressBar, refresh, noData, bottomLayout);
 							mainContainer.setAdapter(deviceListAdapter);
 							}
-
 						} catch (JSONException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -287,9 +281,9 @@ public class DeviceInfo extends Base {
 		obj.put("token", token);
 		obj.put("devid", devId);
 		obj.put("commit", commit);
-		String url = "http://" + ip + "/mobi_api/v1/setcommit";
-		JsonObjectRequest getRequest = new JsonObjectRequest(
-				Request.Method.POST, url, obj,
+		//String url = "http://" + ip + "/mobi_api/v1/setcommit";
+		String url = PrefSingleton.getInstance().getString("url");
+		JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.POST, url, obj,
 				new Response.Listener<JSONObject>() {
 					public void onResponse(JSONObject response) {
 						Toast.makeText(context, "设置成功", Toast.LENGTH_SHORT).show();
@@ -307,8 +301,9 @@ public class DeviceInfo extends Base {
 				});
 		getRequest.setRetryPolicy(new DefaultRetryPolicy(30000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 		// add it to the RequestQueue
-		if(VolleySingleton.getInstance(context).getRequestQueue() != null)
+		if(VolleySingleton.getInstance(context).getRequestQueue() != null) {
 			VolleySingleton.getInstance(context).getRequestQueue().add(getRequest);
+		}
 	}
 
 	public static void sendCommand(final Context context,
@@ -325,12 +320,12 @@ public class DeviceInfo extends Base {
 		obj.put("token", token);
 		obj.put("devid", deviceInfo.getDevId());
 		obj.put("command", command);
-		if (command.equals("monitor"))
+		if (command.equals("monitor")) {
 			obj.put("params", "");
-		else
+		} else {
 			obj.put("params", params);
-		JsonObjectRequest getRequest = new JsonObjectRequest(
-				Request.Method.POST, url, obj,
+		}
+		JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.POST, url, obj,
 				new Response.Listener<JSONObject>() {
 					public void onResponse(JSONObject response) {// display response
 						int errorCode = 1;
@@ -342,14 +337,13 @@ public class DeviceInfo extends Base {
 						if (errorCode == 0) {
 							if (command.equals("wifi_dos_channel") || command.equals("wifi_dos_ssid")) {
 								Intent intent = new Intent();
-								intent.setClass(context,
-										DeviceListActivity.class);
+								intent.setClass(context, DeviceListActivity.class);
 								intent.putExtra("deviceinfo", deviceInfo);
 								intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 								context.startActivity(intent);	
 								((Activity) context).overridePendingTransition(R.anim.slide_left_in,R.anim.slide_right_out);
 								((Activity) context).finish();
-							}else if(command.equals("wifi_sniffer")) {
+							} else if (command.equals("wifi_sniffer")) {
 								Intent intent = new Intent();
 								intent.setClass(context,DeviceListActivity.class);
 								intent.putExtra("deviceinfo", deviceInfo);
@@ -357,7 +351,7 @@ public class DeviceInfo extends Base {
 								context.startActivity(intent);
 								((Activity) context).overridePendingTransition(R.anim.slide_left_in,R.anim.slide_right_out);
 								((Activity) context).finish();
-							}else if(command.equals("wifi_wps")) {
+							} else if (command.equals("wifi_wps")) {
 								Intent intent = new Intent();
 								intent.setClass(context,DeviceListActivity.class);
 								intent.putExtra("deviceinfo", deviceInfo);
@@ -365,7 +359,7 @@ public class DeviceInfo extends Base {
 								context.startActivity(intent);
 								((Activity) context).overridePendingTransition(R.anim.slide_left_in,R.anim.slide_right_out);
 								((Activity) context).finish();
-							}else if(command.equals("wifi_fake_ap")) {
+							} else if (command.equals("wifi_fake_ap")) {
 								Intent intent = new Intent();
 								intent.setClass(context,DeviceListActivity.class);
 								intent.putExtra("deviceinfo", deviceInfo);
@@ -373,7 +367,7 @@ public class DeviceInfo extends Base {
 								context.startActivity(intent);
 								((Activity) context).overridePendingTransition(R.anim.slide_left_in,R.anim.slide_right_out);
 								((Activity) context).finish();
-							}else if(command.equals("connect_wifi_and_fake")) {
+							} else if (command.equals("connect_wifi_and_fake")) {
                                 Intent intent = new Intent();
                                 intent.setClass(context,DeviceListActivity.class);
                                 intent.putExtra("deviceinfo", deviceInfo);
@@ -383,15 +377,13 @@ public class DeviceInfo extends Base {
                                 ((Activity) context).finish();
                             }
 						} else {
-							Toast.makeText(context, "状态错误，请重试", Toast.LENGTH_SHORT)
-									.show();
+							Toast.makeText(context, "状态错误，请重试", Toast.LENGTH_SHORT).show();
 						}
 					}
 				}, new Response.ErrorListener() {
 					@Override
 					public void onErrorResponse(VolleyError error) {
-						Toast.makeText(context, "通讯错误，请重试", Toast.LENGTH_SHORT)
-						.show();
+						Toast.makeText(context, "通讯错误，请重试", Toast.LENGTH_SHORT).show();
 					}
 				});
 		getRequest.setRetryPolicy(new DefaultRetryPolicy(30000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
@@ -399,10 +391,11 @@ public class DeviceInfo extends Base {
 		if(VolleySingleton.getInstance(context).getRequestQueue() != null)
 			VolleySingleton.getInstance(context).getRequestQueue().add(getRequest);
 	}
-	
+
 	public static void sendCommand(final Context context,
                                    final DeviceInfo deviceInfo, final JSONObject params,
-                                   final String command, final ListView listview, final ProgressBar progressBar, final TextView refresh, final TextView noData, final RelativeLayout bottomLayout) throws JSONException {
+                                   final String command, final ListView listview, final ProgressBar progressBar,
+								   final TextView refresh, final TextView noData, final RelativeLayout bottomLayout) throws JSONException {
 		SharedPreferences sharedPreferences = context.getSharedPreferences("user_info", 0);
 		String token = sharedPreferences.getString("token", "");
 		String username = sharedPreferences.getString("username", "");
@@ -439,20 +432,17 @@ public class DeviceInfo extends Base {
 									// TODO Auto-generated catch block
 									e.printStackTrace();
 								}
-								Toast.makeText(context, "停止成功", Toast.LENGTH_SHORT)
-								.show();
+								Toast.makeText(context, "停止成功", Toast.LENGTH_SHORT).show();
 							}
 						} else {
-							Toast.makeText(context, "状态错误，请重试", Toast.LENGTH_SHORT)
-									.show();
+							Toast.makeText(context, "状态错误，请重试", Toast.LENGTH_SHORT).show();
 						}
 
 					}
 				}, new Response.ErrorListener() {
 					@Override
 					public void onErrorResponse(VolleyError error) {
-						Toast.makeText(context, "通讯错误，请重试", Toast.LENGTH_LONG)
-						.show();
+						Toast.makeText(context, "通讯错误，请重试", Toast.LENGTH_LONG).show();
 					}
 				});
 		getRequest.setRetryPolicy(new DefaultRetryPolicy(30000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));

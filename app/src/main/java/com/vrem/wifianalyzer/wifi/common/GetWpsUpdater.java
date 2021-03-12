@@ -138,7 +138,7 @@ public class GetWpsUpdater extends AsyncTask<Object, Object, List<WiFiDetail>> {
         macSsidDBUtils.open();
         for (WiFiDetail apInfo : param) {
             try {
-                macSsidDBUtils.insertOrUpdate(mDevId, apInfo.getBSSID(), apInfo.getSSID());
+                macSsidDBUtils.insertOrUpdate(mDevId, apInfo.getBSSID(), apInfo.getSSID(), apInfo.getLast_time(),apInfo.getCount(),String.valueOf(System.currentTimeMillis()));
             } catch (Exception e) {}
         }
         macSsidDBUtils.close();

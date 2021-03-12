@@ -135,13 +135,14 @@ public class WiFiData {
 //                    Log.v("头部信息"+key,"");
 //                    JSONArray jsonArray = new JSONArray();
                     String chanel=null,bssid=null,enc=null,essid=null,cipher=null,clientTmp=null,wps=null,beacons=null;
+                    String last_time = null;
                     int power=0;
                     JSONArray clients = new JSONArray();
                     while (valueIter.hasNext()){
                         String key1 = (String) valueIter.next();
                         String value1 = valueJson.getString(key1);
                         if ("channel".equals(key1) || "bssid".equals(key1) || "enc".equals(key1) || "power".equals(key1) || "essid".equals(key1) || "sta_bssids".equals(key1)
-                                || "wpa2_cipher".equals(key1) || "wps".equals(key1) || "beacons".equals(key1)){
+                                || "wpa2_cipher".equals(key1) || "wps".equals(key1) || "beacons".equals(key1) || "last_time".equals(key1)){
                             if ("channel".equals(key1)){
                                 chanel = value1;
                             }else if("bssid".equals(key1)){
@@ -191,12 +192,14 @@ public class WiFiData {
                             }
                             } else if ("beacons".equals(key1)) {
                                 beacons = value1;
+                            } else if ("last_time".equals(key1)) {
+                                last_time = value1;
                             }
                         }
                     }
                     WiFiWidth wiFiWidth =WiFiWidth.MHZ_40;//模拟wifi宽度
                     WiFiSignal addWiFiSignal = new WiFiSignal(1,2,wiFiWidth,power,chanel);//模拟wifi信号 13：power dbm,
-                    WiFiDetail addWiFiDetail = new WiFiDetail(essid,bssid,enc,addWiFiSignal,clientTmp,cipher,wps,0,beacons);//模拟单条wifi的基本信息 1111:essid  fds:bssid  fdss:enc
+                    WiFiDetail addWiFiDetail = new WiFiDetail(essid,bssid,enc,addWiFiSignal,clientTmp,cipher,wps,0,beacons,last_time,"");//模拟单条wifi的基本信息 1111:essid  fds:bssid  fdss:enc
                     wiFiDetails1.add(addWiFiDetail);//将模拟数据添加添加到wiFiDetails1集合中
                 }
             } catch (JSONException e) {
@@ -208,7 +211,7 @@ public class WiFiData {
 //        return new ArrayList<>(collected);
         if (wiFiDetails1.size()<=0){
             return wiFiDetails;
-        }else {
+        } else {
             return wiFiDetails1;
         }
     }
@@ -234,7 +237,9 @@ public class WiFiData {
         VendorService vendorService = MainContext.INSTANCE.getVendorService();
         String vendorName = vendorService.findVendorName(wiFiDetail.getBSSID());
         WiFiAdditional wiFiAdditional = new WiFiAdditional(vendorName, wiFiConnection);
-        return new WiFiDetail(wiFiDetail, wiFiAdditional,wiFiDetail.getClient(),wiFiDetail.getCipher(),wiFiDetail.getWps(),wiFiDetail.getRate(),wiFiDetail.getBeacons());
+        return new WiFiDetail(wiFiDetail, wiFiAdditional,wiFiDetail.getClient(),
+                wiFiDetail.getCipher(),wiFiDetail.getWps(),wiFiDetail.getRate(),
+                wiFiDetail.getBeacons(),wiFiDetail.getLast_time(),wiFiDetail.getCount());
     }
 
     private class ConnectionPredicate implements Predicate<WiFiDetail> {
@@ -264,7 +269,8 @@ public class WiFiData {
             String vendorName = vendorService.findVendorName(input.getBSSID());
             boolean contains = wiFiConfigurations.contains(input.getSSID());
             WiFiAdditional wiFiAdditional = new WiFiAdditional(vendorName, contains);
-            return new WiFiDetail(input, wiFiAdditional,input.getClient(),input.getCipher(),input.getWps(),input.getRate(),input.getBeacons());
+            return new WiFiDetail(input, wiFiAdditional,input.getClient(),input.getCipher(),
+                    input.getWps(),input.getRate(),input.getBeacons(),input.getLast_time(),input.getCount());
         }
     }
 

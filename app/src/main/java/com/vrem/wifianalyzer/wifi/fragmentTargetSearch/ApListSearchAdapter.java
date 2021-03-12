@@ -113,6 +113,7 @@ public class ApListSearchAdapter extends BaseAdapter{
         Security security = clientInfo.getSecurity(); //获取这条wifi的信号安全等级 Security：枚举类，枚举信号安全等级
         listItemView.ssid.setTag(clientInfo);
         listItemView.ssid.setText(clientInfo.getTitle());
+        System.out.println("20200921==1>" + clientInfo.getTitle());
         listItemView.tab.setVisibility(View.VISIBLE);
         listItemView.level.setText(String.format(Locale.ENGLISH, "%ddBm", wiFiSignal.getLevel())); //设置dBm值
         listItemView.level.setTextColor(ContextCompat.getColor(context, strength.colorResource())); //设置dBm值颜色

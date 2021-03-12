@@ -67,12 +67,10 @@ public class ApLinkInfoUpdater extends AsyncTask<Object, Object, JSONObject> {
                     devID = "HEHE2017";
                 }
                 PrefSingleton.getInstance().putString("device", devID);
-            }
-            else if (status == 1) {
+            } else if (status == 1) {
                 String devID = "HEHE2017";
                 PrefSingleton.getInstance().putString("device", devID);
-            }
-            else {
+            } else {
                 Toast.makeText(mContext, "出错啦", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -91,6 +89,7 @@ public class ApLinkInfoUpdater extends AsyncTask<Object, Object, JSONObject> {
         obj.put("param", param);
 
         Log.w("AP_INFO", "REQUEST: " + obj.toString());
+        System.out.println("20210305==发送指令：" + obj.toString());
 
         RequestFuture<JSONObject> requestFuture = RequestFuture.newFuture();
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url,  obj, requestFuture, requestFuture);
@@ -108,6 +107,7 @@ public class ApLinkInfoUpdater extends AsyncTask<Object, Object, JSONObject> {
             new InteractRecordDBUtils(mContext).easy_insert(obj.toString(), response.toString());//将请求命令、返回结果存入数据库
 
             Log.w("AP_INFO", "RESPONSE: " + response.toString());
+            System.out.println("20210305==返回结果：" + response.toString());
             return response;
         } catch (TimeoutException e) {
             Log.w("AP_INFO_STEP_2", "TIMEOUT");
