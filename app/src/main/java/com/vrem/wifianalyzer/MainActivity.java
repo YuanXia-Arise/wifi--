@@ -143,8 +143,7 @@ public class MainActivity extends AppCompatActivity implements OnSharedPreferenc
         }
         boolean isWIFI = MainContext.INSTANCE.getScannerService().isWifiStatus();
         if (isWIFI) {
-            PrefSingleton.getInstance().putString("url", "http://192.168.100.1:9494");
-//            PrefSingleton.getInstance().putString("url", "http://39.100.2.75:9494");
+            PrefSingleton.getInstance().putString("url", "http://111.111.111.111:8080");
             if (PrefSingleton.getInstance().getInt("id") < 0) {
                 PrefSingleton.getInstance().putInt("id", 0);
             }
